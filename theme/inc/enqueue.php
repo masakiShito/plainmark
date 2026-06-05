@@ -58,15 +58,23 @@ function plainmark_scripts() {
         true
     );
 
-    // Code copy button on single posts
+    // Code copy button on single posts (respects per-post setting).
     if ( is_single() ) {
-        wp_enqueue_script(
-            'plainmark-code-copy',
-            PLAINMARK_URI . '/assets/js/code-copy.js',
-            array(),
-            PLAINMARK_VERSION,
-            true
-        );
+        $show_code_copy = true;
+        if ( function_exists( 'plainmark_get_article_meta' ) ) {
+            $article_meta   = plainmark_get_article_meta( get_the_ID() );
+            $show_code_copy = $article_meta['show_code_copy'] ?? true;
+        }
+
+        if ( $show_code_copy ) {
+            wp_enqueue_script(
+                'plainmark-code-copy',
+                PLAINMARK_URI . '/assets/js/code-copy.js',
+                array(),
+                PLAINMARK_VERSION,
+                true
+            );
+        }
     }
 
     // Comment reply script

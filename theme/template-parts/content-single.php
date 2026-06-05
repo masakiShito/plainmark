@@ -8,8 +8,25 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$categories = get_the_category();
-$tags       = get_the_tags();
+$categories   = get_the_category();
+$tags         = get_the_tags();
+$article_meta = function_exists( 'plainmark_get_article_meta' ) ? plainmark_get_article_meta() : array();
+$article_type = $article_meta['article_type'] ?? '';
+$difficulty   = $article_meta['difficulty'] ?? '';
+
+// Get article type and difficulty labels.
+$article_type_label = '';
+$difficulty_label   = '';
+
+if ( $article_type && function_exists( 'plainmark_get_article_type_options' ) ) {
+	$type_options       = plainmark_get_article_type_options();
+	$article_type_label = $type_options[ $article_type ] ?? '';
+}
+
+if ( $difficulty && function_exists( 'plainmark_get_difficulty_options' ) ) {
+	$difficulty_options = plainmark_get_difficulty_options();
+	$difficulty_label   = $difficulty_options[ $difficulty ] ?? '';
+}
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'single-post' ); ?>>
@@ -32,6 +49,18 @@ $tags       = get_the_tags();
           </a>
         <?php endforeach; ?>
       <?php endif; ?>
+
+      <?php if ( $article_type_label ) : ?>
+        <span class="single-post__badge single-post__badge--type single-post__badge--<?php echo esc_attr( $article_type ); ?>">
+          <?php echo esc_html( $article_type_label ); ?>
+        </span>
+      <?php endif; ?>
+
+      <?php if ( $difficulty_label ) : ?>
+        <span class="single-post__badge single-post__badge--difficulty single-post__badge--<?php echo esc_attr( $difficulty ); ?>">
+          <?php echo esc_html( $difficulty_label ); ?>
+        </span>
+      <?php endif; ?>
     </div>
 
     <?php the_title( '<h1 class="single-post__title">', '</h1>' ); ?>
@@ -46,6 +75,79 @@ $tags       = get_the_tags();
       ?>
     </figure>
   <?php endif; ?>
+
+  <?php
+  // Article info block (Target Reader, Prerequisites, External Links).
+  $target_reader     = $article_meta['target_reader'] ?? '';
+  $prerequisites     = $article_meta['prerequisites'] ?? '';
+  $github_url        = $article_meta['github_url'] ?? '';
+  $official_docs_url = $article_meta['official_docs_url'] ?? '';
+  $has_info          = $target_reader || $prerequisites || $github_url || $official_docs_url;
+
+  if ( $has_info ) :
+  ?>
+    <aside class="article-info" aria-label="<?php esc_attr_e( '記事情報', 'plainmark' ); ?>">
+      <?php if ( $target_reader ) : ?>
+        <div class="article-info__item">
+          <span class="article-info__label"><?php esc_html_e( '対象読者', 'plainmark' ); ?></span>
+          <span class="article-info__value"><?php echo esc_html( $target_reader ); ?></span>
+        </div>
+      <?php endif; ?>
+
+      <?php if ( $prerequisites ) : ?>
+        <div class="article-info__item">
+          <span class="article-info__label"><?php esc_html_e( '前提知識', 'plainmark' ); ?></span>
+          <span class="article-info__value"><?php echo nl2br( esc_html( $prerequisites ) ); ?></span>
+        </div>
+      <?php endif; ?>
+
+      <?php if ( $github_url || $official_docs_url ) : ?>
+        <div class="article-info__item article-info__item--links">
+          <span class="article-info__label"><?php esc_html_e( '関連リンク', 'plainmark' ); ?></span>
+          <span class="article-info__value">
+            <?php if ( $github_url ) : ?>
+              <a class="article-info__link" href="<?php echo esc_url( $github_url ); ?>" target="_blank" rel="noopener noreferrer">
+                <svg class="article-info__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                GitHub
+              </a>
+            <?php endif; ?>
+            <?php if ( $official_docs_url ) : ?>
+              <a class="article-info__link" href="<?php echo esc_url( $official_docs_url ); ?>" target="_blank" rel="noopener noreferrer">
+                <svg class="article-info__icon" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M3 2.5h7.5a2 2 0 0 1 2 2v9a.5.5 0 0 1-.5.5H4a1 1 0 0 1-1-1V2.5z"/>
+                  <path d="M3 12h9"/>
+                  <path d="M5.5 5.5h5M5.5 8h3"/>
+                </svg>
+                <?php esc_html_e( '公式ドキュメント', 'plainmark' ); ?>
+              </a>
+            <?php endif; ?>
+          </span>
+        </div>
+      <?php endif; ?>
+    </aside>
+  <?php endif; ?>
+
+  <?php
+  // Table of Contents.
+  $show_toc = $article_meta['show_toc'] ?? true;
+  if ( $show_toc && function_exists( 'plainmark_get_toc' ) ) :
+    $toc_html = plainmark_get_toc( get_the_content() );
+    if ( $toc_html ) :
+  ?>
+    <nav class="article-toc" aria-label="<?php esc_attr_e( '目次', 'plainmark' ); ?>">
+      <div class="article-toc__header">
+        <span class="article-toc__title"><?php esc_html_e( '目次', 'plainmark' ); ?></span>
+      </div>
+      <div class="article-toc__body">
+        <?php echo $toc_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+      </div>
+    </nav>
+    <?php
+    endif;
+  endif;
+  ?>
 
   <div class="single-post__content">
     <?php

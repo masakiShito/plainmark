@@ -24,3 +24,4 @@ require_once PLAINMARK_DIR . '/inc/enqueue.php';
 require_once PLAINMARK_DIR . '/inc/customizer.php';
 require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
 require_once PLAINMARK_DIR . '/inc/walker-nav.php';
+require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';
