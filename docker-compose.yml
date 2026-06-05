@@ -1,0 +1,60 @@
+services:
+  wordpress:
+    build:
+      context: ./docker/wordpress
+      dockerfile: Dockerfile
+    container_name: plainmark-wordpress
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./theme:/var/www/html/wp-content/themes/plainmark
+    depends_on:
+      - db
+    networks:
+      - plainmark-network
+
+  db:
+    image: mysql:8.0
+    container_name: plainmark-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
+    networks:
+      - plainmark-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: plainmark-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - db
+    networks:
+      - plainmark-network
+
+volumes:
+  wordpress_data:
+  db_data:
+
+networks:
+  plainmark-network:
+    driver: bridge

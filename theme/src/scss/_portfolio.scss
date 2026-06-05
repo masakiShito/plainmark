@@ -1,0 +1,254 @@
+// ==========================================================================
+// Portfolio Styles
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// Portfolio grid
+// --------------------------------------------------------------------------
+
+.portfolio-grid {
+  display: grid;
+  gap: var(--space-6);
+
+  @include sm {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @include lg {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Portfolio item
+// --------------------------------------------------------------------------
+
+.portfolio-item {
+  position: relative;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background-color: var(--color-bg-secondary);
+  transition: var(--transition-default);
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Portfolio thumbnail
+// --------------------------------------------------------------------------
+
+.portfolio-thumbnail {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-duration-slow)
+      var(--transition-timing-ease-out);
+  }
+
+  &:hover img,
+  &:focus-within img {
+    transform: scale(1.05);
+  }
+}
+
+.portfolio-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  opacity: 0;
+  transition: opacity var(--transition-duration-normal)
+    var(--transition-timing-ease-in-out);
+}
+
+.portfolio-thumbnail:hover .portfolio-overlay,
+.portfolio-thumbnail:focus-within .portfolio-overlay {
+  opacity: 1;
+}
+
+.portfolio-view {
+  padding: var(--space-3) var(--space-6);
+  background-color: var(--color-white);
+  color: var(--color-gray-900);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--border-radius-md);
+  transform: translateY(10px);
+  transition: transform var(--transition-duration-normal)
+    var(--transition-timing-ease-out);
+}
+
+.portfolio-thumbnail:hover .portfolio-view,
+.portfolio-thumbnail:focus-within .portfolio-view {
+  transform: translateY(0);
+}
+
+// --------------------------------------------------------------------------
+// Portfolio content
+// --------------------------------------------------------------------------
+
+.portfolio-content {
+  padding: var(--space-5);
+}
+
+.portfolio-item .entry-header {
+  margin-bottom: var(--space-2);
+}
+
+.portfolio-item .entry-title {
+  font-size: var(--font-size-lg);
+  margin-bottom: 0;
+
+  a {
+    text-decoration: none;
+
+    &:hover,
+    &:focus {
+      text-decoration: underline;
+    }
+  }
+}
+
+.portfolio-item .entry-summary {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+
+  p {
+    margin-bottom: 0;
+  }
+}
+
+// --------------------------------------------------------------------------
+// Portfolio categories
+// --------------------------------------------------------------------------
+
+.portfolio-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.portfolio-category {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-xs);
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-secondary);
+}
+
+// --------------------------------------------------------------------------
+// Single portfolio
+// --------------------------------------------------------------------------
+
+.single-portfolio {
+  .entry-header {
+    margin-bottom: var(--space-8);
+  }
+
+  .entry-title {
+    font-size: var(--font-size-3xl);
+
+    @include md {
+      font-size: var(--font-size-4xl);
+    }
+  }
+
+  .portfolio-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+    padding: var(--space-6);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--border-radius-lg);
+  }
+
+  .portfolio-meta-item {
+    .meta-label {
+      display: block;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: var(--letter-spacing-wide);
+      margin-bottom: var(--space-1);
+    }
+
+    .meta-value {
+      font-weight: var(--font-weight-medium);
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+// Portfolio archive
+// --------------------------------------------------------------------------
+
+.archive-portfolio {
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-10);
+  }
+
+  .page-title {
+    font-size: var(--font-size-3xl);
+
+    @include md {
+      font-size: var(--font-size-4xl);
+    }
+  }
+}
+
+// --------------------------------------------------------------------------
+// Portfolio filter (optional)
+// --------------------------------------------------------------------------
+
+.portfolio-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+}
+
+.portfolio-filter-button {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  border: var(--border-width-thin) solid var(--color-border-default);
+  border-radius: var(--border-radius-full);
+  transition: var(--transition-fast);
+
+  &:hover,
+  &:focus {
+    border-color: var(--color-gray-900);
+  }
+
+  &.is-active {
+    background-color: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    border-color: var(--color-bg-inverse);
+  }
+}

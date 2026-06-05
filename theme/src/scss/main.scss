@@ -1,0 +1,353 @@
+// ==========================================================================
+// Main SCSS Entry Point
+// ==========================================================================
+// plainmark - A minimal monochrome WordPress theme
+// ==========================================================================
+
+// --------------------------------------------------------------------------
+// Variables and Design Tokens
+// --------------------------------------------------------------------------
+@import "variables";
+
+// --------------------------------------------------------------------------
+// Reset / Normalize
+// --------------------------------------------------------------------------
+@import "reset";
+
+// --------------------------------------------------------------------------
+// Typography
+// --------------------------------------------------------------------------
+@import "typography";
+
+// --------------------------------------------------------------------------
+// Layout
+// --------------------------------------------------------------------------
+@import "layout";
+
+// --------------------------------------------------------------------------
+// Components
+// --------------------------------------------------------------------------
+@import "header";
+@import "footer";
+@import "post";
+@import "portfolio";
+
+// --------------------------------------------------------------------------
+// Gutenberg Blocks
+// --------------------------------------------------------------------------
+@import "blocks";
+
+// --------------------------------------------------------------------------
+// Additional Components
+// --------------------------------------------------------------------------
+
+// Search form
+.search-form {
+  display: flex;
+  gap: var(--space-2);
+
+  .search-field {
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width-thin) solid var(--color-border-default);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-base);
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-gray-900);
+      box-shadow: 0 0 0 2px var(--color-gray-200);
+    }
+  }
+
+  .search-submit {
+    padding: var(--space-3) var(--space-6);
+    background-color: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
+    border: none;
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: var(--transition-fast);
+
+    &:hover,
+    &:focus {
+      background-color: var(--color-gray-800);
+    }
+  }
+}
+
+// Comments
+.comments-area {
+  margin-top: var(--space-10);
+  padding-top: var(--space-8);
+  border-top: var(--border-width-thin) solid var(--color-border-light);
+}
+
+.comments-title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-6);
+}
+
+.comment-list {
+  margin-bottom: var(--space-8);
+
+  .comment {
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--border-radius-lg);
+  }
+
+  .comment-author {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+
+    img {
+      border-radius: var(--border-radius-full);
+    }
+
+    .fn {
+      font-weight: var(--font-weight-semibold);
+    }
+  }
+
+  .comment-metadata {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-3);
+
+    a {
+      color: inherit;
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .comment-content {
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .reply {
+    margin-top: var(--space-3);
+
+    a {
+      font-size: var(--font-size-sm);
+      font-weight: var(--font-weight-medium);
+    }
+  }
+
+  .children {
+    margin-top: var(--space-4);
+    margin-left: var(--space-6);
+    padding-left: var(--space-4);
+    border-left: var(--border-width-medium) solid var(--color-border-light);
+  }
+}
+
+.comment-respond {
+  .comment-reply-title {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--space-4);
+
+    small {
+      margin-left: var(--space-2);
+
+      a {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-normal);
+      }
+    }
+  }
+
+  .comment-form {
+    label {
+      display: block;
+      margin-bottom: var(--space-2);
+      font-weight: var(--font-weight-medium);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="url"],
+    textarea {
+      width: 100%;
+      padding: var(--space-3) var(--space-4);
+      border: var(--border-width-thin) solid var(--color-border-default);
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--space-4);
+
+      &:focus {
+        outline: none;
+        border-color: var(--color-gray-900);
+        box-shadow: 0 0 0 2px var(--color-gray-200);
+      }
+    }
+
+    .form-submit {
+      margin-bottom: 0;
+
+      .submit {
+        padding: var(--space-3) var(--space-8);
+        background-color: var(--color-bg-inverse);
+        color: var(--color-text-inverse);
+        border: none;
+        border-radius: var(--border-radius-md);
+        font-weight: var(--font-weight-medium);
+        cursor: pointer;
+        transition: var(--transition-fast);
+
+        &:hover,
+        &:focus {
+          background-color: var(--color-gray-800);
+        }
+      }
+    }
+  }
+}
+
+.no-comments {
+  padding: var(--space-4);
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+// Widgets
+.widget {
+  margin-bottom: var(--space-8);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .widget-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-width-medium) solid var(--color-gray-900);
+  }
+
+  ul {
+    li {
+      margin-bottom: var(--space-2);
+      padding-bottom: var(--space-2);
+      border-bottom: var(--border-width-thin) solid var(--color-border-light);
+
+      &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+    }
+
+    a {
+      text-decoration: none;
+
+      &:hover,
+      &:focus {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+// 404 page
+.error-404 {
+  text-align: center;
+  padding: var(--space-12) 0;
+
+  .page-title {
+    font-size: var(--font-size-4xl);
+  }
+
+  .page-content {
+    max-width: 600px;
+    margin: 0 auto;
+
+    p {
+      font-size: var(--font-size-lg);
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-6);
+    }
+  }
+
+  .search-form {
+    max-width: 400px;
+    margin: 0 auto var(--space-8);
+  }
+
+  &__widgets {
+    display: grid;
+    gap: var(--space-8);
+    text-align: left;
+    margin-top: var(--space-10);
+
+    @include md {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+// No results
+.no-results {
+  text-align: center;
+  padding: var(--space-12) 0;
+
+  .page-title {
+    margin-bottom: var(--space-4);
+  }
+
+  .page-content {
+    max-width: 600px;
+    margin: 0 auto;
+
+    p {
+      color: var(--color-text-secondary);
+      margin-bottom: var(--space-6);
+    }
+  }
+
+  .search-form {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+// Print styles
+@media print {
+  .site-header,
+  .site-footer,
+  .widget-area,
+  .comments-area,
+  .post-navigation,
+  .pagination {
+    display: none;
+  }
+
+  .site-content {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .entry-content a::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: var(--color-text-secondary);
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "plainmark",
+  "version": "0.1.0",
+  "description": "A minimal monochrome WordPress theme for tech blog & portfolio.",
+  "author": "Masaki Morito",
+  "license": "GPL-2.0",
+  "scripts": {
+    "dev": "npm-run-all --parallel sass:dev ts:dev",
+    "build": "npm-run-all sass:build ts:build",
+    "sass:dev": "sass --watch src/scss/main.scss:assets/css/main.css --style=expanded --source-map",
+    "sass:build": "sass src/scss/main.scss:assets/css/main.css --style=compressed --no-source-map",
+    "ts:dev": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts --bundle --outdir=assets/js --sourcemap --watch",
+    "ts:build": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts --bundle --outdir=assets/js --minify",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "npm-run-all2": "^6.1.0",
+    "sass": "^1.70.0",
+    "typescript": "^5.3.0"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

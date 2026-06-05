@@ -1,3 +1,15 @@
+# Build outputs (WordPress theme)
+theme/assets/css/
+theme/assets/js/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# WordPress
+*.sql
+*.sql.gz
+
 # Logs
 logs
 *.log
