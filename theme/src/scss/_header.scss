@@ -3,225 +3,234 @@
 // ==========================================================================
 
 .site-header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: var(--z-index-sticky);
-  background-color: var(--color-bg-primary);
-  border-bottom: var(--border-width-thin) solid var(--color-border-light);
+  left: 0;
+  width: 100%;
+  z-index: 100;
+  background-color: transparent;
+  height: 64px;
+  transition: height 200ms ease-out, background-color 200ms ease-out,
+    border-color 200ms ease-out;
+  border-bottom: 1px solid transparent;
+
+  &.is-scrolled {
+    background-color: var(--color-white);
+    height: 52px;
+    border-bottom-color: var(--color-gray-300);
+  }
 }
 
 .site-header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: var(--container-max-width);
+  max-width: var(--wide-width);
+  height: 100%;
   margin: 0 auto;
-  padding: var(--space-4) var(--container-padding);
-  gap: var(--space-4);
-
-  @include md {
-    padding: var(--space-5) var(--container-padding);
-  }
+  padding: 0 var(--site-padding);
 }
 
 // --------------------------------------------------------------------------
-// Site branding
+// Logo
 // --------------------------------------------------------------------------
 
-.site-branding {
+.site-header__logo {
   flex-shrink: 0;
 }
 
-.site-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  margin: 0;
+.site-header__logo-text {
+  font-family: var(--font-family-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-black);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  transition: font-size 200ms ease-out;
 
-  @include md {
-    font-size: var(--font-size-2xl);
-  }
-
-  a {
-    text-decoration: none;
-
-    &:hover,
-    &:focus {
-      opacity: 0.8;
-    }
+  .is-scrolled & {
+    font-size: 14px;
   }
 }
 
-.site-description {
-  margin-top: var(--space-1);
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+.site-header__logo-dot {
+  color: var(--color-gray-400);
 }
 
 .custom-logo-link {
   display: block;
 
   img {
-    max-height: 50px;
+    max-height: 40px;
     width: auto;
+    transition: max-height 200ms ease-out;
 
-    @include md {
-      max-height: 60px;
+    .is-scrolled & {
+      max-height: 32px;
     }
   }
 }
 
 // --------------------------------------------------------------------------
-// Main navigation
+// PC Navigation
 // --------------------------------------------------------------------------
 
-.main-navigation {
-  display: flex;
-  align-items: center;
-}
-
-.menu-toggle {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 44px;
-  height: 44px;
-  padding: var(--space-2);
-  gap: 5px;
-
-  @include md {
-    display: none;
-  }
-
-  &[aria-expanded="true"] {
-    .menu-toggle__bar:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
-    }
-
-    .menu-toggle__bar:nth-child(2) {
-      opacity: 0;
-    }
-
-    .menu-toggle__bar:nth-child(3) {
-      transform: rotate(-45deg) translate(5px, -5px);
-    }
-  }
-}
-
-.menu-toggle__bar {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background-color: var(--color-gray-900);
-  transition: var(--transition-fast);
-}
-
-.primary-menu {
+.site-header__nav {
   display: none;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background-color: var(--color-bg-primary);
-  border-bottom: var(--border-width-thin) solid var(--color-border-light);
-  padding: var(--space-4) var(--container-padding);
-  flex-direction: column;
-  gap: var(--space-1);
 
-  @include md {
-    display: flex;
-    position: static;
-    flex-direction: row;
-    border: none;
-    padding: 0;
-    gap: var(--space-1);
-  }
-
-  &.is-open {
-    display: flex;
-  }
-}
-
-.primary-menu > li {
-  position: relative;
-}
-
-.primary-menu a {
-  display: block;
-  padding: var(--space-2) var(--space-3);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-  border-radius: var(--border-radius-md);
-  transition: var(--transition-fast);
-
-  &:hover,
-  &:focus {
-    background-color: var(--color-bg-secondary);
-  }
-}
-
-.primary-menu .current-menu-item > a,
-.primary-menu .current-menu-ancestor > a {
-  background-color: var(--color-bg-tertiary);
-}
-
-// --------------------------------------------------------------------------
-// Submenu
-// --------------------------------------------------------------------------
-
-.sub-menu {
-  @include md {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    min-width: 200px;
-    background-color: var(--color-bg-primary);
-    border: var(--border-width-thin) solid var(--color-border-light);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-lg);
-    padding: var(--space-2);
-    z-index: var(--z-index-dropdown);
-  }
-
-  padding-left: var(--space-4);
-
-  @include md {
-    padding-left: 0;
-  }
-}
-
-.has-submenu:hover > .sub-menu,
-.has-submenu:focus-within > .sub-menu {
   @include md {
     display: block;
   }
 }
 
-.submenu-toggle {
-  display: none;
+.site-header__nav-list {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 
-  @include md {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    margin-left: var(--space-1);
-    border-radius: var(--border-radius-sm);
+.site-header__nav-list a {
+  position: relative;
+  font-size: 13px;
+  color: var(--color-gray-700);
+  text-decoration: none;
+  padding-bottom: 2px;
+  transition: color 200ms ease-out;
 
-    &:hover {
-      background-color: var(--color-bg-secondary);
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--color-black);
+    transition: width 200ms ease-out;
+  }
+
+  &:hover {
+    color: var(--color-black);
+
+    &::after {
+      width: 100%;
     }
   }
 }
 
-.submenu-icon {
-  transition: transform var(--transition-duration-fast)
-    var(--transition-timing-ease-in-out);
+.site-header__nav-list .current-menu-item > a,
+.site-header__nav-list .current-menu-ancestor > a {
+  color: var(--color-black);
+  font-weight: 500;
+
+  &::after {
+    width: 100%;
+  }
 }
 
-.submenu-toggle[aria-expanded="true"] .submenu-icon {
-  transform: rotate(180deg);
+// --------------------------------------------------------------------------
+// Hamburger button (SP)
+// --------------------------------------------------------------------------
+
+.site-header__burger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+
+  @include md {
+    display: none;
+  }
+
+  &.is-open {
+    .site-header__burger-line:first-child {
+      transform: translateY(3px) rotate(45deg);
+    }
+
+    .site-header__burger-line:last-child {
+      transform: translateY(-3px) rotate(-45deg);
+    }
+  }
+}
+
+.site-header__burger-line {
+  display: block;
+  width: 18px;
+  height: 1px;
+  background-color: var(--color-black);
+  transition: transform 200ms ease-out;
+}
+
+// --------------------------------------------------------------------------
+// Mobile menu
+// --------------------------------------------------------------------------
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--color-white);
+  border-left: 1px solid var(--color-gray-200);
+  padding-top: 80px;
+  z-index: 99;
+  transform: translateX(100%);
+  transition: transform 200ms ease-out;
+
+  &.is-open {
+    transform: translateX(0);
+  }
+}
+
+.mobile-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-menu__list a {
+  display: block;
+  padding: 16px 32px;
+  font-size: 15px;
+  color: var(--color-gray-700);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color 200ms ease-out, border-color 200ms ease-out;
+
+  &:hover {
+    color: var(--color-black);
+  }
+}
+
+.mobile-menu__list .current-menu-item > a,
+.mobile-menu__list .current-menu-ancestor > a {
+  color: var(--color-black);
+  border-left-color: var(--color-black);
+}
+
+.mobile-menu__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 98;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 200ms ease-out, visibility 200ms ease-out;
+
+  &.is-open {
+    opacity: 1;
+    visibility: visible;
+  }
 }

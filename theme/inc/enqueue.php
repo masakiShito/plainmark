@@ -15,6 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Enqueue frontend scripts and styles
  */
 function plainmark_scripts() {
+    // Google Fonts: Noto Sans JP
+    wp_enqueue_style(
+        'plainmark-google-fonts',
+        'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap',
+        array(),
+        null
+    );
+
     // Main stylesheet
     wp_enqueue_style(
         'plainmark-style',

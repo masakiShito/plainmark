@@ -33,8 +33,8 @@ function plainmark_setup() {
 
     // Register navigation menus
     register_nav_menus( array(
-        'primary' => esc_html__( 'Primary Menu', 'plainmark' ),
-        'footer'  => esc_html__( 'Footer Menu', 'plainmark' ),
+        'primary' => 'メインナビゲーション',
+        'footer'  => 'フッターナビゲーション',
     ) );
 
     // Switch default core markup to HTML5
