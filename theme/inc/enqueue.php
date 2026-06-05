@@ -58,6 +58,17 @@ function plainmark_scripts() {
         true
     );
 
+    // Code copy button on single posts
+    if ( is_single() ) {
+        wp_enqueue_script(
+            'plainmark-code-copy',
+            PLAINMARK_URI . '/assets/js/code-copy.js',
+            array(),
+            PLAINMARK_VERSION,
+            true
+        );
+    }
+
     // Comment reply script
     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
         wp_enqueue_script( 'comment-reply' );
@@ -87,6 +98,14 @@ function plainmark_editor_assets() {
         PLAINMARK_URI . '/assets/css/editor-style.css',
         array(),
         PLAINMARK_VERSION
+    );
+
+    wp_enqueue_script(
+        'plainmark-code-language-editor',
+        PLAINMARK_URI . '/assets/js/code-language-editor.js',
+        array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-compose', 'wp-element', 'wp-hooks', 'wp-i18n' ),
+        PLAINMARK_VERSION,
+        true
     );
 }
 add_action( 'enqueue_block_editor_assets', 'plainmark_editor_assets' );

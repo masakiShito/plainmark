@@ -9,8 +9,8 @@
     "build": "npm-run-all sass:build ts:build",
     "sass:dev": "sass --watch src/scss/main.scss:assets/css/main.css --style=expanded --source-map",
     "sass:build": "sass src/scss/main.scss:assets/css/main.css --style=compressed --no-source-map",
-    "ts:dev": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts --bundle --outdir=assets/js --sourcemap --watch",
-    "ts:build": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts --bundle --outdir=assets/js --minify",
+    "ts:dev": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts src/ts/code-copy.ts src/ts/code-language-editor.ts --bundle --outdir=assets/js --sourcemap --watch",
+    "ts:build": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts src/ts/code-copy.ts src/ts/code-language-editor.ts --bundle --outdir=assets/js --minify",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
