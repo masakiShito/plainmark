@@ -1,6 +1,6 @@
 <?php
 /**
- * The main template file
+ * The home/blog template
  *
  * @package plainmark
  * @since 0.1.0

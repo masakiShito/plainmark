@@ -55,6 +55,9 @@ function init(): void {
 
   // External link handling
   initExternalLinks();
+
+  // Post list scroll animation
+  observePostItems();
 }
 
 /**
@@ -169,6 +172,33 @@ export function throttle<T extends (...args: unknown[]) => void>(
       }, limit);
     }
   };
+}
+
+/**
+ * Post list scroll animation with Intersection Observer
+ */
+function observePostItems(): void {
+  const items = document.querySelectorAll<HTMLElement>('.post-item');
+
+  if (!items.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target as HTMLElement;
+          el.classList.add('is-visible');
+          observer.unobserve(el);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  items.forEach((item, index) => {
+    item.style.transitionDelay = `${index * 60}ms`;
+    observer.observe(item);
+  });
 }
 
 // Initialize on DOM ready

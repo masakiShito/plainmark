@@ -1,95 +1,72 @@
 <?php
 /**
- * Template part for displaying posts
+ * Template part for displaying posts in listing
  *
  * @package plainmark
  * @since 0.1.0
  */
+
+defined( 'ABSPATH' ) || exit;
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-    <header class="entry-header">
-        <?php
-        if ( is_singular() ) :
-            the_title( '<h1 class="entry-title">', '</h1>' );
-        else :
-            the_title( '<h2 class="entry-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></h2>' );
-        endif;
-        ?>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'post-item' ); ?>>
+  <a href="<?php the_permalink(); ?>" class="post-item__link" aria-label="<?php the_title_attribute(); ?>">
 
-        <?php if ( 'post' === get_post_type() ) : ?>
-            <div class="entry-meta">
-                <span class="posted-on">
-                    <time class="entry-date published" datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>">
-                        <?php echo esc_html( get_the_date() ); ?>
-                    </time>
-                </span>
-                <span class="byline">
-                    <?php
-                    printf(
-                        esc_html__( 'by %s', 'plainmark' ),
-                        '<span class="author vcard"><a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a></span>'
-                    );
-                    ?>
-                </span>
-            </div>
-        <?php endif; ?>
-    </header>
-
-    <?php if ( has_post_thumbnail() && ! is_singular() ) : ?>
-        <div class="post-thumbnail">
-            <a href="<?php the_permalink(); ?>">
-                <?php the_post_thumbnail( 'medium_large' ); ?>
-            </a>
-        </div>
+    <?php if ( has_post_thumbnail() ) : ?>
+      <div class="post-item__thumb">
+        <?php the_post_thumbnail( 'thumbnail', array(
+          'class'   => 'post-item__thumb-img',
+          'loading' => 'lazy',
+          'alt'     => get_the_title(),
+        ) ); ?>
+      </div>
     <?php endif; ?>
 
-    <div class="entry-content">
+    <div class="post-item__body">
+      <div class="post-item__meta">
+        <time class="post-item__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
+          <?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?>
+        </time>
         <?php
-        if ( is_singular() ) :
-            the_content();
-
-            wp_link_pages( array(
-                'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'plainmark' ),
-                'after'  => '</div>',
-            ) );
-        else :
-            the_excerpt();
-        endif;
+        $categories = get_the_category();
+        if ( $categories ) :
+          $cat = $categories[0];
         ?>
+          <span class="post-item__cat">
+            <?php echo esc_html( $cat->name ); ?>
+          </span>
+        <?php endif; ?>
+      </div>
+
+      <h2 class="post-item__title"><?php the_title(); ?></h2>
+
+      <p class="post-item__excerpt">
+        <?php echo esc_html( wp_trim_words( get_the_excerpt(), 60, '...' ) ); ?>
+      </p>
+
+      <div class="post-item__footer">
+        <div class="post-item__tags">
+          <?php
+          $tags = get_the_tags();
+          if ( $tags ) :
+            foreach ( array_slice( $tags, 0, 3 ) as $tag ) :
+          ?>
+            <span class="post-item__tag">#<?php echo esc_html( $tag->name ); ?></span>
+          <?php
+            endforeach;
+          endif;
+          ?>
+        </div>
+        <span class="post-item__readtime">
+          <?php
+          $content    = get_the_content();
+          $word_count = mb_strlen( strip_tags( $content ) );
+          $minutes    = max( 1, ceil( $word_count / 400 ) );
+          echo esc_html( $minutes ) . ' min read';
+          ?>
+        </span>
+      </div>
     </div>
 
-    <footer class="entry-footer">
-        <?php
-        $categories_list = get_the_category_list( ', ' );
-        if ( $categories_list ) {
-            printf( '<span class="cat-links">' . esc_html__( 'Posted in %1$s', 'plainmark' ) . '</span>', $categories_list );
-        }
-
-        $tags_list = get_the_tag_list( '', ', ' );
-        if ( $tags_list ) {
-            printf( '<span class="tags-links">' . esc_html__( 'Tagged %1$s', 'plainmark' ) . '</span>', $tags_list );
-        }
-
-        if ( ! is_singular() ) :
-            ?>
-            <span class="read-more">
-                <a href="<?php the_permalink(); ?>"><?php esc_html_e( 'Read More', 'plainmark' ); ?></a>
-            </span>
-            <?php
-        endif;
-
-        edit_post_link(
-            sprintf(
-                wp_kses(
-                    __( 'Edit <span class="screen-reader-text">%s</span>', 'plainmark' ),
-                    array( 'span' => array( 'class' => array() ) )
-                ),
-                wp_kses_post( get_the_title() )
-            ),
-            '<span class="edit-link">',
-            '</span>'
-        );
-        ?>
-    </footer>
+  </a>
 </article>
