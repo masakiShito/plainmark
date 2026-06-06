@@ -58,7 +58,16 @@ function plainmark_scripts() {
         true
     );
 
-    // Code copy button on single posts (respects per-post setting).
+    // Dark mode script (load early to prevent flash).
+    wp_enqueue_script(
+        'plainmark-dark-mode',
+        PLAINMARK_URI . '/assets/js/dark-mode.js',
+        array(),
+        PLAINMARK_VERSION,
+        false // Load in head to prevent flash.
+    );
+
+    // Single post specific scripts.
     if ( is_single() ) {
         $show_code_copy = true;
         if ( function_exists( 'plainmark_get_article_meta' ) ) {
@@ -75,6 +84,15 @@ function plainmark_scripts() {
                 true
             );
         }
+
+        // Reading progress script.
+        wp_enqueue_script(
+            'plainmark-reading-progress',
+            PLAINMARK_URI . '/assets/js/reading-progress.js',
+            array(),
+            PLAINMARK_VERSION,
+            true
+        );
     }
 
     // Comment reply script

@@ -16,6 +16,13 @@
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
 
+<!-- Reading progress bar -->
+<?php if ( is_single() ) : ?>
+<div class="reading-progress" aria-hidden="true">
+  <div class="reading-progress__bar"></div>
+</div>
+<?php endif; ?>
+
 <header class="site-header" id="site-header">
   <div class="site-header__inner">
 
@@ -43,11 +50,25 @@
       ?>
     </nav>
 
-    <!-- Hamburger button (SP) -->
-    <button class="site-header__burger" aria-label="<?php esc_attr_e( 'メニューを開く', 'plainmark' ); ?>" aria-expanded="false" aria-controls="mobile-menu">
-      <span class="site-header__burger-line"></span>
-      <span class="site-header__burger-line"></span>
-    </button>
+    <!-- Actions -->
+    <div class="site-header__actions">
+      <!-- Dark mode toggle -->
+      <button class="dark-mode-toggle" data-dark-mode-toggle aria-label="<?php esc_attr_e( 'Switch to dark mode', 'plainmark' ); ?>" aria-pressed="false">
+        <svg class="dark-mode-toggle__icon dark-mode-toggle__icon--light" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+        <svg class="dark-mode-toggle__icon dark-mode-toggle__icon--dark" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+
+      <!-- Hamburger button (SP) -->
+      <button class="site-header__burger" aria-label="<?php esc_attr_e( 'メニューを開く', 'plainmark' ); ?>" aria-expanded="false" aria-controls="mobile-menu">
+        <span class="site-header__burger-line"></span>
+        <span class="site-header__burger-line"></span>
+      </button>
+    </div>
 
   </div>
 </header>

@@ -1,5 +1,5 @@
 /**
- * Code block language label and copy button
+ * Enhanced code block with language label, copy button, line numbers, and terminal mode
  *
  * @package plainmark
  * @since 0.1.0
@@ -32,18 +32,24 @@ const LANGUAGE_LABELS: Record<string, string> = {
   cpp: 'C++',
   csharp: 'C#',
   css: 'CSS',
+  diff: 'Diff',
   go: 'Go',
   html: 'HTML',
   java: 'Java',
   javascript: 'JavaScript',
   json: 'JSON',
   jsx: 'JSX',
+  kotlin: 'Kotlin',
+  markdown: 'Markdown',
   php: 'PHP',
   plaintext: 'Plain text',
   python: 'Python',
   ruby: 'Ruby',
+  rust: 'Rust',
   scss: 'SCSS',
   sql: 'SQL',
+  swift: 'Swift',
+  terminal: 'Terminal',
   typescript: 'TypeScript',
   tsx: 'TSX',
   xml: 'XML',
@@ -52,6 +58,7 @@ const LANGUAGE_LABELS: Record<string, string> = {
 
 const LANGUAGE_ALIASES: Record<string, string> = {
   cs: 'csharp',
+  console: 'terminal',
   html5: 'html',
   js: 'javascript',
   md: 'markdown',
@@ -61,7 +68,11 @@ const LANGUAGE_ALIASES: Record<string, string> = {
   shell: 'bash',
   ts: 'typescript',
   yml: 'yaml',
+  zsh: 'bash',
 };
+
+// Languages that should display as terminal
+const TERMINAL_LANGUAGES = ['bash', 'shell', 'terminal', 'console', 'zsh', 'sh'];
 
 /**
  * Copy text with a fallback for browsers without the Clipboard API.
@@ -106,6 +117,10 @@ function detectLanguage(code: string): string {
   const source = code.trim();
 
   if (!source) return 'plaintext';
+
+  // Diff detection
+  if (/^[-+@]{1,3}\s|^diff --git/m.test(source)) return 'diff';
+
   if (/^<\?php|\$[A-Za-z_]\w*\s*=|->\w+\(/m.test(source)) return 'php';
   if (/^\s*[<{][\s\S]*[>}]\s*$/.test(source)) {
     try {
@@ -126,9 +141,10 @@ function detectLanguage(code: string): string {
   if (/\b(SELECT|INSERT INTO|UPDATE|DELETE FROM|CREATE TABLE)\b/i.test(source)) return 'sql';
   if (/^\s*(def|class)\s+\w+.*:|^\s*(from|import)\s+[\w.]+/m.test(source)) return 'python';
   if (/^\s*(package\s+main|func\s+\w+|import\s+\()/m.test(source)) return 'go';
-  if (/^\s*(#!\/.*\b(sh|bash)|(?:sudo\s+)?(?:npm|yarn|pnpm|git|docker|wp)\s+)/m.test(source)) {
+  if (/^\s*(#!\/.*\b(sh|bash)|(?:sudo\s+)?(?:npm|yarn|pnpm|git|docker|wp|curl|wget)\s+)/m.test(source)) {
     return 'bash';
   }
+  if (/^\s*\$\s+\w+/m.test(source)) return 'terminal';
   if (/^\s*---|^[\w.-]+:\s+.+$/m.test(source)) return 'yaml';
 
   return 'plaintext';
@@ -147,6 +163,105 @@ function getLanguage(block: HTMLElement, code: HTMLElement): string {
 
 function getLanguageLabel(language: string): string {
   return LANGUAGE_LABELS[language] ?? language.toUpperCase();
+}
+
+function isTerminalLanguage(language: string): boolean {
+  return TERMINAL_LANGUAGES.includes(language);
+}
+
+function isDiffLanguage(language: string): boolean {
+  return language === 'diff';
+}
+
+/**
+ * Parse filename from code block attributes or first line comment
+ */
+function getFilename(block: HTMLElement, code: HTMLElement): string | null {
+  // Check data attribute first
+  const filename = block.dataset.filename || block.dataset.codeFilename;
+  if (filename) return filename;
+
+  // Check first line for filename comment pattern
+  const firstLine = (code.textContent ?? '').split('\n')[0];
+  const filenameMatch = firstLine.match(/^(?:\/\/|#|\/\*|\<!--)\s*(?:file(?:name)?[:=]?\s*)?([^\s*/>]+\.[a-z0-9]+)/i);
+  if (filenameMatch) return filenameMatch[1];
+
+  return null;
+}
+
+/**
+ * Get highlighted line numbers from data attribute
+ */
+function getHighlightedLines(block: HTMLElement): Set<number> {
+  const highlight = block.dataset.highlight || block.dataset.line || '';
+  const lines = new Set<number>();
+
+  if (!highlight) return lines;
+
+  // Parse formats like "1,3,5-7" or "1-3"
+  highlight.split(',').forEach((part) => {
+    const range = part.trim().match(/^(\d+)(?:-(\d+))?$/);
+    if (range) {
+      const start = parseInt(range[1], 10);
+      const end = range[2] ? parseInt(range[2], 10) : start;
+      for (let i = start; i <= end; i++) {
+        lines.add(i);
+      }
+    }
+  });
+
+  return lines;
+}
+
+/**
+ * Add line numbers and highlighting to code
+ */
+function processCodeLines(code: HTMLElement, language: string, highlightedLines: Set<number>): void {
+  const content = code.textContent ?? '';
+  const lines = content.split('\n');
+
+  // Remove trailing empty line if exists
+  if (lines[lines.length - 1] === '') {
+    lines.pop();
+  }
+
+  const isDiff = isDiffLanguage(language);
+  const isTerminal = isTerminalLanguage(language);
+
+  const processedLines = lines.map((line, index) => {
+    const lineNum = index + 1;
+    const isHighlighted = highlightedLines.has(lineNum);
+
+    // Diff line coloring
+    let diffClass = '';
+    if (isDiff) {
+      if (line.startsWith('+') && !line.startsWith('+++')) {
+        diffClass = ' code-line--added';
+      } else if (line.startsWith('-') && !line.startsWith('---')) {
+        diffClass = ' code-line--removed';
+      } else if (line.startsWith('@')) {
+        diffClass = ' code-line--info';
+      }
+    }
+
+    // Terminal prompt styling
+    let lineContent = escapeHtml(line);
+    if (isTerminal && line.match(/^\s*\$/)) {
+      lineContent = `<span class="code-prompt">$</span>${escapeHtml(line.replace(/^\s*\$\s?/, ''))}`;
+    }
+
+    const highlightClass = isHighlighted ? ' code-line--highlight' : '';
+
+    return `<span class="code-line${highlightClass}${diffClass}" data-line="${lineNum}"><span class="code-line-number">${lineNum}</span><span class="code-line-content">${lineContent || ' '}</span></span>`;
+  });
+
+  code.innerHTML = processedLines.join('\n');
+}
+
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 function setCopyButtonState(
@@ -173,26 +288,60 @@ function initCodeCopy(): void {
   blocks.forEach((block) => {
     // A pre nested inside a Gutenberg code block is handled by its parent.
     if (block.matches('pre') && block.parentElement?.closest('.wp-block-code')) return;
-    if (block.closest('.code-copy')) return;
+    if (block.closest('.code-block')) return;
 
     const code = block.querySelector<HTMLElement>('code');
     if (!code) return;
 
+    const originalText = code.textContent ?? '';
+    const language = getLanguage(block, code);
+    const filename = getFilename(block, code);
+    const highlightedLines = getHighlightedLines(block);
+    const isTerminal = isTerminalLanguage(language);
+    const isDiff = isDiffLanguage(language);
+
+    // Process lines with numbers and highlighting
+    processCodeLines(code, language, highlightedLines);
+
+    // Create wrapper
     const wrapper = document.createElement('div');
-    wrapper.className = 'code-copy';
+    wrapper.className = `code-block${isTerminal ? ' code-block--terminal' : ''}${isDiff ? ' code-block--diff' : ''}`;
     block.parentNode?.insertBefore(wrapper, block);
 
+    // Create header
     const header = document.createElement('div');
-    header.className = 'code-copy__header';
+    header.className = 'code-block__header';
 
-    const language = document.createElement('span');
-    language.className = 'code-copy__language';
-    language.textContent = getLanguageLabel(getLanguage(block, code));
-    header.appendChild(language);
+    // Left side: filename or language
+    const labelContainer = document.createElement('div');
+    labelContainer.className = 'code-block__label';
 
+    if (filename) {
+      const filenameEl = document.createElement('span');
+      filenameEl.className = 'code-block__filename';
+      filenameEl.textContent = filename;
+      labelContainer.appendChild(filenameEl);
+    }
+
+    const languageEl = document.createElement('span');
+    languageEl.className = 'code-block__language';
+    languageEl.textContent = isTerminal ? 'Terminal' : getLanguageLabel(language);
+    labelContainer.appendChild(languageEl);
+
+    header.appendChild(labelContainer);
+
+    // Terminal dots decoration
+    if (isTerminal) {
+      const dots = document.createElement('div');
+      dots.className = 'code-block__dots';
+      dots.innerHTML = '<span></span><span></span><span></span>';
+      header.insertBefore(dots, header.firstChild);
+    }
+
+    // Copy button
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'code-copy__button';
+    button.className = 'code-block__copy';
     setCopyButtonState(button, 'copy', 'Copy code to clipboard', 'Copy');
     header.appendChild(button);
 
@@ -205,7 +354,7 @@ function initCodeCopy(): void {
       window.clearTimeout(resetTimer);
 
       try {
-        await copyText(code.textContent ?? '');
+        await copyText(originalText);
         setCopyButtonState(button, 'copied', 'Code copied to clipboard', 'Copied');
       } catch {
         setCopyButtonState(button, 'failed', 'Failed to copy code', 'Failed');

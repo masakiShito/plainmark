@@ -25,3 +25,4 @@ require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';
 require_once PLAINMARK_DIR . '/inc/enqueue.php';
 require_once PLAINMARK_DIR . '/inc/customizer.php';
 require_once PLAINMARK_DIR . '/inc/walker-nav.php';
+require_once PLAINMARK_DIR . '/inc/shortcodes.php';

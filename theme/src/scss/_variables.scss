@@ -24,6 +24,16 @@
   --color-accent: #111111;
   --color-accent-hover: #333333;
 
+  /* Semantic colors (light mode default) */
+  --color-bg-primary: var(--color-white);
+  --color-bg-secondary: var(--color-gray-100);
+  --color-bg-inverse: var(--color-gray-900);
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-500);
+  --color-text-inverse: var(--color-white);
+  --color-border-default: var(--color-gray-300);
+  --color-border-light: var(--color-gray-200);
+
   // --------------------------------------------------------------------------
   // Typography
   // --------------------------------------------------------------------------
@@ -117,4 +127,29 @@ $breakpoint-xl: 1280px;
   @media (min-width: $breakpoint-xl) {
     @content;
   }
+}
+
+// --------------------------------------------------------------------------
+// Dark Mode
+// --------------------------------------------------------------------------
+
+.is-dark-mode {
+  --color-black: #ffffff;
+  --color-white: #111111;
+  --color-gray-900: #f4f4f4;
+  --color-gray-700: #cccccc;
+  --color-gray-500: #999999;
+  --color-gray-400: #777777;
+  --color-gray-300: #444444;
+  --color-gray-200: #2a2a2a;
+  --color-gray-100: #1a1a1a;
+
+  --color-bg-primary: #111111;
+  --color-bg-secondary: #1a1a1a;
+  --color-bg-inverse: #f4f4f4;
+  --color-text-primary: #f4f4f4;
+  --color-text-secondary: #999999;
+  --color-text-inverse: #111111;
+  --color-border-default: #444444;
+  --color-border-light: #2a2a2a;
 }
