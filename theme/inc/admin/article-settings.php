@@ -70,39 +70,48 @@ if ( ! function_exists( 'plainmark_get_difficulty_options' ) ) {
  * @return array<string, string|bool>
  */
 if ( ! function_exists( 'plainmark_get_article_meta' ) ) {
-    function plainmark_get_article_meta( $post_id = null ) {
-        $post_id = $post_id ? absint( $post_id ) : get_the_ID();
+	function plainmark_get_article_meta( $post_id = null ) {
+		$post_id = $post_id ? absint( $post_id ) : get_the_ID();
 
-        $defaults = array(
-            'article_type'      => '',
-            'difficulty'        => '',
-            'target_reader'     => '',
-            'prerequisites'     => '',
-            'github_url'        => '',
-            'official_docs_url' => '',
-            'show_toc'          => true,
-            'show_code_copy'    => true,
-        );
+		$defaults = array(
+			'article_type'       => '',
+			'article_type_label' => '',
+			'difficulty'         => '',
+			'difficulty_label'   => '',
+			'target_reader'      => '',
+			'prerequisites'      => '',
+			'github_url'         => '',
+			'official_docs_url'  => '',
+			'show_toc'           => true,
+			'show_code_copy'     => true,
+		);
 
-        if ( ! $post_id ) {
-            return $defaults;
-        }
+		if ( ! $post_id ) {
+			return $defaults;
+		}
 
-        return array(
-            'article_type'      => (string) get_post_meta( $post_id, '_plainmark_article_type', true ),
-            'difficulty'        => (string) get_post_meta( $post_id, '_plainmark_difficulty', true ),
-            'target_reader'     => (string) get_post_meta( $post_id, '_plainmark_target_reader', true ),
-            'prerequisites'     => (string) get_post_meta( $post_id, '_plainmark_prerequisites', true ),
-            'github_url'        => (string) get_post_meta( $post_id, '_plainmark_github_url', true ),
-            'official_docs_url' => (string) get_post_meta( $post_id, '_plainmark_official_docs_url', true ),
-            'show_toc'          => metadata_exists( 'post', $post_id, '_plainmark_show_toc' )
-                ? '1' === get_post_meta( $post_id, '_plainmark_show_toc', true )
-                : true,
-            'show_code_copy'    => metadata_exists( 'post', $post_id, '_plainmark_show_code_copy' )
-                ? '1' === get_post_meta( $post_id, '_plainmark_show_code_copy', true )
-                : true,
-        );
-    }
+		$article_type       = (string) get_post_meta( $post_id, '_plainmark_article_type', true );
+		$difficulty         = (string) get_post_meta( $post_id, '_plainmark_difficulty', true );
+		$article_types      = plainmark_get_article_type_options();
+		$difficulty_options = plainmark_get_difficulty_options();
+
+		return array(
+			'article_type'       => $article_type,
+			'article_type_label' => isset( $article_types[ $article_type ] ) ? $article_types[ $article_type ] : '',
+			'difficulty'         => $difficulty,
+			'difficulty_label'   => isset( $difficulty_options[ $difficulty ] ) ? $difficulty_options[ $difficulty ] : '',
+			'target_reader'      => (string) get_post_meta( $post_id, '_plainmark_target_reader', true ),
+			'prerequisites'      => (string) get_post_meta( $post_id, '_plainmark_prerequisites', true ),
+			'github_url'         => (string) get_post_meta( $post_id, '_plainmark_github_url', true ),
+			'official_docs_url'  => (string) get_post_meta( $post_id, '_plainmark_official_docs_url', true ),
+			'show_toc'           => metadata_exists( 'post', $post_id, '_plainmark_show_toc' )
+				? '1' === get_post_meta( $post_id, '_plainmark_show_toc', true )
+				: true,
+			'show_code_copy'     => metadata_exists( 'post', $post_id, '_plainmark_show_code_copy' )
+				? '1' === get_post_meta( $post_id, '_plainmark_show_code_copy', true )
+				: true,
+		);
+	}
 }
 
 /**

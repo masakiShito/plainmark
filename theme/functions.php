@@ -20,8 +20,8 @@ define( 'PLAINMARK_URI', get_template_directory_uri() );
  * Include theme files
  */
 require_once PLAINMARK_DIR . '/inc/setup.php';
+require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
+require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';
 require_once PLAINMARK_DIR . '/inc/enqueue.php';
 require_once PLAINMARK_DIR . '/inc/customizer.php';
-require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
 require_once PLAINMARK_DIR . '/inc/walker-nav.php';
-require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';

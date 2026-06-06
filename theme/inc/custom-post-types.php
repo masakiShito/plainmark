@@ -104,11 +104,49 @@ function plainmark_register_portfolio_taxonomy() {
 add_action( 'init', 'plainmark_register_portfolio_taxonomy', 0 );
 
 /**
+ * Register Technology taxonomy for tech stack
+ */
+function plainmark_register_technology_taxonomy() {
+	$labels = array(
+		'name'                       => _x( '技術スタック', 'taxonomy general name', 'plainmark' ),
+		'singular_name'              => _x( '技術スタック', 'taxonomy singular name', 'plainmark' ),
+		'search_items'               => __( '技術スタックを検索', 'plainmark' ),
+		'popular_items'              => __( 'よく使う技術スタック', 'plainmark' ),
+		'all_items'                  => __( 'すべての技術スタック', 'plainmark' ),
+		'parent_item'                => null,
+		'parent_item_colon'          => null,
+		'edit_item'                  => __( '技術スタックを編集', 'plainmark' ),
+		'update_item'                => __( '技術スタックを更新', 'plainmark' ),
+		'add_new_item'               => __( '新規技術スタックを追加', 'plainmark' ),
+		'new_item_name'              => __( '新規技術スタック名', 'plainmark' ),
+		'separate_items_with_commas' => __( 'カンマで区切って入力', 'plainmark' ),
+		'add_or_remove_items'        => __( '技術スタックの追加または削除', 'plainmark' ),
+		'choose_from_most_used'      => __( 'よく使う技術スタックから選択', 'plainmark' ),
+		'not_found'                  => __( '技術スタックが見つかりません', 'plainmark' ),
+		'menu_name'                  => __( '技術スタック', 'plainmark' ),
+	);
+
+	$args = array(
+		'hierarchical'      => false,
+		'labels'            => $labels,
+		'show_ui'           => true,
+		'show_admin_column' => true,
+		'query_var'         => true,
+		'rewrite'           => array( 'slug' => 'technology' ),
+		'show_in_rest'      => true,
+	);
+
+	register_taxonomy( 'technology', array( 'post', 'portfolio' ), $args );
+}
+add_action( 'init', 'plainmark_register_technology_taxonomy', 0 );
+
+/**
  * Flush rewrite rules on theme activation
  */
 function plainmark_rewrite_flush() {
-    plainmark_register_portfolio_post_type();
-    plainmark_register_portfolio_taxonomy();
-    flush_rewrite_rules();
+	plainmark_register_portfolio_post_type();
+	plainmark_register_portfolio_taxonomy();
+	plainmark_register_technology_taxonomy();
+	flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'plainmark_rewrite_flush' );
