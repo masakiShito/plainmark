@@ -140,9 +140,10 @@
       padding: var(--space-6);
       overflow-x: auto;
       overscroll-behavior-x: contain;
+      border: 1px solid var(--color-gray-200);
       border-radius: var(--border-radius-md);
-      background: var(--color-gray-900);
-      color: var(--color-gray-100);
+      background: var(--color-gray-100);
+      color: var(--color-gray-900);
       font-family: var(--font-family-mono);
       font-size: var(--font-size-sm);
       line-height: var(--line-height-base);
@@ -177,8 +178,9 @@
       min-width: 0;
       margin: var(--space-8) 0;
       overflow: hidden;
+      border: 1px solid var(--color-gray-200);
       border-radius: var(--border-radius-md);
-      background: var(--color-gray-900);
+      background: var(--color-gray-100);
 
       &__header {
         display: flex;
@@ -186,8 +188,8 @@
         justify-content: space-between;
         min-height: 40px;
         padding: 0 var(--space-3) 0 var(--space-4);
-        border-bottom: 1px solid var(--color-gray-700);
-        background: var(--color-black);
+        border-bottom: 1px solid var(--color-gray-200);
+        background: var(--color-white);
       }
 
       &__label {
@@ -197,14 +199,14 @@
       }
 
       &__filename {
-        color: var(--color-gray-300);
+        color: var(--color-gray-700);
         font-family: var(--font-family-mono);
         font-size: var(--font-size-xs);
         font-weight: var(--font-weight-medium);
       }
 
       &__language {
-        color: var(--color-gray-400);
+        color: var(--color-gray-500);
         font-family: var(--font-family-base);
         font-size: var(--font-size-xs);
         font-weight: var(--font-weight-medium);
@@ -221,7 +223,7 @@
           width: 12px;
           height: 12px;
           border-radius: 50%;
-          background: var(--color-gray-600);
+          background: var(--color-gray-300);
         }
 
         span:nth-child(1) { background: #ff5f57; }
@@ -233,6 +235,7 @@
       > .wp-block-code {
         margin: 0;
         padding: 0;
+        border: none;
         border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
       }
 
@@ -250,10 +253,10 @@
         min-width: 28px;
         height: 28px;
         padding: 0 var(--space-2);
-        border: 1px solid var(--color-gray-500);
+        border: 1px solid var(--color-gray-300);
         border-radius: var(--border-radius-sm);
-        background: rgba(51, 51, 51, 0.9);
-        color: var(--color-gray-300);
+        background: var(--color-white);
+        color: var(--color-gray-500);
         font-family: var(--font-family-base);
         font-size: var(--font-size-xs);
         line-height: 1;
@@ -264,23 +267,23 @@
 
         &:hover,
         &:focus-visible {
-          border-color: var(--color-gray-300);
-          background: var(--color-gray-700);
-          color: var(--color-white);
+          border-color: var(--color-gray-900);
+          background: var(--color-gray-100);
+          color: var(--color-gray-900);
         }
 
         &:focus-visible {
-          outline: 2px solid var(--color-white);
+          outline: 2px solid var(--color-gray-900);
           outline-offset: 2px;
         }
 
         &.is-copied {
-          border-color: var(--color-gray-300);
-          color: var(--color-white);
+          border-color: var(--color-gray-900);
+          color: var(--color-gray-900);
         }
 
         &.is-failed {
-          color: var(--color-gray-300);
+          color: var(--color-gray-500);
         }
 
         svg {
@@ -294,15 +297,49 @@
         }
       }
 
-      // Terminal mode
+      // Terminal mode (keep dark for terminal)
       &--terminal {
+        background: var(--color-gray-900);
+        border-color: var(--color-gray-700);
+
         .code-block__header {
-          background: linear-gradient(180deg, #3a3a3a 0%, #2a2a2a 100%);
-          border-bottom: 1px solid var(--color-gray-800);
+          background: var(--color-black);
+          border-bottom-color: var(--color-gray-700);
+        }
+
+        .code-block__filename {
+          color: var(--color-gray-300);
         }
 
         .code-block__language {
+          color: var(--color-gray-400);
+        }
+
+        .code-block__copy {
+          border-color: var(--color-gray-500);
+          background: rgba(51, 51, 51, 0.9);
+          color: var(--color-gray-300);
+
+          &:hover,
+          &:focus-visible {
+            border-color: var(--color-gray-300);
+            background: var(--color-gray-700);
+            color: var(--color-white);
+          }
+        }
+
+        > pre,
+        > .wp-block-code {
+          background: var(--color-gray-900);
+          color: var(--color-gray-100);
+        }
+
+        .code-line-number {
           color: var(--color-gray-500);
+        }
+
+        .code-prompt {
+          color: #22c55e;
         }
       }
 
@@ -312,7 +349,7 @@
           background: rgba(46, 160, 67, 0.15);
 
           .code-line-content {
-            color: #7ee787;
+            color: #166534;
           }
         }
 
@@ -320,7 +357,7 @@
           background: rgba(248, 81, 73, 0.15);
 
           .code-line-content {
-            color: #ff7b72;
+            color: #991b1b;
           }
         }
 
@@ -359,9 +396,9 @@
       }
     }
 
-    // Terminal prompt
+    // Terminal prompt (for non-terminal blocks)
     .code-prompt {
-      color: #22c55e;
+      color: #16a34a;
       margin-right: 0.5em;
     }
 
@@ -370,8 +407,9 @@
       min-width: 0;
       margin: var(--space-8) 0;
       overflow: hidden;
+      border: 1px solid var(--color-gray-200);
       border-radius: var(--border-radius-md);
-      background: var(--color-gray-900);
+      background: var(--color-gray-100);
 
       &__header {
         display: flex;
@@ -379,12 +417,12 @@
         justify-content: space-between;
         min-height: 40px;
         padding: 0 var(--space-3) 0 var(--space-4);
-        border-bottom: 1px solid var(--color-gray-700);
-        background: var(--color-black);
+        border-bottom: 1px solid var(--color-gray-200);
+        background: var(--color-white);
       }
 
       &__language {
-        color: var(--color-gray-400);
+        color: var(--color-gray-500);
         font-family: var(--font-family-base);
         font-size: var(--font-size-xs);
         font-weight: var(--font-weight-medium);
@@ -394,6 +432,7 @@
       > pre,
       > .wp-block-code {
         margin: 0;
+        border: none;
         border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
       }
 
@@ -405,10 +444,10 @@
         min-width: 28px;
         height: 28px;
         padding: 0 var(--space-2);
-        border: 1px solid var(--color-gray-500);
+        border: 1px solid var(--color-gray-300);
         border-radius: var(--border-radius-sm);
-        background: rgba(51, 51, 51, 0.9);
-        color: var(--color-gray-300);
+        background: var(--color-white);
+        color: var(--color-gray-500);
         font-family: var(--font-family-base);
         font-size: var(--font-size-xs);
         line-height: 1;
@@ -419,23 +458,23 @@
 
         &:hover,
         &:focus-visible {
-          border-color: var(--color-gray-300);
-          background: var(--color-gray-700);
-          color: var(--color-white);
+          border-color: var(--color-gray-900);
+          background: var(--color-gray-100);
+          color: var(--color-gray-900);
         }
 
         &:focus-visible {
-          outline: 2px solid var(--color-white);
+          outline: 2px solid var(--color-gray-900);
           outline-offset: 2px;
         }
 
         &.is-copied {
-          border-color: var(--color-gray-300);
-          color: var(--color-white);
+          border-color: var(--color-gray-900);
+          color: var(--color-gray-900);
         }
 
         &.is-failed {
-          color: var(--color-gray-300);
+          color: var(--color-gray-500);
         }
 
         svg {
