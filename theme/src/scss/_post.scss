@@ -3,7 +3,97 @@
 // ==========================================================================
 
 // --------------------------------------------------------------------------
-// Archive Header
+// Blog Header
+// --------------------------------------------------------------------------
+
+.blog-header {
+  padding: var(--space-16) 0 var(--space-8);
+  border-bottom: 1px solid var(--color-gray-200);
+  margin-bottom: var(--space-4);
+
+  &__top {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  &__title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-black);
+    letter-spacing: -0.02em;
+    margin: 0;
+
+    @include md {
+      font-size: var(--font-size-4xl);
+    }
+  }
+
+  &__count {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-400);
+  }
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}
+
+.blog-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--border-radius-full);
+  background: var(--color-white);
+  color: var(--color-gray-600);
+  font-size: var(--font-size-sm);
+  text-decoration: none;
+  transition: background var(--transition-duration) var(--transition-easing),
+    border-color var(--transition-duration) var(--transition-easing),
+    color var(--transition-duration) var(--transition-easing);
+
+  &:hover,
+  &:focus {
+    background: var(--color-gray-100);
+    border-color: var(--color-gray-300);
+    color: var(--color-gray-900);
+  }
+
+  &--active {
+    background: var(--color-gray-900);
+    border-color: var(--color-gray-900);
+    color: var(--color-white);
+
+    &:hover,
+    &:focus {
+      background: var(--color-black);
+      border-color: var(--color-black);
+      color: var(--color-white);
+    }
+
+    .blog-filter__count {
+      background: rgba(255, 255, 255, 0.2);
+      color: var(--color-white);
+    }
+  }
+
+  &__count {
+    padding: 1px 6px;
+    border-radius: var(--border-radius-full);
+    background: var(--color-gray-100);
+    color: var(--color-gray-500);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+  }
+}
+
+// --------------------------------------------------------------------------
+// Archive Header (for category/tag pages)
 // --------------------------------------------------------------------------
 
 .archive-header {
