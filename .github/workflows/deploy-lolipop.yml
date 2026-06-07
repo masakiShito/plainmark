@@ -1,0 +1,83 @@
+name: Deploy WordPress theme to Lolipop
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-lolipop-production
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    defaults:
+      run:
+        working-directory: theme
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: theme/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Install lftp
+        working-directory: .
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy theme to Lolipop via FTPS
+        working-directory: .
+        env:
+          FTP_HOST: ${{ secrets.LOLIPOP_FTP_HOST }}
+          FTP_USER: ${{ secrets.LOLIPOP_FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.LOLIPOP_FTP_PASSWORD }}
+          FTP_SERVER_DIR: ${{ secrets.LOLIPOP_FTP_SERVER_DIR }}
+        run: |
+          test -n "$FTP_HOST"
+          test -n "$FTP_USER"
+          test -n "$FTP_PASSWORD"
+          test -n "$FTP_SERVER_DIR"
+
+          lftp <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:passive-mode true
+          set net:max-retries 3
+          set net:timeout 30
+          set ssl:verify-certificate true
+
+          open -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST"
+
+          mirror --reverse --delete --verbose \
+            --exclude-glob node_modules/ \
+            --exclude-glob src/ \
+            --exclude-glob package.json \
+            --exclude-glob package-lock.json \
+            --exclude-glob tsconfig.json \
+            theme/ "$FTP_SERVER_DIR"
+
+          bye
+          EOF
