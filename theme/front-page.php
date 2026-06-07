@@ -153,7 +153,7 @@ $portfolio_items = new WP_Query(
     </section>
 
     <?php if ( $portfolio_items->have_posts() ) : ?>
-        <section class="front-section front-portfolio" aria-labelledby="front-portfolio-title">
+        <section id="works" class="front-section front-portfolio" aria-labelledby="front-portfolio-title">
             <div class="container container--wide">
                 <div class="front-section__heading">
                     <div>
@@ -188,7 +188,7 @@ $portfolio_items = new WP_Query(
         <?php wp_reset_postdata(); ?>
     <?php endif; ?>
 
-    <section class="front-section front-about">
+    <section id="about" class="front-section front-about">
         <div class="container container--wide front-about__inner">
             <div>
                 <p class="front-section__eyebrow"><?php esc_html_e( 'ABOUT', 'plainmark' ); ?></p>
