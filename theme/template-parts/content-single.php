@@ -160,51 +160,34 @@ $has_article_info = $article_type_label || $difficulty_label || $target_reader |
 	<?php endif; ?>
 
 	<?php
-	$toc_html = '';
-	if ( $show_toc && function_exists( 'plainmark_get_toc' ) ) {
+	if ( $show_toc && function_exists( 'plainmark_get_toc' ) ) :
 		$toc_html = plainmark_get_toc( get_the_content() );
-	}
+		if ( $toc_html ) :
+			?>
+		<nav class="article-toc" aria-label="<?php esc_attr_e( '目次', 'plainmark' ); ?>">
+			<div class="article-toc__header">
+				<span class="article-toc__title"><?php esc_html_e( '目次', 'plainmark' ); ?></span>
+			</div>
+			<div class="article-toc__body">
+				<?php echo $toc_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+		</nav>
+			<?php
+		endif;
+	endif;
 	?>
 
-	<div class="single-post__body<?php echo $toc_html ? ' has-toc' : ''; ?>">
-		<div class="single-post__main">
-			<?php if ( $toc_html ) : ?>
-				<nav class="article-toc article-toc--inline" aria-label="<?php esc_attr_e( '目次', 'plainmark' ); ?>">
-					<div class="article-toc__header">
-						<span class="article-toc__title"><?php esc_html_e( '目次', 'plainmark' ); ?></span>
-					</div>
-					<div class="article-toc__body">
-						<?php echo $toc_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-				</nav>
-			<?php endif; ?>
+	<div class="single-post__content">
+		<?php
+		the_content();
 
-			<div class="single-post__content">
-				<?php
-				the_content();
-
-				wp_link_pages(
-					array(
-						'before' => '<nav class="page-links" aria-label="' . esc_attr__( '投稿ページ', 'plainmark' ) . '"><span class="page-links-title">' . esc_html__( 'ページ:', 'plainmark' ) . '</span>',
-						'after'  => '</nav>',
-					)
-				);
-				?>
-			</div>
-		</div>
-
-		<?php if ( $toc_html ) : ?>
-			<aside class="single-post__sidebar">
-				<nav class="article-toc article-toc--sticky" aria-label="<?php esc_attr_e( '目次', 'plainmark' ); ?>">
-					<div class="article-toc__header">
-						<span class="article-toc__title"><?php esc_html_e( '目次', 'plainmark' ); ?></span>
-					</div>
-					<div class="article-toc__body">
-						<?php echo $toc_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-				</nav>
-			</aside>
-		<?php endif; ?>
+		wp_link_pages(
+			array(
+				'before' => '<nav class="page-links" aria-label="' . esc_attr__( '投稿ページ', 'plainmark' ) . '"><span class="page-links-title">' . esc_html__( 'ページ:', 'plainmark' ) . '</span>',
+				'after'  => '</nav>',
+			)
+		);
+		?>
 	</div>
 
 	<footer class="single-post__footer">

@@ -845,56 +845,15 @@
 }
 
 // ==========================================================================
-// Article Body Layout with Sticky TOC
-// ==========================================================================
-
-.single-post__body {
-  &.has-toc {
-    @media (min-width: 1200px) {
-      display: grid;
-      grid-template-columns: 1fr 260px;
-      gap: var(--space-12);
-      align-items: start;
-    }
-  }
-}
-
-.single-post__main {
-  min-width: 0;
-}
-
-.single-post__sidebar {
-  display: none;
-
-  @media (min-width: 1200px) {
-    display: block;
-  }
-}
-
-// ==========================================================================
 // Table of Contents
 // ==========================================================================
 
 .article-toc {
+  margin: var(--space-8) 0;
   padding: var(--space-4) var(--space-6);
   background: var(--color-white);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--border-radius-md);
-
-  &--inline {
-    margin: var(--space-8) 0;
-
-    @media (min-width: 1200px) {
-      display: none;
-    }
-  }
-
-  &--sticky {
-    position: sticky;
-    top: calc(var(--space-8) + 60px);
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-  }
 
   &__header {
     margin-bottom: var(--space-3);
@@ -943,11 +902,6 @@
         content: counter(toc-counter) "." counter(toc-sub-counter) " ";
         color: var(--color-gray-400);
       }
-    }
-
-    &.is-active > .article-toc__link {
-      color: var(--color-black);
-      font-weight: var(--font-weight-medium);
     }
   }
 
