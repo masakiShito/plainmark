@@ -31,6 +31,18 @@ function plainmark_scripts() {
         PLAINMARK_VERSION
     );
 
+    // Front page stylesheet.
+    if ( is_front_page() ) {
+        $front_page_css = PLAINMARK_DIR . '/assets/css/front-page.css';
+
+        wp_enqueue_style(
+            'plainmark-front-page',
+            PLAINMARK_URI . '/assets/css/front-page.css',
+            array( 'plainmark-style' ),
+            file_exists( $front_page_css ) ? (string) filemtime( $front_page_css ) : PLAINMARK_VERSION
+        );
+    }
+
     // Main script
     wp_enqueue_script(
         'plainmark-script',
