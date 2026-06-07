@@ -93,6 +93,15 @@ function plainmark_scripts() {
             PLAINMARK_VERSION,
             true
         );
+
+        // Article enhancements script (anchors, share, feedback).
+        wp_enqueue_script(
+            'plainmark-article-enhancements',
+            PLAINMARK_URI . '/assets/js/article-enhancements.js',
+            array(),
+            PLAINMARK_VERSION,
+            true
+        );
     }
 
     // Comment reply script
@@ -130,6 +139,15 @@ function plainmark_editor_assets() {
         'plainmark-code-language-editor',
         PLAINMARK_URI . '/assets/js/code-language-editor.js',
         array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-compose', 'wp-element', 'wp-hooks', 'wp-i18n' ),
+        PLAINMARK_VERSION,
+        true
+    );
+
+    // Series settings sidebar panel.
+    wp_enqueue_script(
+        'plainmark-series-sidebar',
+        PLAINMARK_URI . '/assets/js/series-sidebar.js',
+        array( 'wp-plugins', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n' ),
         PLAINMARK_VERSION,
         true
     );

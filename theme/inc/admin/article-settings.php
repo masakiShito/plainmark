@@ -11,6 +11,84 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+/**
+ * Register series meta fields for REST API (Block Editor sidebar).
+ */
+function plainmark_register_series_meta() {
+	$post_types = plainmark_get_article_settings_post_types();
+
+	foreach ( $post_types as $post_type ) {
+		register_post_meta(
+			$post_type,
+			'_plainmark_series_name',
+			array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'string',
+				'auth_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
+
+		register_post_meta(
+			$post_type,
+			'_plainmark_series_order',
+			array(
+				'show_in_rest'  => true,
+				'single'        => true,
+				'type'          => 'integer',
+				'auth_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
+	}
+}
+add_action( 'init', 'plainmark_register_series_meta' );
+
+/**
+ * Register REST API endpoint to get all series names.
+ */
+function plainmark_register_series_rest_route() {
+	register_rest_route(
+		'plainmark/v1',
+		'/series',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'plainmark_get_all_series_names',
+			'permission_callback' => function () {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+}
+add_action( 'rest_api_init', 'plainmark_register_series_rest_route' );
+
+/**
+ * Get all unique series names.
+ *
+ * @return WP_REST_Response List of series names.
+ */
+function plainmark_get_all_series_names() {
+	global $wpdb;
+
+	$series_names = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT DISTINCT meta_value
+			FROM {$wpdb->postmeta} pm
+			INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+			WHERE pm.meta_key = %s
+			AND pm.meta_value != ''
+			AND p.post_status IN ('publish', 'draft', 'pending', 'private')
+			ORDER BY meta_value ASC",
+			'_plainmark_series_name'
+		)
+	);
+
+	return rest_ensure_response( $series_names ? $series_names : array() );
+}
+
 if ( ! defined( 'PLAINMARK_ARTICLE_SETTINGS_NONCE_ACTION' ) ) {
     define( 'PLAINMARK_ARTICLE_SETTINGS_NONCE_ACTION', 'plainmark_save_article_settings' );
 }
@@ -84,6 +162,8 @@ if ( ! function_exists( 'plainmark_get_article_meta' ) ) {
 			'official_docs_url'  => '',
 			'show_toc'           => true,
 			'show_code_copy'     => true,
+			'series_name'        => '',
+			'series_order'       => '',
 		);
 
 		if ( ! $post_id ) {
@@ -110,6 +190,8 @@ if ( ! function_exists( 'plainmark_get_article_meta' ) ) {
 			'show_code_copy'     => metadata_exists( 'post', $post_id, '_plainmark_show_code_copy' )
 				? '1' === get_post_meta( $post_id, '_plainmark_show_code_copy', true )
 				: true,
+			'series_name'        => (string) get_post_meta( $post_id, '_plainmark_series_name', true ),
+			'series_order'       => (string) get_post_meta( $post_id, '_plainmark_series_order', true ),
 		);
 	}
 }
@@ -290,6 +372,7 @@ if ( ! function_exists( 'plainmark_render_article_settings_meta_box' ) ) {
                     </span>
                 </label>
             </div>
+
         </div>
         <?php
     }
@@ -376,6 +459,7 @@ if ( ! function_exists( 'plainmark_save_article_settings_meta' ) ) {
         );
         update_post_meta( $post_id, '_plainmark_show_toc', isset( $_POST['plainmark_show_toc'] ) ? '1' : '0' );
         update_post_meta( $post_id, '_plainmark_show_code_copy', isset( $_POST['plainmark_show_code_copy'] ) ? '1' : '0' );
+        // Series settings are saved via REST API (Block Editor sidebar).
     }
 }
 add_action( 'save_post', 'plainmark_save_article_settings_meta' );

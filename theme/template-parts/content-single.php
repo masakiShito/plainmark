@@ -24,16 +24,59 @@ $github_url         = $article_meta['github_url'] ?? '';
 $official_docs_url  = $article_meta['official_docs_url'] ?? '';
 $show_toc           = $article_meta['show_toc'] ?? true;
 
+// Check if post was modified.
+$is_modified = function_exists( 'plainmark_is_post_modified' ) && plainmark_is_post_modified();
+
+// Get series info.
+$series_info = function_exists( 'plainmark_get_series_posts' ) ? plainmark_get_series_posts() : array();
+
+// Get related posts.
+$related_posts = function_exists( 'plainmark_get_related_posts' ) ? plainmark_get_related_posts( get_the_ID(), 3 ) : array();
+
 // Check if we have any article info to display.
 $has_article_info = $article_type_label || $difficulty_label || $target_reader || $prerequisites || $github_url || $official_docs_url;
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'single-post' ); ?>>
+	<?php if ( ! empty( $series_info ) && ! empty( $series_info['posts'] ) ) : ?>
+		<div class="series-badge">
+			<span class="series-badge__label"><?php esc_html_e( 'シリーズ', 'plainmark' ); ?></span>
+			<span class="series-badge__name"><?php echo esc_html( $series_info['name'] ); ?></span>
+			<span class="series-badge__part">
+				<?php
+				printf(
+					/* translators: 1: current part, 2: total parts */
+					esc_html__( 'Part %1$d / %2$d', 'plainmark' ),
+					(int) $series_info['current_part'],
+					(int) $series_info['total']
+				);
+				?>
+			</span>
+		</div>
+	<?php endif; ?>
+
 	<header class="single-post__header">
 		<div class="single-post__meta">
 			<time class="single-post__date" datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>">
 				<?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?>
 			</time>
+
+			<?php if ( $is_modified ) : ?>
+				<span class="single-post__updated">
+					<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+						<path d="M1 4v6h6"/>
+						<path d="M23 20v-6h-6"/>
+						<path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+					</svg>
+					<?php
+					printf(
+						/* translators: %s: modified date */
+						esc_html__( '更新: %s', 'plainmark' ),
+						esc_html( get_the_modified_date( 'Y.m.d' ) )
+					);
+					?>
+				</span>
+			<?php endif; ?>
 
 			<?php if ( $categories ) : ?>
 				<?php foreach ( $categories as $category ) : ?>
@@ -61,6 +104,68 @@ $has_article_info = $article_type_label || $difficulty_label || $target_reader |
 
 		<?php the_title( '<h1 class="single-post__title">', '</h1>' ); ?>
 	</header>
+
+	<?php if ( ! empty( $series_info ) && ! empty( $series_info['posts'] ) ) : ?>
+		<nav class="series-nav" aria-label="<?php esc_attr_e( 'シリーズ記事', 'plainmark' ); ?>">
+			<div class="series-nav__header">
+				<div class="series-nav__info">
+					<span class="series-nav__badge"><?php esc_html_e( 'シリーズ', 'plainmark' ); ?></span>
+					<span class="series-nav__name"><?php echo esc_html( $series_info['name'] ); ?></span>
+				</div>
+				<span class="series-nav__progress">
+					<?php
+					printf(
+						/* translators: 1: current part, 2: total parts */
+						esc_html__( '%1$d / %2$d', 'plainmark' ),
+						(int) $series_info['current_part'],
+						(int) $series_info['total']
+					);
+					?>
+				</span>
+			</div>
+
+			<div class="series-nav__steps">
+				<?php foreach ( $series_info['posts'] as $index => $series_post ) : ?>
+					<?php
+					$is_current = ( $series_post->ID === get_the_ID() );
+					$is_done    = ( $index < $series_info['current_index'] );
+					$step_class = 'series-nav__step';
+					if ( $is_current ) {
+						$step_class .= ' series-nav__step--current';
+					} elseif ( $is_done ) {
+						$step_class .= ' series-nav__step--done';
+					}
+					?>
+					<div class="<?php echo esc_attr( $step_class ); ?>">
+						<?php if ( $is_current ) : ?>
+							<span class="series-nav__step-number"><?php echo esc_html( $index + 1 ); ?></span>
+							<span class="series-nav__step-title"><?php echo esc_html( get_the_title( $series_post ) ); ?></span>
+							<span class="series-nav__step-label"><?php esc_html_e( '現在', 'plainmark' ); ?></span>
+						<?php else : ?>
+							<a href="<?php echo esc_url( get_permalink( $series_post ) ); ?>" class="series-nav__step-link">
+								<span class="series-nav__step-number"><?php echo esc_html( $index + 1 ); ?></span>
+								<span class="series-nav__step-title"><?php echo esc_html( get_the_title( $series_post ) ); ?></span>
+							</a>
+						<?php endif; ?>
+					</div>
+				<?php endforeach; ?>
+			</div>
+
+			<?php if ( $series_info['next_post'] ) : ?>
+				<div class="series-nav__next">
+					<a href="<?php echo esc_url( get_permalink( $series_info['next_post'] ) ); ?>" class="series-nav__next-link">
+						<span class="series-nav__next-label"><?php esc_html_e( '次の記事', 'plainmark' ); ?></span>
+						<span class="series-nav__next-title"><?php echo esc_html( get_the_title( $series_info['next_post'] ) ); ?></span>
+						<span class="series-nav__next-arrow">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+								<path d="M5 12h14M12 5l7 7-7 7"/>
+							</svg>
+						</span>
+					</a>
+				</div>
+			<?php endif; ?>
+		</nav>
+	<?php endif; ?>
 
 	<?php if ( $has_article_info ) : ?>
 		<div class="single-post__info">
@@ -190,6 +295,89 @@ $has_article_info = $article_type_label || $difficulty_label || $target_reader |
 		?>
 	</div>
 
+	<!-- Share Buttons -->
+	<div class="share-buttons">
+		<span class="share-buttons__label"><?php esc_html_e( 'Share', 'plainmark' ); ?></span>
+		<div class="share-buttons__list">
+			<button type="button" class="share-button share-button--twitter" data-share="twitter" aria-label="<?php esc_attr_e( 'Twitterでシェア', 'plainmark' ); ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+					<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+				</svg>
+				<span class="share-button__text">Tweet</span>
+			</button>
+			<button type="button" class="share-button share-button--hatena" data-share="hatena" aria-label="<?php esc_attr_e( 'はてなブックマークに追加', 'plainmark' ); ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+					<path d="M20.47 21.22a2.69 2.69 0 0 1-.78 1.93 2.59 2.59 0 0 1-1.87.82 2.71 2.71 0 0 1-1.94-.79 2.63 2.63 0 0 1-.81-1.96 2.65 2.65 0 0 1 .81-1.91 2.69 2.69 0 0 1 1.94-.77 2.65 2.65 0 0 1 1.87.77 2.67 2.67 0 0 1 .78 1.91zm-1.39-7.79h-3.24V.97h3.24v12.46zM12.68 9.23a7.59 7.59 0 0 1-1.06 2.84 5.51 5.51 0 0 1-2 1.88 6.73 6.73 0 0 1-2.62.73l-.72.03H.97v-3.38h3.38a3.94 3.94 0 0 0 2.35-.53 2.77 2.77 0 0 0 1.07-1.88H.97V5.54h6.8c-.06-.48-.35-.89-.91-1.24a3.94 3.94 0 0 0-2.08-.53H.97V.39h5.31a6.76 6.76 0 0 1 2.62.72 5.48 5.48 0 0 1 2 1.88 7.57 7.57 0 0 1 1.06 2.84c.19 1.1.28 2.36.28 3.4s-.09 2.3-.28 3.4z"/>
+				</svg>
+				<span class="share-button__text">Bookmark</span>
+			</button>
+			<button type="button" class="share-button share-button--copy" data-share="copy" aria-label="<?php esc_attr_e( 'URLをコピー', 'plainmark' ); ?>">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+					<path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+				</svg>
+				<span class="share-button__text"><?php esc_html_e( 'Copy', 'plainmark' ); ?></span>
+			</button>
+		</div>
+	</div>
+
+	<!-- Feedback -->
+	<div class="article-feedback" data-post-id="<?php the_ID(); ?>">
+		<p class="article-feedback__question"><?php esc_html_e( 'この記事は役に立ちましたか？', 'plainmark' ); ?></p>
+		<div class="article-feedback__buttons">
+			<button type="button" class="article-feedback__button article-feedback__button--yes" data-feedback="helpful">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+				</svg>
+				<?php esc_html_e( '役に立った', 'plainmark' ); ?>
+			</button>
+			<button type="button" class="article-feedback__button article-feedback__button--no" data-feedback="not_helpful">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+					<path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+				</svg>
+				<?php esc_html_e( '改善が必要', 'plainmark' ); ?>
+			</button>
+		</div>
+	</div>
+
+	<?php if ( ! empty( $series_info ) && $series_info['next_post'] ) : ?>
+		<div class="series-continue">
+			<div class="series-continue__header">
+				<span class="series-continue__badge"><?php echo esc_html( $series_info['name'] ); ?></span>
+				<span class="series-continue__progress">
+					<?php
+					printf(
+						/* translators: 1: current part, 2: total parts */
+						esc_html__( '%1$d / %2$d 完了', 'plainmark' ),
+						(int) $series_info['current_part'],
+						(int) $series_info['total']
+					);
+					?>
+				</span>
+			</div>
+			<a href="<?php echo esc_url( get_permalink( $series_info['next_post'] ) ); ?>" class="series-continue__card">
+				<div class="series-continue__content">
+					<span class="series-continue__label">
+						<?php
+						printf(
+							/* translators: %d: next part number */
+							esc_html__( 'Part %d', 'plainmark' ),
+							(int) $series_info['current_part'] + 1
+						);
+						?>
+					</span>
+					<span class="series-continue__title"><?php echo esc_html( get_the_title( $series_info['next_post'] ) ); ?></span>
+				</div>
+				<span class="series-continue__action">
+					<?php esc_html_e( '次へ進む', 'plainmark' ); ?>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+						<path d="M5 12h14M12 5l7 7-7 7"/>
+					</svg>
+				</span>
+			</a>
+		</div>
+	<?php endif; ?>
+
 	<footer class="single-post__footer">
 		<?php if ( $tags ) : ?>
 			<div class="single-post__tags" aria-label="<?php esc_attr_e( 'タグ', 'plainmark' ); ?>">
@@ -216,6 +404,31 @@ $has_article_info = $article_type_label || $difficulty_label || $target_reader |
 					<?php next_post_link( '%link', esc_html__( '次の記事:', 'plainmark' ) . ' %title &rarr;' ); ?>
 				</div>
 			</nav>
+		<?php endif; ?>
+
+		<?php if ( ! empty( $related_posts ) ) : ?>
+			<section class="related-posts">
+				<h2 class="related-posts__title"><?php esc_html_e( '関連記事', 'plainmark' ); ?></h2>
+				<div class="related-posts__list">
+					<?php foreach ( $related_posts as $related ) : ?>
+						<article class="related-posts__item">
+							<a href="<?php echo esc_url( get_permalink( $related ) ); ?>">
+								<?php if ( has_post_thumbnail( $related ) ) : ?>
+									<div class="related-posts__thumb">
+										<?php echo get_the_post_thumbnail( $related, 'thumbnail' ); ?>
+									</div>
+								<?php endif; ?>
+								<div class="related-posts__content">
+									<h3 class="related-posts__item-title"><?php echo esc_html( get_the_title( $related ) ); ?></h3>
+									<time class="related-posts__date" datetime="<?php echo esc_attr( get_the_date( DATE_W3C, $related ) ); ?>">
+										<?php echo esc_html( get_the_date( 'Y.m.d', $related ) ); ?>
+									</time>
+								</div>
+							</a>
+						</article>
+					<?php endforeach; ?>
+				</div>
+			</section>
 		<?php endif; ?>
 
 		<a class="single-post__back" href="<?php echo esc_url( home_url( '/' ) ); ?>">
