@@ -29,14 +29,74 @@ require_once PLAINMARK_DIR . '/inc/shortcodes.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
 
 /**
- * Redirect the fallback blog path to the latest posts section.
+ * Register /blog/ as the post archive path.
  */
-function plainmark_redirect_blog_path() {
-    $request_path = trim( wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' );
+function plainmark_register_blog_archive_route() {
+    add_rewrite_rule( '^blog/?$', 'index.php?plainmark_blog_archive=1', 'top' );
+}
+add_action( 'init', 'plainmark_register_blog_archive_route' );
 
-    if ( 'blog' === $request_path || str_ends_with( $request_path, '/blog' ) ) {
-        wp_safe_redirect( home_url( '/#latest-posts' ), 301 );
-        exit;
+/**
+ * Add custom query vars.
+ *
+ * @param array $vars Query vars.
+ * @return array
+ */
+function plainmark_add_query_vars( $vars ) {
+    $vars[] = 'plainmark_blog_archive';
+    return $vars;
+}
+add_filter( 'query_vars', 'plainmark_add_query_vars' );
+
+/**
+ * Force /blog/ to query normal posts.
+ *
+ * @param WP_Query $query Main query.
+ */
+function plainmark_blog_archive_query( $query ) {
+    if ( is_admin() || ! $query->is_main_query() ) {
+        return;
+    }
+
+    if ( $query->get( 'plainmark_blog_archive' ) ) {
+        $query->set( 'post_type', 'post' );
+        $query->set( 'posts_per_page', get_option( 'posts_per_page' ) );
+        $query->is_home    = true;
+        $query->is_archive = false;
+        $query->is_page    = false;
+        $query->is_404     = false;
     }
 }
-add_action( 'template_redirect', 'plainmark_redirect_blog_path' );
+add_action( 'pre_get_posts', 'plainmark_blog_archive_query' );
+
+/**
+ * Use index.php for /blog/ archive.
+ *
+ * @param string $template Template path.
+ * @return string
+ */
+function plainmark_blog_archive_template( $template ) {
+    if ( get_query_var( 'plainmark_blog_archive' ) ) {
+        $index_template = locate_template( 'index.php' );
+
+        if ( $index_template ) {
+            return $index_template;
+        }
+    }
+
+    return $template;
+}
+add_filter( 'template_include', 'plainmark_blog_archive_template' );
+
+/**
+ * Flush rewrite rules once after this route is introduced.
+ */
+function plainmark_maybe_flush_rewrite_rules() {
+    $rewrite_version = '20260608_blog_archive_route';
+
+    if ( get_option( 'plainmark_rewrite_version' ) !== $rewrite_version ) {
+        flush_rewrite_rules();
+        update_option( 'plainmark_rewrite_version', $rewrite_version );
+    }
+}
+add_action( 'init', 'plainmark_maybe_flush_rewrite_rules', 20 );
