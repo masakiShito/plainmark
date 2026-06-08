@@ -18,9 +18,9 @@ get_header();
         <div class="container container--wide about-hero__inner">
             <div class="about-hero__content">
                 <p class="about-eyebrow"><?php esc_html_e( 'ABOUT ME', 'plainmark' ); ?></p>
-                <h1 class="about-hero__title"><?php esc_html_e( '複雑な業務を、使いやすい仕組みに落とし込む。', 'plainmark' ); ?></h1>
+                <h1 class="about-hero__title"><?php esc_html_e( '業務を、使いやすく。', 'plainmark' ); ?></h1>
                 <p class="about-hero__lead">
-                    <?php esc_html_e( 'まーさんです。業務システム、EC、予約システムなどの開発で、要件整理から設計、実装、テストまで一貫して携わってきました。フロントエンドとバックエンドの両方を理解しながら、利用者にも運用者にも扱いやすいWebシステムをつくることを大切にしています。', 'plainmark' ); ?>
+                    <?php esc_html_e( 'まーさんです。業務システム、EC、予約システムなどの開発で、要件整理から設計、実装、テストまで一貫して携わってきました。複雑な仕様を整理し、利用者にも運用者にも扱いやすいWebシステムに落とし込むことを大切にしています。', 'plainmark' ); ?>
                 </p>
             </div>
             <aside class="about-profile-card" aria-label="<?php esc_attr_e( 'プロフィール概要', 'plainmark' ); ?>">
@@ -49,7 +49,7 @@ get_header();
         <div class="container container--wide about-summary__grid">
             <div>
                 <p class="about-eyebrow"><?php esc_html_e( 'PHILOSOPHY', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( 'ただ作るだけではなく、伝わる形にする。', 'plainmark' ); ?></h2>
+                <h2><?php esc_html_e( '伝わる形にする。', 'plainmark' ); ?></h2>
             </div>
             <div class="about-summary__text">
                 <p><?php esc_html_e( '開発で大切にしているのは、仕様をそのまま実装することではなく、背景にある業務や課題を理解したうえで、保守しやすく、使いやすい形に整理することです。', 'plainmark' ); ?></p>
@@ -88,7 +88,7 @@ get_header();
         <div class="container container--wide about-skills__grid">
             <div>
                 <p class="about-eyebrow"><?php esc_html_e( 'TECH STACK', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( 'よく使う技術', 'plainmark' ); ?></h2>
+                <h2><?php esc_html_e( '技術', 'plainmark' ); ?></h2>
             </div>
             <div class="about-skill-groups">
                 <div class="about-skill-group">
@@ -129,7 +129,7 @@ get_header();
         <div class="container container--wide">
             <div class="about-section__heading">
                 <p class="about-eyebrow"><?php esc_html_e( 'EXPERIENCE', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( 'これまで取り組んできたこと', 'plainmark' ); ?></h2>
+                <h2><?php esc_html_e( '経験', 'plainmark' ); ?></h2>
             </div>
             <div class="about-timeline__list">
                 <article class="about-timeline__item">
@@ -168,7 +168,7 @@ get_header();
         <div class="container container--wide about-cta__inner">
             <div>
                 <p class="about-eyebrow"><?php esc_html_e( 'BLOG', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( '学んだことを、あとから使える知識として残す。', 'plainmark' ); ?></h2>
+                <h2><?php esc_html_e( '学びを残す。', 'plainmark' ); ?></h2>
             </div>
             <a class="about-cta__button" href="<?php echo esc_url( home_url( '/blog/' ) ); ?>">
                 <?php esc_html_e( '記事一覧を見る', 'plainmark' ); ?>
