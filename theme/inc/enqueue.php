@@ -31,6 +31,14 @@ function plainmark_scripts() {
         PLAINMARK_VERSION
     );
 
+    $live_search_css = PLAINMARK_DIR . '/assets/css/live-search.css';
+    wp_enqueue_style(
+        'plainmark-live-search',
+        PLAINMARK_URI . '/assets/css/live-search.css',
+        array( 'plainmark-style' ),
+        file_exists( $live_search_css ) ? (string) filemtime( $live_search_css ) : PLAINMARK_VERSION
+    );
+
     // Front page stylesheet.
     if ( is_front_page() ) {
         $front_page_css = PLAINMARK_DIR . '/assets/css/front-page.css';
