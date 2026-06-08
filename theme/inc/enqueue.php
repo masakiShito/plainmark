@@ -39,6 +39,18 @@ function plainmark_scripts() {
         file_exists( $live_search_css ) ? (string) filemtime( $live_search_css ) : PLAINMARK_VERSION
     );
 
+    // Shared Home / Blog hero stylesheet.
+    if ( is_front_page() || is_home() || get_query_var( 'plainmark_blog_archive' ) ) {
+        $page_heroes_css = PLAINMARK_DIR . '/assets/css/page-heroes.css';
+
+        wp_enqueue_style(
+            'plainmark-page-heroes',
+            PLAINMARK_URI . '/assets/css/page-heroes.css',
+            array( 'plainmark-style' ),
+            file_exists( $page_heroes_css ) ? (string) filemtime( $page_heroes_css ) : PLAINMARK_VERSION
+        );
+    }
+
     // Front page stylesheet.
     if ( is_front_page() ) {
         $front_page_css = PLAINMARK_DIR . '/assets/css/front-page.css';
@@ -46,7 +58,7 @@ function plainmark_scripts() {
         wp_enqueue_style(
             'plainmark-front-page',
             PLAINMARK_URI . '/assets/css/front-page.css',
-            array( 'plainmark-style' ),
+            array( 'plainmark-style', 'plainmark-page-heroes' ),
             file_exists( $front_page_css ) ? (string) filemtime( $front_page_css ) : PLAINMARK_VERSION
         );
     }
