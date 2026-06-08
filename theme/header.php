@@ -71,6 +71,14 @@ $about_url      = home_url( '/about/' );
           <?php esc_html_e( '記事を読む', 'plainmark' ); ?>
         </a>
 
+        <button class="site-header__search" type="button" data-search-toggle aria-label="<?php esc_attr_e( '検索を開く', 'plainmark' ); ?>">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m20 20-3.5-3.5"/>
+          </svg>
+          <span class="site-header__search-key">⌘K</span>
+        </button>
+
         <button class="dark-mode-toggle" data-dark-mode-toggle aria-label="<?php esc_attr_e( 'ダークモードを切り替える', 'plainmark' ); ?>" aria-pressed="false">
           <svg class="dark-mode-toggle__icon dark-mode-toggle__icon--light" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <circle cx="12" cy="12" r="4"/>
@@ -92,6 +100,34 @@ $about_url      = home_url( '/about/' );
     </div>
   </div>
 </header>
+
+<div class="search-overlay" aria-hidden="true">
+  <div class="search-overlay__panel" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'サイト内検索', 'plainmark' ); ?>">
+    <div class="search-overlay__header">
+      <p class="search-overlay__eyebrow"><?php esc_html_e( 'SEARCH', 'plainmark' ); ?></p>
+      <button class="search-close" type="button" aria-label="<?php esc_attr_e( '検索を閉じる', 'plainmark' ); ?>">
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+
+    <form class="search-form search-overlay__form" role="search" method="get" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+      <label class="screen-reader-text" for="plainmark-live-search"><?php esc_html_e( '検索', 'plainmark' ); ?></label>
+      <input
+        id="plainmark-live-search"
+        class="search-field"
+        type="search"
+        name="s"
+        placeholder="<?php esc_attr_e( '記事やWorksを検索…', 'plainmark' ); ?>"
+        autocomplete="off"
+        data-live-search
+        data-results="#plainmark-search-results"
+      >
+    </form>
+
+    <div id="plainmark-search-results" class="search-results" aria-live="polite"></div>
+    <p class="search-overlay__hint"><?php esc_html_e( '3文字以上入力すると、記事とPortfolioを横断検索します。', 'plainmark' ); ?></p>
+  </div>
+</div>
 
 <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
   <div class="mobile-menu__inner">
