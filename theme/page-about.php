@@ -20,12 +20,12 @@ get_header();
                 <p class="about-eyebrow"><?php esc_html_e( 'ABOUT ME', 'plainmark' ); ?></p>
                 <h1 class="about-hero__title"><?php esc_html_e( '複雑な業務を、使いやすい仕組みに落とし込む。', 'plainmark' ); ?></h1>
                 <p class="about-hero__lead">
-                    <?php esc_html_e( '師藤 真基です。業務システム、EC、予約システムなどの開発で、要件整理から設計、実装、テストまで一貫して携わってきました。フロントエンドとバックエンドの両方を理解しながら、利用者にも運用者にも扱いやすいWebシステムをつくることを大切にしています。', 'plainmark' ); ?>
+                    <?php esc_html_e( 'まーさんです。業務システム、EC、予約システムなどの開発で、要件整理から設計、実装、テストまで一貫して携わってきました。フロントエンドとバックエンドの両方を理解しながら、利用者にも運用者にも扱いやすいWebシステムをつくることを大切にしています。', 'plainmark' ); ?>
                 </p>
             </div>
             <aside class="about-profile-card" aria-label="<?php esc_attr_e( 'プロフィール概要', 'plainmark' ); ?>">
-                <div class="about-profile-card__mark">MS</div>
-                <p class="about-profile-card__name"><?php esc_html_e( '師藤 真基', 'plainmark' ); ?></p>
+                <div class="about-profile-card__mark">M</div>
+                <p class="about-profile-card__name"><?php esc_html_e( 'まーさん', 'plainmark' ); ?></p>
                 <p class="about-profile-card__role"><?php esc_html_e( 'Web Engineer / Frontend & Backend', 'plainmark' ); ?></p>
                 <dl class="about-profile-card__list">
                     <div>
