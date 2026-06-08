@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A minimal monochrome WordPress theme for tech blog & portfolio.",
   "author": "Masaki Morito",
-  "license": "GPL-2.0",
+  "license": "GPL-2.0-or-later",
   "scripts": {
     "dev": "npm-run-all --parallel sass:dev ts:dev",
     "build": "npm-run-all sass:build ts:build",
