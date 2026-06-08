@@ -65,7 +65,7 @@
     <!-- Footer bottom: Copyright -->
     <div class="site-footer__bottom">
       <p class="site-footer__copy">
-        &copy; <?php echo esc_html( date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. All rights reserved.
+        &copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. All rights reserved.
       </p>
       <p class="site-footer__credit">
         Built with <a href="https://github.com/YOUR_USERNAME/plainmark" target="_blank" rel="noopener noreferrer">plainmark</a>
