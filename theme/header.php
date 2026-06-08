@@ -9,6 +9,7 @@
 $posts_page_id  = (int) get_option( 'page_for_posts' );
 $posts_page_url = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/blog/' );
 $portfolio_url  = post_type_exists( 'portfolio' ) ? get_post_type_archive_link( 'portfolio' ) : home_url( '/#works' );
+$about_url      = home_url( '/about/' );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -60,7 +61,7 @@ $portfolio_url  = post_type_exists( 'portfolio' ) ? get_post_type_archive_link( 
             <?php if ( $portfolio_url ) : ?>
               <li><a href="<?php echo esc_url( $portfolio_url ); ?>"><?php esc_html_e( 'Works', 'plainmark' ); ?></a></li>
             <?php endif; ?>
-            <li><a href="<?php echo esc_url( home_url( '/#about' ) ); ?>"><?php esc_html_e( 'About', 'plainmark' ); ?></a></li>
+            <li><a href="<?php echo esc_url( $about_url ); ?>"><?php esc_html_e( 'About', 'plainmark' ); ?></a></li>
           </ul>
         <?php endif; ?>
       </nav>
@@ -117,7 +118,7 @@ $portfolio_url  = post_type_exists( 'portfolio' ) ? get_post_type_archive_link( 
           <?php if ( $portfolio_url ) : ?>
             <li><a href="<?php echo esc_url( $portfolio_url ); ?>"><span>03</span><?php esc_html_e( 'Works', 'plainmark' ); ?></a></li>
           <?php endif; ?>
-          <li><a href="<?php echo esc_url( home_url( '/#about' ) ); ?>"><span>04</span><?php esc_html_e( 'About', 'plainmark' ); ?></a></li>
+          <li><a href="<?php echo esc_url( $about_url ); ?>"><span>04</span><?php esc_html_e( 'About', 'plainmark' ); ?></a></li>
         </ul>
       <?php endif; ?>
     </nav>
