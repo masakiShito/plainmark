@@ -45,13 +45,21 @@ function plainmark_scripts() {
 
     // About page stylesheet.
     if ( is_page( 'about' ) || get_query_var( 'plainmark_about_page' ) ) {
-        $about_css = PLAINMARK_DIR . '/assets/css/about.css';
+        $about_css        = PLAINMARK_DIR . '/assets/css/about.css';
+        $about_polish_css = PLAINMARK_DIR . '/assets/css/about-polish.css';
 
         wp_enqueue_style(
             'plainmark-about',
             PLAINMARK_URI . '/assets/css/about.css',
             array( 'plainmark-style' ),
             file_exists( $about_css ) ? (string) filemtime( $about_css ) : PLAINMARK_VERSION
+        );
+
+        wp_enqueue_style(
+            'plainmark-about-polish',
+            PLAINMARK_URI . '/assets/css/about-polish.css',
+            array( 'plainmark-about' ),
+            file_exists( $about_polish_css ) ? (string) filemtime( $about_polish_css ) : PLAINMARK_VERSION
         );
     }
 
