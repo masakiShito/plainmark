@@ -63,6 +63,18 @@ function plainmark_scripts() {
         );
     }
 
+    // Works stylesheet.
+    if ( is_post_type_archive( 'portfolio' ) || is_singular( 'portfolio' ) ) {
+        $works_css = PLAINMARK_DIR . '/assets/css/works.css';
+
+        wp_enqueue_style(
+            'plainmark-works',
+            PLAINMARK_URI . '/assets/css/works.css',
+            array( 'plainmark-style' ),
+            file_exists( $works_css ) ? (string) filemtime( $works_css ) : PLAINMARK_VERSION
+        );
+    }
+
     // Main script
     wp_enqueue_script(
         'plainmark-script',
