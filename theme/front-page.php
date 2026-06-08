@@ -40,14 +40,14 @@ $portfolio_items = new WP_Query(
     <section class="front-hero">
         <div class="container container--wide front-hero__inner">
             <div class="front-hero__content">
-                <p class="front-hero__eyebrow"><?php esc_html_e( 'TECH BLOG & PORTFOLIO', 'plainmark' ); ?></p>
+                <p class="front-hero__eyebrow"><?php esc_html_e( 'HOME', 'plainmark' ); ?></p>
                 <h1 class="front-hero__title">
-                    <?php bloginfo( 'name' ); ?>
+                    <?php esc_html_e( 'つくる。学ぶ。残す。', 'plainmark' ); ?>
                 </h1>
                 <p class="front-hero__lead">
                     <?php
                     echo esc_html(
-                        $site_description ?: __( '技術、学び、ものづくりをシンプルに記録する場所。', 'plainmark' )
+                        $site_description ?: __( '技術、設計、個人開発。日々の試行錯誤を、あとから使える知識として記録しています。', 'plainmark' )
                     );
                     ?>
                 </p>
