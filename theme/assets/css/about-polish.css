@@ -1,0 +1,185 @@
+.about-hero {
+  padding-top: 132px;
+  padding-bottom: 78px;
+}
+
+.about-hero__content {
+  min-height: 320px;
+}
+
+.about-hero__title {
+  max-width: 720px;
+  font-size: clamp(3.5rem, 7vw, 6.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.072em;
+}
+
+.about-hero__lead {
+  max-width: 680px;
+  margin-top: 28px;
+}
+
+.about-profile-card {
+  min-height: 360px;
+}
+
+.about-section {
+  padding-top: 88px;
+  padding-bottom: 88px;
+}
+
+.about-section h2,
+.about-summary h2,
+.about-skills h2,
+.about-cta h2 {
+  max-width: 520px;
+  font-size: clamp(2.25rem, 4.6vw, 3.85rem);
+  line-height: 1.06;
+  letter-spacing: -0.058em;
+}
+
+.about-summary__grid {
+  align-items: center;
+}
+
+.about-summary__text {
+  padding: 30px 34px;
+}
+
+.about-card {
+  min-height: 300px;
+}
+
+.about-card h3 {
+  max-width: 360px;
+  font-size: clamp(1.35rem, 2.2vw, 1.7rem);
+}
+
+.about-skills__grid {
+  align-items: start;
+}
+
+.about-timeline__item h3 {
+  font-size: clamp(1.15rem, 2.1vw, 1.45rem);
+}
+
+.about-cta {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+.about-cta::before {
+  color: color-mix(in srgb, var(--color-text-primary) 5%, transparent);
+}
+
+.about-cta .about-eyebrow {
+  color: var(--color-text-secondary);
+}
+
+.about-cta__button {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.about-cta__button:hover,
+.about-cta__button:focus-visible {
+  color: var(--color-text-inverse);
+  background: var(--color-bg-inverse);
+}
+
+@media (min-width: 760px) {
+  .about-hero__inner {
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.65fr);
+    align-items: end;
+  }
+
+  .about-summary__grid,
+  .about-skills__grid,
+  .about-cta__inner {
+    grid-template-columns: minmax(0, 0.72fr) minmax(320px, 1.28fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .about-hero {
+    padding-top: 108px;
+    padding-bottom: 56px;
+  }
+
+  .about-hero::before {
+    bottom: -0.12em;
+    font-size: 7.5rem;
+  }
+
+  .about-hero__content {
+    min-height: auto;
+  }
+
+  .about-hero__title {
+    max-width: 330px;
+    font-size: clamp(3.4rem, 17vw, 4.8rem);
+    line-height: 0.96;
+    letter-spacing: -0.078em;
+  }
+
+  .about-hero__lead {
+    margin-top: 24px;
+    font-size: 0.95rem;
+    line-height: 1.95;
+  }
+
+  .about-profile-card {
+    min-height: 270px;
+    border-radius: 24px;
+    padding: 24px;
+  }
+
+  .about-profile-card__mark {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+  }
+
+  .about-profile-card__name {
+    margin-top: 58px;
+    font-size: 1.8rem;
+  }
+
+  .about-section {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  .about-section h2,
+  .about-summary h2,
+  .about-skills h2,
+  .about-cta h2 {
+    max-width: 300px;
+    font-size: clamp(2.6rem, 14vw, 3.8rem);
+    line-height: 0.98;
+  }
+
+  .about-summary__text {
+    padding: 24px;
+    font-size: 0.93rem;
+    line-height: 1.95;
+  }
+
+  .about-card h3 {
+    font-size: 1.45rem;
+  }
+
+  .about-card p,
+  .about-timeline__item p {
+    font-size: 0.9rem;
+  }
+
+  .about-timeline__item {
+    padding: 22px;
+  }
+
+  .about-cta::before {
+    bottom: -0.12em;
+    font-size: 8rem;
+  }
+}
