@@ -17,20 +17,20 @@ get_header();
     <section class="about-hero">
         <div class="container container--wide about-hero__inner">
             <div class="about-hero__content">
-                <p class="about-eyebrow"><?php esc_html_e( 'ABOUT', 'plainmark' ); ?></p>
-                <h1 class="about-hero__title"><?php esc_html_e( '設計から実装まで、事業に寄り添ってつくるWebエンジニア。', 'plainmark' ); ?></h1>
+                <p class="about-eyebrow"><?php esc_html_e( 'ABOUT ME', 'plainmark' ); ?></p>
+                <h1 class="about-hero__title"><?php esc_html_e( '複雑な業務を、使いやすい仕組みに落とし込む。', 'plainmark' ); ?></h1>
                 <p class="about-hero__lead">
-                    <?php esc_html_e( 'React / Vue を用いたフロントエンド開発と、Python（FastAPI）・Java によるバックエンド開発を軸に、業務システム・EC・予約システムの開発に携わってきました。要件整理、設計、実装、テストまで一貫して対応できることが強みです。', 'plainmark' ); ?>
+                    <?php esc_html_e( '師藤 真基です。業務システム、EC、予約システムなどの開発で、要件整理から設計、実装、テストまで一貫して携わってきました。フロントエンドとバックエンドの両方を理解しながら、利用者にも運用者にも扱いやすいWebシステムをつくることを大切にしています。', 'plainmark' ); ?>
                 </p>
             </div>
             <aside class="about-profile-card" aria-label="<?php esc_attr_e( 'プロフィール概要', 'plainmark' ); ?>">
                 <div class="about-profile-card__mark">MS</div>
                 <p class="about-profile-card__name"><?php esc_html_e( '師藤 真基', 'plainmark' ); ?></p>
-                <p class="about-profile-card__role"><?php esc_html_e( 'Web Engineer / PL', 'plainmark' ); ?></p>
+                <p class="about-profile-card__role"><?php esc_html_e( 'Web Engineer / Frontend & Backend', 'plainmark' ); ?></p>
                 <dl class="about-profile-card__list">
                     <div>
-                        <dt><?php esc_html_e( 'Experience', 'plainmark' ); ?></dt>
-                        <dd><?php esc_html_e( '約6年', 'plainmark' ); ?></dd>
+                        <dt><?php esc_html_e( 'Focus', 'plainmark' ); ?></dt>
+                        <dd><?php esc_html_e( '業務理解と設計', 'plainmark' ); ?></dd>
                     </div>
                     <div>
                         <dt><?php esc_html_e( 'Frontend', 'plainmark' ); ?></dt>
@@ -48,12 +48,12 @@ get_header();
     <section class="about-section about-summary">
         <div class="container container--wide about-summary__grid">
             <div>
-                <p class="about-eyebrow"><?php esc_html_e( 'SUMMARY', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( '業務システムからWeb予約、ECまで。', 'plainmark' ); ?></h2>
+                <p class="about-eyebrow"><?php esc_html_e( 'PHILOSOPHY', 'plainmark' ); ?></p>
+                <h2><?php esc_html_e( 'ただ作るだけではなく、伝わる形にする。', 'plainmark' ); ?></h2>
             </div>
             <div class="about-summary__text">
-                <p><?php esc_html_e( 'Webシステム開発に約6年間従事し、業務システム、ECシステム、予約システムなどの開発で要件整理・基本設計・実装・テストを担当してきました。', 'plainmark' ); ?></p>
-                <p><?php esc_html_e( '直近ではPLとして、FastAPIによるAPI開発やVue.jsによる画面開発、CASLを用いた権限管理基盤の整備などを推進。設計と実装の両面から、保守性と品質を意識した開発に取り組んでいます。', 'plainmark' ); ?></p>
+                <p><?php esc_html_e( '開発で大切にしているのは、仕様をそのまま実装することではなく、背景にある業務や課題を理解したうえで、保守しやすく、使いやすい形に整理することです。', 'plainmark' ); ?></p>
+                <p><?php esc_html_e( '画面、API、DB、権限、運用フローはそれぞれ独立しているようで、実際には強くつながっています。だからこそ、フロントエンドとバックエンドを横断して全体像を見ながら設計することを意識しています。', 'plainmark' ); ?></p>
             </div>
         </div>
     </section>
@@ -62,23 +62,23 @@ get_header();
         <div class="container container--wide">
             <div class="about-section__heading">
                 <p class="about-eyebrow"><?php esc_html_e( 'STRENGTHS', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( '得意なこと', 'plainmark' ); ?></h2>
+                <h2><?php esc_html_e( '強み', 'plainmark' ); ?></h2>
             </div>
             <div class="about-card-grid">
                 <article class="about-card">
                     <span class="about-card__number">01</span>
-                    <h3><?php esc_html_e( '設計から実装まで一貫対応', 'plainmark' ); ?></h3>
-                    <p><?php esc_html_e( '要件整理・仕様検討から基本設計、実装、テストまで一連の工程を経験。業務フローと運用を意識した設計を大切にしています。', 'plainmark' ); ?></p>
+                    <h3><?php esc_html_e( '曖昧な要件を整理する', 'plainmark' ); ?></h3>
+                    <p><?php esc_html_e( '業務フローや既存仕様を読み解き、画面・API・データのつながりを整理します。関係者の認識をそろえながら、実装に落とし込める状態へ具体化することが得意です。', 'plainmark' ); ?></p>
                 </article>
                 <article class="about-card">
                     <span class="about-card__number">02</span>
-                    <h3><?php esc_html_e( 'フロント・バックエンド横断', 'plainmark' ); ?></h3>
-                    <p><?php esc_html_e( 'React / Vue / Next.js と、Python（FastAPI）・JavaによるAPI開発の両方を経験。画面とAPIの整合性を意識して開発できます。', 'plainmark' ); ?></p>
+                    <h3><?php esc_html_e( '使いやすさと保守性を両立する', 'plainmark' ); ?></h3>
+                    <p><?php esc_html_e( 'UI/UX、権限管理、業務ロジック、テストのしやすさを意識して設計します。短期的に動くだけでなく、あとから変更しやすい実装を目指しています。', 'plainmark' ); ?></p>
                 </article>
                 <article class="about-card">
                     <span class="about-card__number">03</span>
-                    <h3><?php esc_html_e( 'PL・リーダー経験', 'plainmark' ); ?></h3>
-                    <p><?php esc_html_e( '小〜中規模チームでタスク割り振り、レビュー、進捗管理、技術相談を担当。品質と納期の両立を意識して推進してきました。', 'plainmark' ); ?></p>
+                    <h3><?php esc_html_e( 'チームで前に進める', 'plainmark' ); ?></h3>
+                    <p><?php esc_html_e( 'PL・チームリーダーとして、タスク整理、レビュー、技術相談、進捗管理を経験。メンバーが迷わず動けるように、情報を整理して共有することを大切にしています。', 'plainmark' ); ?></p>
                 </article>
             </div>
         </div>
@@ -87,18 +87,18 @@ get_header();
     <section class="about-section about-skills">
         <div class="container container--wide about-skills__grid">
             <div>
-                <p class="about-eyebrow"><?php esc_html_e( 'SKILLS', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( '技術スタック', 'plainmark' ); ?></h2>
+                <p class="about-eyebrow"><?php esc_html_e( 'TECH STACK', 'plainmark' ); ?></p>
+                <h2><?php esc_html_e( 'よく使う技術', 'plainmark' ); ?></h2>
             </div>
             <div class="about-skill-groups">
                 <div class="about-skill-group">
                     <h3><?php esc_html_e( 'Frontend', 'plainmark' ); ?></h3>
                     <ul>
+                        <li>TypeScript</li>
                         <li>React</li>
                         <li>Vue.js</li>
                         <li>Next.js</li>
-                        <li>TypeScript</li>
-                        <li>HTML / CSS</li>
+                        <li>UI Design</li>
                     </ul>
                 </div>
                 <div class="about-skill-group">
@@ -107,18 +107,18 @@ get_header();
                         <li>Python</li>
                         <li>FastAPI</li>
                         <li>Java</li>
-                        <li>Spring MVC</li>
-                        <li>C# / ASP.NET</li>
+                        <li>API Design</li>
+                        <li>Authorization</li>
                     </ul>
                 </div>
                 <div class="about-skill-group">
-                    <h3><?php esc_html_e( 'Database / Infra', 'plainmark' ); ?></h3>
+                    <h3><?php esc_html_e( 'Workflow', 'plainmark' ); ?></h3>
                     <ul>
                         <li>PostgreSQL</li>
-                        <li>Oracle</li>
                         <li>MySQL</li>
                         <li>AWS Lambda</li>
-                        <li>Docker / Git</li>
+                        <li>Docker</li>
+                        <li>Git</li>
                     </ul>
                 </div>
             </div>
@@ -128,36 +128,36 @@ get_header();
     <section class="about-section about-timeline">
         <div class="container container--wide">
             <div class="about-section__heading">
-                <p class="about-eyebrow"><?php esc_html_e( 'CAREER', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( '主な経験', 'plainmark' ); ?></h2>
+                <p class="about-eyebrow"><?php esc_html_e( 'EXPERIENCE', 'plainmark' ); ?></p>
+                <h2><?php esc_html_e( 'これまで取り組んできたこと', 'plainmark' ); ?></h2>
             </div>
             <div class="about-timeline__list">
                 <article class="about-timeline__item">
-                    <time>2025 - 2026</time>
+                    <time>EC / Payment</time>
                     <div>
-                        <h3><?php esc_html_e( '大規模EC販売システム / ペイメントアプリ', 'plainmark' ); ?></h3>
-                        <p><?php esc_html_e( '仕様整理、基本設計、API仕様設計、既存システム改善、レビュー、セキュリティ課題整理などを担当。', 'plainmark' ); ?></p>
+                        <h3><?php esc_html_e( '購入導線や決済に関わるシステムの設計・改善', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( '大規模ECの基本設計や、自治体向けデジタル決済アプリの改善に携わりました。既存仕様を整理し、関係者と認識を合わせながら、画面仕様・API仕様・データ設計へ落とし込む経験を積んできました。', 'plainmark' ); ?></p>
                     </div>
                 </article>
                 <article class="about-timeline__item">
-                    <time>2025</time>
+                    <time>PL / FastAPI</time>
                     <div>
-                        <h3><?php esc_html_e( '空調管理システム', 'plainmark' ); ?></h3>
-                        <p><?php esc_html_e( 'PLとして約15本のAPIと複数画面の開発を推進。権限管理基盤、UI/UX改善、テストコード拡充にも取り組みました。', 'plainmark' ); ?></p>
+                        <h3><?php esc_html_e( '空調管理システムのリプレイスと機能改善', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( 'PLとして、FastAPIによるAPI開発、Vue.jsによる画面実装、CASLを用いた権限管理、レビュー、メンバーサポートを担当。運用性と保守性を高める改善にも取り組みました。', 'plainmark' ); ?></p>
                     </div>
                 </article>
                 <article class="about-timeline__item">
-                    <time>2023 - 2025</time>
+                    <time>Reservation</time>
                     <div>
-                        <h3><?php esc_html_e( 'クルーズ予約・アクティビティ予約システム', 'plainmark' ); ?></h3>
-                        <p><?php esc_html_e( 'AWS Lambda上で動作するバックエンドAPIや、Next.jsを用いたWeb予約画面を開発。', 'plainmark' ); ?></p>
+                        <h3><?php esc_html_e( '予約システムのフロントエンド・API開発', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( 'クルーズ予約やアクティビティ予約システムで、Next.jsを用いた予約画面と、AWS Lambda上で動作するバックエンドAPIを開発。外部API連携や仕様変更にも対応しました。', 'plainmark' ); ?></p>
                     </div>
                 </article>
                 <article class="about-timeline__item">
-                    <time>2019 - 2023</time>
+                    <time>Legacy / Improve</time>
                     <div>
-                        <h3><?php esc_html_e( '業務システム開発・保守運用', 'plainmark' ); ?></h3>
-                        <p><?php esc_html_e( 'Java、Spring MVC、jQuery、Knockout.jsなどを用いた業務システム開発、保守運用、リリース対応を経験。', 'plainmark' ); ?></p>
+                        <h3><?php esc_html_e( '既存システムの理解と改善', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( 'JavaやjQuery、Knockout.jsを用いた業務システムの開発・保守運用を経験。設計書整備、ブラウザ対応、運用改善、自動化ツール作成など、現場の困りごとを減らす改善にも取り組んできました。', 'plainmark' ); ?></p>
                     </div>
                 </article>
             </div>
@@ -168,7 +168,7 @@ get_header();
         <div class="container container--wide about-cta__inner">
             <div>
                 <p class="about-eyebrow"><?php esc_html_e( 'BLOG', 'plainmark' ); ?></p>
-                <h2><?php esc_html_e( '学んだことを、わかりやすく残しています。', 'plainmark' ); ?></h2>
+                <h2><?php esc_html_e( '学んだことを、あとから使える知識として残す。', 'plainmark' ); ?></h2>
             </div>
             <a class="about-cta__button" href="<?php echo esc_url( home_url( '/blog/' ) ); ?>">
                 <?php esc_html_e( '記事一覧を見る', 'plainmark' ); ?>
