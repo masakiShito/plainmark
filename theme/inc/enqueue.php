@@ -195,6 +195,19 @@ function plainmark_editor_assets() {
         PLAINMARK_VERSION,
         true
     );
+
+    $screen = get_current_screen();
+    if ( $screen && 'portfolio' === $screen->post_type ) {
+        $work_settings_sidebar_js = PLAINMARK_DIR . '/assets/js/work-settings-sidebar.js';
+
+        wp_enqueue_script(
+            'plainmark-work-settings-sidebar',
+            PLAINMARK_URI . '/assets/js/work-settings-sidebar.js',
+            array( 'wp-plugins', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n' ),
+            file_exists( $work_settings_sidebar_js ) ? (string) filemtime( $work_settings_sidebar_js ) : PLAINMARK_VERSION,
+            true
+        );
+    }
 }
 add_action( 'enqueue_block_editor_assets', 'plainmark_editor_assets' );
 
