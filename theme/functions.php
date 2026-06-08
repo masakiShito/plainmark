@@ -29,12 +29,13 @@ require_once PLAINMARK_DIR . '/inc/shortcodes.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
 
 /**
- * Register /blog/ as the post archive path.
+ * Register custom theme routes.
  */
-function plainmark_register_blog_archive_route() {
+function plainmark_register_custom_routes() {
     add_rewrite_rule( '^blog/?$', 'index.php?plainmark_blog_archive=1', 'top' );
+    add_rewrite_rule( '^about/?$', 'index.php?plainmark_about_page=1', 'top' );
 }
-add_action( 'init', 'plainmark_register_blog_archive_route' );
+add_action( 'init', 'plainmark_register_custom_routes' );
 
 /**
  * Add custom query vars.
@@ -44,6 +45,7 @@ add_action( 'init', 'plainmark_register_blog_archive_route' );
  */
 function plainmark_add_query_vars( $vars ) {
     $vars[] = 'plainmark_blog_archive';
+    $vars[] = 'plainmark_about_page';
     return $vars;
 }
 add_filter( 'query_vars', 'plainmark_add_query_vars' );
@@ -66,16 +68,23 @@ function plainmark_blog_archive_query( $query ) {
         $query->is_page    = false;
         $query->is_404     = false;
     }
+
+    if ( $query->get( 'plainmark_about_page' ) ) {
+        $query->is_page    = true;
+        $query->is_home    = false;
+        $query->is_archive = false;
+        $query->is_404     = false;
+    }
 }
 add_action( 'pre_get_posts', 'plainmark_blog_archive_query' );
 
 /**
- * Use index.php for /blog/ archive.
+ * Use theme templates for custom routes.
  *
  * @param string $template Template path.
  * @return string
  */
-function plainmark_blog_archive_template( $template ) {
+function plainmark_custom_route_template( $template ) {
     if ( get_query_var( 'plainmark_blog_archive' ) ) {
         $index_template = locate_template( 'index.php' );
 
@@ -84,15 +93,23 @@ function plainmark_blog_archive_template( $template ) {
         }
     }
 
+    if ( get_query_var( 'plainmark_about_page' ) ) {
+        $about_template = locate_template( 'page-about.php' );
+
+        if ( $about_template ) {
+            return $about_template;
+        }
+    }
+
     return $template;
 }
-add_filter( 'template_include', 'plainmark_blog_archive_template' );
+add_filter( 'template_include', 'plainmark_custom_route_template' );
 
 /**
- * Flush rewrite rules once after this route is introduced.
+ * Flush rewrite rules once after route changes.
  */
 function plainmark_maybe_flush_rewrite_rules() {
-    $rewrite_version = '20260608_blog_archive_route';
+    $rewrite_version = '20260608_blog_about_routes';
 
     if ( get_option( 'plainmark_rewrite_version' ) !== $rewrite_version ) {
         flush_rewrite_rules();
