@@ -159,6 +159,56 @@ add_action( 'wp_ajax_plainmark_article_feedback', 'plainmark_handle_article_feed
 add_action( 'wp_ajax_nopriv_plainmark_article_feedback', 'plainmark_handle_article_feedback' );
 
 /**
+ * Handle live search AJAX.
+ */
+function plainmark_handle_live_search() {
+	// Verify nonce. This must match plainmarkData.nonce generated with wp_create_nonce( 'plainmark_nonce' ).
+	if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'plainmark_nonce' ) ) {
+		wp_send_json_error( array( 'message' => __( 'Invalid nonce', 'plainmark' ) ) );
+	}
+
+	$query = isset( $_POST['query'] ) ? sanitize_text_field( wp_unslash( $_POST['query'] ) ) : '';
+
+	if ( mb_strlen( $query ) < 3 ) {
+		wp_send_json_success( array( 'results' => array() ) );
+	}
+
+	$search_query = new WP_Query(
+		array(
+			'post_type'           => array( 'post', 'portfolio' ),
+			'post_status'         => 'publish',
+			'posts_per_page'      => 8,
+			's'                   => $query,
+			'ignore_sticky_posts' => true,
+			'no_found_rows'       => true,
+		)
+	);
+
+	$type_labels = array(
+		'post'      => __( '記事', 'plainmark' ),
+		'portfolio' => 'Portfolio',
+	);
+
+	$results = array();
+
+	foreach ( $search_query->posts as $post ) {
+		$post_type = get_post_type( $post );
+
+		$results[] = array(
+			'id'      => (int) $post->ID,
+			'title'   => get_the_title( $post ),
+			'url'     => get_permalink( $post ),
+			'excerpt' => wp_trim_words( get_the_excerpt( $post ), 24, '…' ),
+			'type'    => isset( $type_labels[ $post_type ] ) ? $type_labels[ $post_type ] : $post_type,
+		);
+	}
+
+	wp_send_json_success( array( 'results' => $results ) );
+}
+add_action( 'wp_ajax_plainmark_live_search', 'plainmark_handle_live_search' );
+add_action( 'wp_ajax_nopriv_plainmark_live_search', 'plainmark_handle_live_search' );
+
+/**
  * Get GitHub edit URL for the current post.
  *
  * @param int $post_id Post ID.
