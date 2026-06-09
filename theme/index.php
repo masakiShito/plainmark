@@ -13,10 +13,10 @@ get_header();
   <section class="blog-hero">
     <div class="container container--wide blog-hero__inner">
       <p class="blog-hero__eyebrow"><?php esc_html_e( 'BLOG', 'plainmark' ); ?></p>
-      <h1 class="blog-hero__title"><?php esc_html_e( '学んだことを、次に使える形へ。', 'plainmark' ); ?></h1>
+      <h1 class="blog-hero__title"><?php esc_html_e( '学びを、残す。', 'plainmark' ); ?></h1>
       <div class="blog-hero__bottom">
         <p class="blog-hero__lead">
-          <?php esc_html_e( '開発で試したこと、設計で考えたこと、つまずいて分かったこと。あとから自分や誰かが使えるように、技術の学びを整理して残しています。', 'plainmark' ); ?>
+          <?php esc_html_e( '開発で試したことや、つまずいて分かったことを、あとから使える知識として記録しています。', 'plainmark' ); ?>
         </p>
         <?php if ( $wp_query->found_posts ) : ?>
           <span class="blog-hero__count">
