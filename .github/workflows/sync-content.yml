@@ -1,0 +1,98 @@
+name: Sync Markdown content to WordPress
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'content/posts/**/*.md'
+      - 'content/works/**/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plainmark-content-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Validate secrets
+        env:
+          SYNC_URL: ${{ secrets.PLAINMARK_SYNC_URL }}
+          SYNC_SECRET: ${{ secrets.PLAINMARK_SYNC_SECRET }}
+        run: |
+          set -euo pipefail
+          test -n "$SYNC_URL" || { echo 'PLAINMARK_SYNC_URL is not configured.' >&2; exit 1; }
+          test -n "$SYNC_SECRET" || { echo 'PLAINMARK_SYNC_SECRET is not configured.' >&2; exit 1; }
+
+      - name: Find Markdown files to sync
+        id: files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            git ls-files 'content/posts/**/*.md' 'content/works/**/*.md' > /tmp/plainmark-files.txt
+          else
+            BEFORE='${{ github.event.before }}'
+            if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]]; then
+              git ls-files 'content/posts/**/*.md' 'content/works/**/*.md' > /tmp/plainmark-files.txt
+            else
+              git diff --name-only --diff-filter=AM "$BEFORE" '${{ github.sha }}' -- 'content/posts/**/*.md' 'content/works/**/*.md' > /tmp/plainmark-files.txt
+            fi
+          fi
+
+          sort -u /tmp/plainmark-files.txt -o /tmp/plainmark-files.txt
+          echo "count=$(wc -l < /tmp/plainmark-files.txt | tr -d ' ')" >> "$GITHUB_OUTPUT"
+          cat /tmp/plainmark-files.txt
+
+      - name: Sync changed content
+        if: steps.files.outputs.count != '0'
+        env:
+          SYNC_URL: ${{ secrets.PLAINMARK_SYNC_URL }}
+          SYNC_SECRET: ${{ secrets.PLAINMARK_SYNC_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          while IFS= read -r file; do
+            [[ -n "$file" && -f "$file" ]] || continue
+
+            sha=$(git rev-parse "HEAD:$file")
+            payload=$(jq -n \
+              --arg path "$file" \
+              --arg sha "$sha" \
+              --rawfile content "$file" \
+              '{path: $path, sha: $sha, content: $content}')
+
+            echo "Syncing $file"
+            response_file=$(mktemp)
+            status=$(curl --silent --show-error \
+              --output "$response_file" \
+              --write-out '%{http_code}' \
+              --request POST "$SYNC_URL" \
+              --header 'Content-Type: application/json' \
+              --header "X-Plainmark-Secret: $SYNC_SECRET" \
+              --data "$payload")
+
+            cat "$response_file"
+            echo
+
+            if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
+              echo "Sync failed for $file with HTTP $status" >&2
+              exit 1
+            fi
+          done < /tmp/plainmark-files.txt
+
+      - name: No content changes
+        if: steps.files.outputs.count == '0'
+        run: echo 'No Markdown content changes to sync.'
