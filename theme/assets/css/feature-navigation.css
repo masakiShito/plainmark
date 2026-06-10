@@ -175,8 +175,101 @@
   transform: translateY(-2px);
 }
 
+.front-tools {
+  background: var(--color-bg-secondary);
+}
+
+.front-tools__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.front-tool-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: start;
+  min-height: 230px;
+  padding: 28px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 24px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.front-tool-card:hover,
+.front-tool-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--color-border-default);
+  box-shadow: 0 22px 60px color-mix(in srgb, #000 8%, transparent);
+}
+
+.front-tool-card__number,
+.front-tool-card__eyebrow {
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.front-tool-card__eyebrow {
+  margin: 0 0 16px;
+}
+
+.front-tool-card h3 {
+  margin: 0 0 14px;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+
+.front-tool-card p:last-child {
+  max-width: 560px;
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.85;
+}
+
+.front-tool-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--color-text-inverse);
+  background: var(--color-bg-inverse);
+  transition: transform 180ms ease;
+}
+
+.front-tool-card:hover .front-tool-card__arrow,
+.front-tool-card:focus-visible .front-tool-card__arrow {
+  transform: translateX(4px);
+}
+
+@media (min-width: 760px) {
+  .front-tools__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 767px) {
   .site-header__explore {
+    display: none;
+  }
+
+  .front-tool-card {
+    grid-template-columns: 1fr auto;
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .front-tool-card__number {
     display: none;
   }
 }
