@@ -39,6 +39,14 @@ function plainmark_scripts() {
         file_exists( $live_search_css ) ? (string) filemtime( $live_search_css ) : PLAINMARK_VERSION
     );
 
+    $differentiation_css = PLAINMARK_DIR . '/assets/css/differentiation-features.css';
+    wp_enqueue_style(
+        'plainmark-differentiation-features',
+        PLAINMARK_URI . '/assets/css/differentiation-features.css',
+        array( 'plainmark-style' ),
+        file_exists( $differentiation_css ) ? (string) filemtime( $differentiation_css ) : PLAINMARK_VERSION
+    );
+
     // Front page stylesheet.
     if ( is_front_page() ) {
         $front_page_css = PLAINMARK_DIR . '/assets/css/front-page.css';
@@ -122,6 +130,15 @@ function plainmark_scripts() {
         PLAINMARK_URI . '/assets/js/search.js',
         array(),
         PLAINMARK_VERSION,
+        true
+    );
+
+    $differentiation_js = PLAINMARK_DIR . '/assets/js/differentiation-features.js';
+    wp_enqueue_script(
+        'plainmark-differentiation-features',
+        PLAINMARK_URI . '/assets/js/differentiation-features.js',
+        array(),
+        file_exists( $differentiation_js ) ? (string) filemtime( $differentiation_js ) : PLAINMARK_VERSION,
         true
     );
 
@@ -219,7 +236,28 @@ function plainmark_editor_assets() {
         true
     );
 
+    $code_tabs_block_js = PLAINMARK_DIR . '/assets/js/code-tabs-block.js';
+    wp_enqueue_script(
+        'plainmark-code-tabs-block',
+        PLAINMARK_URI . '/assets/js/code-tabs-block.js',
+        array( 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n' ),
+        file_exists( $code_tabs_block_js ) ? (string) filemtime( $code_tabs_block_js ) : PLAINMARK_VERSION,
+        true
+    );
+
     $screen = get_current_screen();
+    if ( $screen && 'post' === $screen->post_type ) {
+        $article_extras_sidebar_js = PLAINMARK_DIR . '/assets/js/article-extras-sidebar.js';
+
+        wp_enqueue_script(
+            'plainmark-article-extras-sidebar',
+            PLAINMARK_URI . '/assets/js/article-extras-sidebar.js',
+            array( 'wp-plugins', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n' ),
+            file_exists( $article_extras_sidebar_js ) ? (string) filemtime( $article_extras_sidebar_js ) : PLAINMARK_VERSION,
+            true
+        );
+    }
+
     if ( $screen && 'portfolio' === $screen->post_type ) {
         $work_settings_sidebar_js = PLAINMARK_DIR . '/assets/js/work-settings-sidebar.js';
 
