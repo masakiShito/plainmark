@@ -1,0 +1,102 @@
+/**
+ * Alert block editor styles.
+ *
+ * @package plainmark
+ */
+
+.alert-block {
+	margin: 1.5rem 0;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	border-left: 4px solid;
+
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 0.5rem;
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		display: flex;
+
+		svg {
+			stroke-linecap: round;
+			stroke-linejoin: round;
+		}
+	}
+
+	&__title {
+		font-size: 0.875rem;
+		font-weight: 700;
+	}
+
+	&__content {
+		font-size: 0.875rem;
+		line-height: 1.6;
+
+		> *:last-child {
+			margin-bottom: 0;
+		}
+
+		p {
+			margin-bottom: 0.75rem;
+		}
+	}
+
+	// Note (default)
+	&--note {
+		background: #f3f4f6;
+		border-color: #9ca3af;
+
+		.alert-block__icon,
+		.alert-block__title {
+			color: #374151;
+		}
+	}
+
+	// Info
+	&--info {
+		background: #eff6ff;
+		border-color: #3b82f6;
+
+		.alert-block__icon,
+		.alert-block__title {
+			color: #1d4ed8;
+		}
+	}
+
+	// Tip
+	&--tip {
+		background: #f0fdf4;
+		border-color: #22c55e;
+
+		.alert-block__icon,
+		.alert-block__title {
+			color: #16a34a;
+		}
+	}
+
+	// Warning
+	&--warning {
+		background: #fffbeb;
+		border-color: #f59e0b;
+
+		.alert-block__icon,
+		.alert-block__title {
+			color: #d97706;
+		}
+	}
+
+	// Danger
+	&--danger {
+		background: #fef2f2;
+		border-color: #ef4444;
+
+		.alert-block__icon,
+		.alert-block__title {
+			color: #dc2626;
+		}
+	}
+}

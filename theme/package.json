@@ -11,9 +11,12 @@
     "sass:build": "sass src/scss/main.scss:assets/css/main.css --style=compressed --no-source-map",
     "ts:dev": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts src/ts/code-copy.ts src/ts/code-language-editor.ts src/ts/reading-progress.ts src/ts/dark-mode.ts src/ts/article-enhancements.ts src/ts/series-sidebar.ts --bundle --outdir=assets/js --sourcemap --watch",
     "ts:build": "esbuild src/ts/main.ts src/ts/navigation.ts src/ts/search.ts src/ts/code-copy.ts src/ts/code-language-editor.ts src/ts/reading-progress.ts src/ts/dark-mode.ts src/ts/article-enhancements.ts src/ts/series-sidebar.ts --bundle --outdir=assets/js --minify",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:blocks": "wp-scripts build --webpack-src-dir=src/blocks --output-path=build/blocks",
+    "start:blocks": "wp-scripts start --webpack-src-dir=src/blocks --output-path=build/blocks"
   },
   "devDependencies": {
+    "@wordpress/scripts": "^28.0.0",
     "esbuild": "^0.20.0",
     "npm-run-all2": "^6.1.0",
     "sass": "^1.70.0",
@@ -25,5 +28,8 @@
   ],
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.29.7"
   }
 }

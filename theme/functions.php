@@ -30,6 +30,7 @@ require_once PLAINMARK_DIR . '/inc/customizer.php';
 require_once PLAINMARK_DIR . '/inc/walker-nav.php';
 require_once PLAINMARK_DIR . '/inc/shortcodes.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
+require_once PLAINMARK_DIR . '/inc/blocks.php';
 
 /**
  * Register custom theme routes.

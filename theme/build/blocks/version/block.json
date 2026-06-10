@@ -1,0 +1,34 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "plainmark/version",
+  "version": "0.1.0",
+  "title": "Version Badge",
+  "category": "text",
+  "icon": "tag",
+  "description": "Display a version badge with optional label.",
+  "keywords": [
+    "version",
+    "badge",
+    "tag",
+    "release"
+  ],
+  "textdomain": "plainmark",
+  "attributes": {
+    "label": {
+      "type": "string",
+      "default": ""
+    },
+    "version": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "supports": {
+    "html": false,
+    "anchor": true
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "render": "file:./render.php"
+}
