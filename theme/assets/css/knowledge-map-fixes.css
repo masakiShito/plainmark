@@ -1,0 +1,51 @@
+.knowledge-map__empty[hidden] {
+  display: none !important;
+}
+
+.knowledge-map__node text.is-collapsed {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms ease, visibility 150ms ease;
+}
+
+.knowledge-map__node:hover text.is-collapsed,
+.knowledge-map__node:focus text.is-collapsed {
+  opacity: 1;
+  visibility: visible;
+}
+
+.knowledge-map__node text {
+  paint-order: stroke;
+  stroke: var(--color-bg-secondary);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.knowledge-map__node.is-portfolio text {
+  fill: var(--color-text-primary);
+  font-weight: 700;
+}
+
+.knowledge-map__link {
+  opacity: 0.56;
+}
+
+.knowledge-map__node:hover,
+.knowledge-map__node:focus {
+  outline: none;
+}
+
+.knowledge-map__node:hover text,
+.knowledge-map__node:focus text {
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .knowledge-map {
+    overflow-x: auto;
+  }
+
+  .knowledge-map__canvas {
+    min-width: 720px;
+  }
+}
