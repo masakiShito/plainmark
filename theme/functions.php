@@ -35,6 +35,7 @@ require_once PLAINMARK_DIR . '/inc/markdown-export.php';
 require_once PLAINMARK_DIR . '/inc/markdown-import.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
 require_once PLAINMARK_DIR . '/inc/blocks.php';
+require_once PLAINMARK_DIR . '/inc/differentiation-features.php';
 
 /**
  * Register custom theme routes.
