@@ -110,6 +110,16 @@
 
 		var allNodes = data.nodes || [];
 		var allLinks = data.links || [];
+		var resizeTimer = null;
+
+		function boxesOverlap( a, b ) {
+			return ! (
+				a.right < b.left ||
+				a.left > b.right ||
+				a.bottom < b.top ||
+				a.top > b.bottom
+			);
+		}
 
 		function render( query ) {
 			var keyword = ( query || '' ).trim().toLowerCase();
@@ -124,33 +134,47 @@
 			} );
 
 			svg.innerHTML = '';
-			empty.hidden = nodes.length > 0;
+
+			if ( empty ) {
+				empty.hidden = nodes.length > 0;
+				empty.style.display = nodes.length > 0 ? 'none' : 'grid';
+			}
+
 			if ( ! nodes.length ) {
 				return;
 			}
 
 			var width = Math.max( container.clientWidth, 640 );
-			var height = Math.max( Math.min( 760, nodes.length * 34 ), 480 );
-			svg.setAttribute( 'viewBox', '0 0 ' + width + ' ' + height );
-
+			var height = Math.max( 560, Math.min( 900, 500 + nodes.length * 14 ) );
 			var centerX = width / 2;
 			var centerY = height / 2;
-			var radius = Math.max( 140, Math.min( width, height ) * 0.36 );
+			var maxRadiusX = Math.max( 170, width / 2 - 145 );
+			var maxRadiusY = Math.max( 170, height / 2 - 80 );
+			var goldenAngle = Math.PI * ( 3 - Math.sqrt( 5 ) );
 			var positions = {};
+			var labelBoxes = [];
+
+			svg.setAttribute( 'viewBox', '0 0 ' + width + ' ' + height );
 
 			nodes.forEach( function ( node, index ) {
-				var angle = ( Math.PI * 2 * index ) / nodes.length - Math.PI / 2;
-				var ring = 0.62 + ( index % 3 ) * 0.18;
+				var progress = Math.sqrt( ( index + 1 ) / nodes.length );
+				var angle = index * goldenAngle - Math.PI / 2;
+				var portfolioOffset = node.type === 'portfolio' ? 0.08 : 0;
+				var radius = Math.min( 1, progress + portfolioOffset );
+
 				positions[ node.id ] = {
-					x: centerX + Math.cos( angle ) * radius * ring,
-					y: centerY + Math.sin( angle ) * radius * ring,
+					x: centerX + Math.cos( angle ) * maxRadiusX * radius,
+					y: centerY + Math.sin( angle ) * maxRadiusY * radius,
 				};
 			} );
 
 			links.forEach( function ( link ) {
 				var source = positions[ link.source ];
 				var target = positions[ link.target ];
-				if ( ! source || ! target ) { return; }
+				if ( ! source || ! target ) {
+					return;
+				}
+
 				var line = document.createElementNS( 'http://www.w3.org/2000/svg', 'line' );
 				line.setAttribute( 'x1', source.x );
 				line.setAttribute( 'y1', source.y );
@@ -163,13 +187,33 @@
 			nodes.forEach( function ( node ) {
 				var position = positions[ node.id ];
 				var link = document.createElementNS( 'http://www.w3.org/2000/svg', 'a' );
+				var isPortfolio = node.type === 'portfolio';
+				var label = node.title.length > 20 ? node.title.slice( 0, 20 ) + '…' : node.title;
+				var placeRight = position.x < centerX;
+				var labelX = position.x + ( placeRight ? 15 : -15 );
+				var estimatedWidth = Math.min( 155, Math.max( 56, label.length * 7 ) );
+				var labelBox = {
+					left: placeRight ? labelX : labelX - estimatedWidth,
+					right: placeRight ? labelX + estimatedWidth : labelX,
+					top: position.y - 10,
+					bottom: position.y + 10,
+				};
+				var collides = labelBoxes.some( function ( existingBox ) {
+					return boxesOverlap( labelBox, existingBox );
+				} );
+				var showLabel = isPortfolio || ! collides || nodes.length <= 12;
+
+				if ( showLabel ) {
+					labelBoxes.push( labelBox );
+				}
+
 				link.setAttribute( 'href', node.url );
-				link.setAttribute( 'class', 'knowledge-map__node is-' + node.type );
+				link.setAttribute( 'class', 'knowledge-map__node is-' + node.type + ( showLabel ? '' : ' has-collapsed-label' ) );
 
 				var circle = document.createElementNS( 'http://www.w3.org/2000/svg', 'circle' );
 				circle.setAttribute( 'cx', position.x );
 				circle.setAttribute( 'cy', position.y );
-				circle.setAttribute( 'r', node.type === 'portfolio' ? 11 : 8 );
+				circle.setAttribute( 'r', isPortfolio ? 11 : 8 );
 
 				var title = document.createElementNS( 'http://www.w3.org/2000/svg', 'title' );
 				title.textContent = node.title;
@@ -177,18 +221,29 @@
 				link.appendChild( circle );
 
 				var text = document.createElementNS( 'http://www.w3.org/2000/svg', 'text' );
-				text.setAttribute( 'x', position.x + 14 );
+				text.setAttribute( 'x', labelX );
 				text.setAttribute( 'y', position.y + 4 );
-				text.textContent = node.title.length > 18 ? node.title.slice( 0, 18 ) + '…' : node.title;
+				text.setAttribute( 'text-anchor', placeRight ? 'start' : 'end' );
+				text.setAttribute( 'class', showLabel ? '' : 'is-collapsed' );
+				text.textContent = label;
 				link.appendChild( text );
 				svg.appendChild( link );
 			} );
 		}
 
 		if ( input ) {
-			input.addEventListener( 'input', function () { render( input.value ); } );
+			input.addEventListener( 'input', function () {
+				render( input.value );
+			} );
 		}
-		window.addEventListener( 'resize', function () { render( input ? input.value : '' ); } );
+
+		window.addEventListener( 'resize', function () {
+			window.clearTimeout( resizeTimer );
+			resizeTimer = window.setTimeout( function () {
+				render( input ? input.value : '' );
+			}, 120 );
+		} );
+
 		render( '' );
 	}
 
