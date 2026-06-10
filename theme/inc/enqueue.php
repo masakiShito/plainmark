@@ -47,6 +47,14 @@ function plainmark_scripts() {
         file_exists( $differentiation_css ) ? (string) filemtime( $differentiation_css ) : PLAINMARK_VERSION
     );
 
+    $feature_navigation_css = PLAINMARK_DIR . '/assets/css/feature-navigation.css';
+    wp_enqueue_style(
+        'plainmark-feature-navigation',
+        PLAINMARK_URI . '/assets/css/feature-navigation.css',
+        array( 'plainmark-style' ),
+        file_exists( $feature_navigation_css ) ? (string) filemtime( $feature_navigation_css ) : PLAINMARK_VERSION
+    );
+
     // Front page stylesheet.
     if ( is_front_page() ) {
         $front_page_css = PLAINMARK_DIR . '/assets/css/front-page.css';
@@ -139,6 +147,15 @@ function plainmark_scripts() {
         PLAINMARK_URI . '/assets/js/differentiation-features.js',
         array(),
         file_exists( $differentiation_js ) ? (string) filemtime( $differentiation_js ) : PLAINMARK_VERSION,
+        true
+    );
+
+    $feature_navigation_js = PLAINMARK_DIR . '/assets/js/feature-navigation.js';
+    wp_enqueue_script(
+        'plainmark-feature-navigation',
+        PLAINMARK_URI . '/assets/js/feature-navigation.js',
+        array(),
+        file_exists( $feature_navigation_js ) ? (string) filemtime( $feature_navigation_js ) : PLAINMARK_VERSION,
         true
     );
 
