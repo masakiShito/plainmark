@@ -93,31 +93,42 @@ jobs:
 
             sha=$(git rev-parse "HEAD:$file")
             content_base64=$(base64 -w 0 "$file")
+            response_file=$(mktemp)
+            success=false
 
             echo "Syncing $file"
-            response_file=$(mktemp)
-            status=$(curl --silent --show-error \
-              --output "$response_file" \
-              --write-out '%{http_code}' \
-              --request POST "$AJAX_URL" \
-              --header 'Accept: application/json' \
-              --header 'User-Agent: plainmark-github-sync/1.0' \
-              --data-urlencode 'action=plainmark_github_sync' \
-              --data-urlencode "secret=$SYNC_SECRET" \
-              --data-urlencode "path=$file" \
-              --data-urlencode "sha=$sha" \
-              --data-urlencode "content_base64=$content_base64")
 
-            cat "$response_file"
-            echo
+            for attempt in 1 2 3 4 5 6; do
+              echo "Attempt $attempt of 6"
 
-            if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
-              echo "Sync failed for $file with HTTP $status" >&2
-              exit 1
-            fi
+              status=$(curl --silent --show-error \
+                --output "$response_file" \
+                --write-out '%{http_code}' \
+                --request POST "$AJAX_URL" \
+                --header 'Accept: application/json' \
+                --header 'User-Agent: plainmark-github-sync/1.0' \
+                --data-urlencode 'action=plainmark_github_sync' \
+                --data-urlencode "secret=$SYNC_SECRET" \
+                --data-urlencode "path=$file" \
+                --data-urlencode "sha=$sha" \
+                --data-urlencode "content_base64=$content_base64")
 
-            if ! jq -e '.success == true' "$response_file" > /dev/null 2>&1; then
-              echo "WordPress rejected $file" >&2
+              cat "$response_file"
+              echo
+
+              if [[ "$status" -ge 200 && "$status" -lt 300 ]] && jq -e '.success == true' "$response_file" > /dev/null 2>&1; then
+                success=true
+                break
+              fi
+
+              if [[ "$attempt" -lt 6 ]]; then
+                echo "Endpoint is not ready yet (HTTP $status). Retrying in 15 seconds..."
+                sleep 15
+              fi
+            done
+
+            if [[ "$success" != true ]]; then
+              echo "Sync failed for $file after 6 attempts" >&2
               exit 1
             fi
           done < /tmp/plainmark-files.txt
