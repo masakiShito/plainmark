@@ -79,6 +79,39 @@ $portfolio_items = new WP_Query(
         </div>
     </section>
 
+    <section class="front-section front-tools" aria-labelledby="front-tools-title">
+        <div class="container container--wide">
+            <div class="front-section__heading">
+                <div>
+                    <p class="front-section__eyebrow"><?php esc_html_e( 'EXPLORE', 'plainmark' ); ?></p>
+                    <h2 id="front-tools-title" class="front-section__title"><?php esc_html_e( '知識を別の角度から見る', 'plainmark' ); ?></h2>
+                </div>
+            </div>
+
+            <div class="front-tools__grid">
+                <a class="front-tool-card" href="<?php echo esc_url( home_url( '/skills/' ) ); ?>">
+                    <span class="front-tool-card__number">01</span>
+                    <div>
+                        <p class="front-tool-card__eyebrow">SKILL SHEET</p>
+                        <h3><?php esc_html_e( 'Skills', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( '記事とWorksで使われている技術を集計し、アウトプットに基づくスキルを確認できます。', 'plainmark' ); ?></p>
+                    </div>
+                    <span class="front-tool-card__arrow" aria-hidden="true">→</span>
+                </a>
+
+                <a class="front-tool-card" href="<?php echo esc_url( home_url( '/knowledge-map/' ) ); ?>">
+                    <span class="front-tool-card__number">02</span>
+                    <div>
+                        <p class="front-tool-card__eyebrow">KNOWLEDGE MAP</p>
+                        <h3><?php esc_html_e( 'Knowledge Map', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( '記事・Works・技術タグ・シリーズの関係から、サイト内の知識のつながりを探索できます。', 'plainmark' ); ?></p>
+                    </div>
+                    <span class="front-tool-card__arrow" aria-hidden="true">→</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
     <?php if ( $categories ) : ?>
         <section class="front-section front-categories" aria-labelledby="front-categories-title">
             <div class="container container--wide">
