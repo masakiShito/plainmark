@@ -50,6 +50,30 @@
   opacity: 0.82;
 }
 
+.post-item__verification {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.post-item__verification--verified {
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+}
+
+.post-item__verification--review_due,
+.post-item__verification--deprecated {
+  border-style: dashed;
+}
+
 .content-bridge {
   margin: 5rem 0 1rem;
   padding-top: 3rem;
