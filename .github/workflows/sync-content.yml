@@ -78,31 +78,46 @@ jobs:
         run: |
           set -euo pipefail
 
+          if [[ "$SYNC_URL" == *"/wp-json/"* ]]; then
+            AJAX_URL="${SYNC_URL%%/wp-json/*}/wp-admin/admin-ajax.php"
+          elif [[ "$SYNC_URL" == *"/wp-admin/admin-ajax.php"* ]]; then
+            AJAX_URL="$SYNC_URL"
+          else
+            AJAX_URL="${SYNC_URL%/}/wp-admin/admin-ajax.php"
+          fi
+
+          echo "Using sync endpoint: $AJAX_URL"
+
           while IFS= read -r file; do
             [[ -n "$file" && -f "$file" ]] || continue
 
             sha=$(git rev-parse "HEAD:$file")
-            payload=$(jq -n \
-              --arg path "$file" \
-              --arg sha "$sha" \
-              --rawfile content "$file" \
-              '{path: $path, sha: $sha, content: $content}')
+            content_base64=$(base64 -w 0 "$file")
 
             echo "Syncing $file"
             response_file=$(mktemp)
             status=$(curl --silent --show-error \
               --output "$response_file" \
               --write-out '%{http_code}' \
-              --request POST "$SYNC_URL" \
-              --header 'Content-Type: application/json' \
-              --header "X-Plainmark-Secret: $SYNC_SECRET" \
-              --data "$payload")
+              --request POST "$AJAX_URL" \
+              --header 'Accept: application/json' \
+              --header 'User-Agent: plainmark-github-sync/1.0' \
+              --data-urlencode 'action=plainmark_github_sync' \
+              --data-urlencode "secret=$SYNC_SECRET" \
+              --data-urlencode "path=$file" \
+              --data-urlencode "sha=$sha" \
+              --data-urlencode "content_base64=$content_base64")
 
             cat "$response_file"
             echo
 
             if [[ "$status" -lt 200 || "$status" -ge 300 ]]; then
               echo "Sync failed for $file with HTTP $status" >&2
+              exit 1
+            fi
+
+            if ! jq -e '.success == true' "$response_file" > /dev/null 2>&1; then
+              echo "WordPress rejected $file" >&2
               exit 1
             fi
           done < /tmp/plainmark-files.txt
