@@ -147,7 +147,7 @@ function plainmark_context_shortcode( $atts, $content = '' ) {
 		'<section class="reader-context reader-context--%1$s" data-reader-context="%1$s"><p class="reader-context__label">%2$s</p><div class="reader-context__body">%3$s</div></section>',
 		esc_attr( $level ),
 		esc_html( $label ),
-		do_shortcode( $content )
+		do_shortcode( shortcode_unautop( $content ) )
 	);
 }
 add_shortcode( 'context', 'plainmark_context_shortcode' );
@@ -189,18 +189,13 @@ add_shortcode( 'code_tab', 'plainmark_code_tab_shortcode' );
 /**
  * Multi-file code tabs shortcode.
  *
- * Usage:
- * [code_tabs]
- * [code_tab file="app.py" language="python"]...[/code_tab]
- * [/code_tabs]
- *
  * @param array  $atts    Attributes.
  * @param string $content Inner shortcodes.
  * @return string
  */
 function plainmark_code_tabs_shortcode( $atts, $content = '' ) {
 	$GLOBALS['plainmark_code_tabs_buffer'] = array();
-	do_shortcode( $content );
+	do_shortcode( shortcode_unautop( $content ) );
 	$tabs = $GLOBALS['plainmark_code_tabs_buffer'];
 	$GLOBALS['plainmark_code_tabs_buffer'] = array();
 
@@ -233,11 +228,12 @@ function plainmark_code_tabs_shortcode( $atts, $content = '' ) {
 		$panel_id = $group_id . '-panel-' . $index;
 		$class    = $tab['language'] ? 'language-' . $tab['language'] : '';
 		$html    .= sprintf(
-			'<div class="code-tabs__panel%1$s" role="tabpanel" id="%2$s" aria-labelledby="%3$s" data-code-panel="%4$d"><pre><code class="%5$s">%6$s</code></pre></div>',
+			'<div class="code-tabs__panel%1$s" role="tabpanel" id="%2$s" aria-labelledby="%3$s" data-code-panel="%4$d"%5$s><pre><code class="%6$s">%7$s</code></pre></div>',
 			0 === $index ? ' is-active' : '',
 			esc_attr( $panel_id ),
 			esc_attr( $tab_id ),
 			$index,
+			0 === $index ? '' : ' hidden',
 			esc_attr( $class ),
 			esc_html( $tab['content'] )
 		);
@@ -272,6 +268,25 @@ function plainmark_add_differentiation_query_vars( $vars ) {
 add_filter( 'query_vars', 'plainmark_add_differentiation_query_vars' );
 
 /**
+ * Mark custom routes as valid pages.
+ *
+ * @param WP_Query $query Main query.
+ */
+function plainmark_prepare_differentiation_routes( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	if ( $query->get( 'plainmark_knowledge_map' ) || $query->get( 'plainmark_skill_sheet' ) ) {
+		$query->is_404     = false;
+		$query->is_page    = true;
+		$query->is_home    = false;
+		$query->is_archive = false;
+	}
+}
+add_action( 'pre_get_posts', 'plainmark_prepare_differentiation_routes' );
+
+/**
  * Resolve feature page templates.
  *
  * @param string $template Current template.
@@ -296,7 +311,7 @@ add_filter( 'template_include', 'plainmark_differentiation_template_include' );
  * Flush rewrite rules once for feature routes.
  */
 function plainmark_maybe_flush_differentiation_routes() {
-	$version = '20260610_differentiation_routes_v1';
+	$version = '20260610_differentiation_routes_v2';
 	if ( get_option( 'plainmark_differentiation_routes_version' ) !== $version ) {
 		flush_rewrite_rules();
 		update_option( 'plainmark_differentiation_routes_version', $version );
