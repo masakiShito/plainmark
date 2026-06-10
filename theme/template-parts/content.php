@@ -7,6 +7,8 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+$verification = function_exists( 'plainmark_get_verification_data' ) ? plainmark_get_verification_data( get_the_ID() ) : null;
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'post-item' ); ?>>
@@ -34,6 +36,11 @@ defined( 'ABSPATH' ) || exit;
         ?>
           <span class="post-item__cat">
             <?php echo esc_html( $cat->name ); ?>
+          </span>
+        <?php endif; ?>
+        <?php if ( $verification && 'unverified' !== $verification['status'] ) : ?>
+          <span class="post-item__verification post-item__verification--<?php echo esc_attr( $verification['status'] ); ?>">
+            <?php echo esc_html( plainmark_get_verification_label( $verification['status'] ) ); ?>
           </span>
         <?php endif; ?>
       </div>
