@@ -79,14 +79,15 @@ jobs:
           set -euo pipefail
 
           if [[ "$SYNC_URL" == *"/wp-json/"* ]]; then
-            AJAX_URL="${SYNC_URL%%/wp-json/*}/wp-admin/admin-ajax.php"
-          elif [[ "$SYNC_URL" == *"/wp-admin/admin-ajax.php"* ]]; then
-            AJAX_URL="$SYNC_URL"
+            SITE_BASE="${SYNC_URL%%/wp-json/*}"
+          elif [[ "$SYNC_URL" == *"/wp-admin/"* ]]; then
+            SITE_BASE="${SYNC_URL%%/wp-admin/*}"
           else
-            AJAX_URL="${SYNC_URL%/}/wp-admin/admin-ajax.php"
+            SITE_BASE="${SYNC_URL%/}"
           fi
 
-          echo "Using sync endpoint: $AJAX_URL"
+          REST_URL="$SITE_BASE/index.php?rest_route=/plainmark/v1/github-sync-form"
+          echo "Using sync endpoint: $REST_URL"
 
           while IFS= read -r file; do
             [[ -n "$file" && -f "$file" ]] || continue
@@ -104,10 +105,10 @@ jobs:
               status=$(curl --silent --show-error \
                 --output "$response_file" \
                 --write-out '%{http_code}' \
-                --request POST "$AJAX_URL" \
+                --request POST "$REST_URL" \
                 --header 'Accept: application/json' \
+                --header 'Content-Type: application/x-www-form-urlencoded' \
                 --header 'User-Agent: plainmark-github-sync/1.0' \
-                --data-urlencode 'action=plainmark_github_sync' \
                 --data-urlencode "secret=$SYNC_SECRET" \
                 --data-urlencode "path=$file" \
                 --data-urlencode "sha=$sha" \
