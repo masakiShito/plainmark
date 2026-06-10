@@ -6,10 +6,12 @@
  * @since 0.1.0
  */
 
-$posts_page_id  = (int) get_option( 'page_for_posts' );
-$posts_page_url = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/blog/' );
-$portfolio_url  = post_type_exists( 'portfolio' ) ? get_post_type_archive_link( 'portfolio' ) : home_url( '/#works' );
-$about_url      = home_url( '/about/' );
+$posts_page_id    = (int) get_option( 'page_for_posts' );
+$posts_page_url   = $posts_page_id ? get_permalink( $posts_page_id ) : home_url( '/blog/' );
+$portfolio_url    = post_type_exists( 'portfolio' ) ? get_post_type_archive_link( 'portfolio' ) : home_url( '/#works' );
+$about_url        = home_url( '/about/' );
+$skills_url       = home_url( '/skills/' );
+$knowledge_url    = home_url( '/knowledge-map/' );
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
@@ -64,6 +66,23 @@ $about_url      = home_url( '/about/' );
             <li><a href="<?php echo esc_url( $about_url ); ?>"><?php esc_html_e( 'About', 'plainmark' ); ?></a></li>
           </ul>
         <?php endif; ?>
+
+        <div class="site-header__explore">
+          <button class="site-header__explore-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+            <?php esc_html_e( 'Explore', 'plainmark' ); ?>
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div class="site-header__explore-menu">
+            <a href="<?php echo esc_url( $skills_url ); ?>">
+              <strong><?php esc_html_e( 'Skills', 'plainmark' ); ?></strong>
+              <span><?php esc_html_e( '記事とWorksから技術を集計', 'plainmark' ); ?></span>
+            </a>
+            <a href="<?php echo esc_url( $knowledge_url ); ?>">
+              <strong><?php esc_html_e( 'Knowledge Map', 'plainmark' ); ?></strong>
+              <span><?php esc_html_e( '知識のつながりを可視化', 'plainmark' ); ?></span>
+            </a>
+          </div>
+        </div>
       </nav>
 
       <div class="site-header__actions">
@@ -157,6 +176,16 @@ $about_url      = home_url( '/about/' );
           <li><a href="<?php echo esc_url( $about_url ); ?>"><span>04</span><?php esc_html_e( 'About', 'plainmark' ); ?></a></li>
         </ul>
       <?php endif; ?>
+
+      <div class="mobile-menu__features">
+        <p><?php esc_html_e( 'EXPLORE', 'plainmark' ); ?></p>
+        <a href="<?php echo esc_url( $skills_url ); ?>">
+          <span>05</span><?php esc_html_e( 'Skills', 'plainmark' ); ?>
+        </a>
+        <a href="<?php echo esc_url( $knowledge_url ); ?>">
+          <span>06</span><?php esc_html_e( 'Knowledge Map', 'plainmark' ); ?>
+        </a>
+      </div>
     </nav>
   </div>
 </div>
