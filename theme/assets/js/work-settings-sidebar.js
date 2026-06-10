@@ -7,12 +7,12 @@
 	var PluginDocumentSettingPanel = wp.editPost.PluginDocumentSettingPanel;
 	var TextControl = wp.components.TextControl;
 	var TextareaControl = wp.components.TextareaControl;
-	var PanelBody = wp.components.PanelBody;
+	var SelectControl = wp.components.SelectControl;
+	var Notice = wp.components.Notice;
 	var useSelect = wp.data.useSelect;
 	var useDispatch = wp.data.useDispatch;
 	var createElement = wp.element.createElement;
 	var Fragment = wp.element.Fragment;
-	var __ = wp.i18n.__;
 
 	var fields = [
 		{ key: 'work_summary', label: '概要', type: 'textarea', help: '一覧と詳細のリード文に表示されます。' },
@@ -37,6 +37,15 @@
 			return select( 'core/editor' ).getEditedPostAttribute( 'meta' ) || {};
 		}, [] );
 
+		var posts = useSelect( function ( select ) {
+			return select( 'core' ).getEntityRecords( 'postType', 'post', {
+				per_page: 100,
+				orderby: 'title',
+				order: 'asc',
+				_fields: 'id,title',
+			} ) || [];
+		}, [] );
+
 		var editPost = useDispatch( 'core/editor' ).editPost;
 
 		if ( postType !== 'portfolio' ) {
@@ -52,38 +61,82 @@
 			editPost( { meta: nextMeta } );
 		}
 
-		return createElement(
-			PluginDocumentSettingPanel,
-			{
-				name: 'plainmark-work-settings',
-				title: 'ケーススタディ設定',
-				className: 'plainmark-work-settings-panel',
-			},
-			createElement(
-				Fragment,
-				null,
-				createElement(
-					'p',
-					{ className: 'plainmark-work-settings-panel__description' },
-					'Works詳細ページに表示する内容を入力します。未入力の項目は表示されません。'
-				),
-				fields.map( function ( field ) {
-					var value = meta && meta[ field.key ] ? meta[ field.key ] : '';
-					var Component = field.type === 'textarea' ? TextareaControl : TextControl;
+		var postOptions = posts.map( function ( post ) {
+			return {
+				label: post.title && post.title.rendered ? post.title.rendered : '#' + post.id,
+				value: String( post.id ),
+			};
+		} );
+		var selectedPosts = Array.isArray( meta._plainmark_related_posts )
+			? meta._plainmark_related_posts.map( String )
+			: [];
 
-					return createElement( Component, {
-						key: field.key,
-						label: field.label,
-						type: field.type === 'url' ? 'url' : 'text',
-						value: value,
-						help: field.help || undefined,
-						rows: field.type === 'textarea' ? 5 : undefined,
-						onChange: function ( nextValue ) {
-							updateMeta( field.key, nextValue );
-						},
-					} );
+		return createElement(
+			Fragment,
+			null,
+			createElement(
+				PluginDocumentSettingPanel,
+				{
+					name: 'plainmark-work-settings',
+					title: 'ケーススタディ設定',
+					className: 'plainmark-work-settings-panel',
+				},
+				createElement(
+					Fragment,
+					null,
+					createElement(
+						'p',
+						{ className: 'plainmark-work-settings-panel__description' },
+						'Works詳細ページに表示する内容を入力します。未入力の項目は表示されません。'
+					),
+					fields.map( function ( field ) {
+						var value = meta && meta[ field.key ] ? meta[ field.key ] : '';
+						var Component = field.type === 'textarea' ? TextareaControl : TextControl;
+
+						return createElement( Component, {
+							key: field.key,
+							label: field.label,
+							type: field.type === 'url' ? 'url' : 'text',
+							value: value,
+							help: field.help || undefined,
+							rows: field.type === 'textarea' ? 5 : undefined,
+							onChange: function ( nextValue ) {
+								updateMeta( field.key, nextValue );
+							},
+						} );
+					} )
+				)
+			),
+			createElement(
+				PluginDocumentSettingPanel,
+				{
+					name: 'plainmark-related-posts',
+					title: '関連記事',
+					className: 'plainmark-related-posts-panel',
+				},
+				createElement( SelectControl, {
+					label: 'この制作物に関連する記事',
+					multiple: true,
+					value: selectedPosts,
+					options: postOptions,
+					help: '複数選択できます。Worksと記事の双方に関連コンテンツが表示されます。',
+					onChange: function ( values ) {
+						var normalized = Array.isArray( values ) ? values.map( function ( value ) { return parseInt( value, 10 ); } ) : [];
+						updateMeta( '_plainmark_related_posts', normalized.filter( Boolean ) );
+					},
 				} )
-			)
+			),
+			meta._plainmark_github_path ? createElement(
+				PluginDocumentSettingPanel,
+				{
+					name: 'plainmark-work-github-source',
+					title: 'GitHub管理',
+					className: 'plainmark-work-github-source-panel',
+				},
+				createElement( Notice, { status: 'success', isDismissible: false }, 'このWorksはGitHubから同期されています。' ),
+				createElement( 'p', null, createElement( 'strong', null, 'Path: ' ), meta._plainmark_github_path ),
+				meta._plainmark_github_synced_at ? createElement( 'p', null, createElement( 'strong', null, 'Synced: ' ), meta._plainmark_github_synced_at ) : null
+			) : null
 		);
 	}
 
