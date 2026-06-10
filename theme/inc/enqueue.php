@@ -55,6 +55,17 @@ function plainmark_scripts() {
         file_exists( $feature_navigation_css ) ? (string) filemtime( $feature_navigation_css ) : PLAINMARK_VERSION
     );
 
+    if ( get_query_var( 'plainmark_knowledge_map' ) ) {
+        $knowledge_map_fixes_css = PLAINMARK_DIR . '/assets/css/knowledge-map-fixes.css';
+
+        wp_enqueue_style(
+            'plainmark-knowledge-map-fixes',
+            PLAINMARK_URI . '/assets/css/knowledge-map-fixes.css',
+            array( 'plainmark-differentiation-features' ),
+            file_exists( $knowledge_map_fixes_css ) ? (string) filemtime( $knowledge_map_fixes_css ) : PLAINMARK_VERSION
+        );
+    }
+
     // Front page stylesheet.
     if ( is_front_page() ) {
         $front_page_css = PLAINMARK_DIR . '/assets/css/front-page.css';
