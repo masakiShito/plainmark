@@ -1,0 +1,182 @@
+.site-header__nav {
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .site-header__nav {
+    display: flex;
+    gap: 4px;
+  }
+}
+
+.site-header__explore {
+  position: relative;
+}
+
+.site-header__explore-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-text-secondary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 180ms ease, background-color 180ms ease;
+}
+
+.site-header__explore-toggle:hover,
+.site-header__explore-toggle:focus-visible,
+.site-header__explore.is-open .site-header__explore-toggle {
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+}
+
+.site-header__explore-toggle:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+}
+
+.site-header__explore-toggle span {
+  font-size: 10px;
+  transition: transform 180ms ease;
+}
+
+.site-header__explore.is-open .site-header__explore-toggle span {
+  transform: rotate(180deg);
+}
+
+.site-header__explore-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  display: grid;
+  width: 280px;
+  padding: 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--color-bg-primary) 96%, transparent);
+  box-shadow: 0 22px 60px color-mix(in srgb, #000 16%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 180ms ease, visibility 180ms ease, transform 180ms ease;
+}
+
+.site-header__explore.is-open .site-header__explore-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.site-header__explore-menu a {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border-radius: 12px;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.site-header__explore-menu a:hover,
+.site-header__explore-menu a:focus-visible {
+  background: var(--color-bg-secondary);
+  transform: translateX(3px);
+}
+
+.site-header__explore-menu strong {
+  font-size: 0.88rem;
+}
+
+.site-header__explore-menu span {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.mobile-menu__features {
+  display: grid;
+  gap: 0;
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.mobile-menu__features p {
+  margin: 0 0 8px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.mobile-menu__features a {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 15px 2px;
+  border-bottom: 1px solid var(--color-border-light);
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: padding-left 180ms ease, color 180ms ease;
+}
+
+.mobile-menu__features a span {
+  width: 24px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+}
+
+.mobile-menu__features a:hover,
+.mobile-menu__features a:focus-visible {
+  padding-left: 8px;
+  color: var(--color-text-secondary);
+}
+
+.site-footer__feature-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.site-footer__feature-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border-light);
+  border-radius: 999px;
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.site-footer__feature-links a:hover,
+.site-footer__feature-links a:focus-visible {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-default);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px) {
+  .site-header__explore {
+    display: none;
+  }
+}
