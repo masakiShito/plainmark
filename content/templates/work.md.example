@@ -1,0 +1,26 @@
+---
+title: "制作物タイトル"
+slug: "work-slug"
+post_type: "portfolio"
+status: "draft"
+date: "2026-06-10"
+technologies:
+  - "WordPress"
+  - "PHP"
+work_summary: "制作物を一文で説明します。"
+work_problem: "解決したかった課題を記載します。"
+work_solution: "どのように解決したかを記載します。"
+work_architecture: "設計や構成を記載します。"
+work_features: "主な機能を記載します。"
+work_learnings: "開発を通じて学んだことを記載します。"
+work_next_steps: "今後の改善内容を記載します。"
+work_role: "Design / Development"
+work_period: "2026.06"
+work_github_url: "https://github.com/owner/repository"
+related_posts:
+  - "article-slug"
+---
+
+## 概要
+
+ここに制作物の詳しい説明を書きます。
