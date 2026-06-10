@@ -1,0 +1,29 @@
+---
+title: "記事タイトル"
+slug: "article-slug"
+post_type: "post"
+status: "draft"
+date: "2026-06-10"
+article_type: "tutorial"
+difficulty: "beginner"
+categories:
+  - "TypeScript"
+technologies:
+  - "TypeScript"
+verified_status: "verified"
+verified_date: "2026-06-10"
+verified_env: "Node.js 24 / TypeScript 5.9 / macOS"
+review_date: "2026-09-10"
+related_works:
+  - "plainmark-wordpress-theme"
+---
+
+## はじめに
+
+ここに本文を書きます。
+
+## 実装
+
+```ts
+console.log('plainmark');
+```
