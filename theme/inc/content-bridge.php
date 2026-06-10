@@ -39,7 +39,9 @@ function plainmark_register_content_bridge_meta() {
 				array(
 					'type'              => $definition['type'],
 					'single'            => true,
-					'show_in_rest'      => 'array' === $definition['type'] ? array( 'schema' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ) ) : true,
+					'show_in_rest'      => 'array' === $definition['type']
+						? array( 'schema' => array( 'type' => 'array', 'items' => array( 'type' => 'integer' ) ) )
+						: true,
 					'sanitize_callback' => $definition['sanitize_callback'],
 					'auth_callback'     => static function() {
 						return current_user_can( 'edit_posts' );
@@ -50,6 +52,18 @@ function plainmark_register_content_bridge_meta() {
 	}
 }
 add_action( 'init', 'plainmark_register_content_bridge_meta' );
+
+/** Enqueue frontend styles. */
+function plainmark_enqueue_content_bridge_assets() {
+	$css = PLAINMARK_DIR . '/assets/css/content-bridge.css';
+	wp_enqueue_style(
+		'plainmark-content-bridge',
+		PLAINMARK_URI . '/assets/css/content-bridge.css',
+		array( 'plainmark-style' ),
+		file_exists( $css ) ? (string) filemtime( $css ) : PLAINMARK_VERSION
+	);
+}
+add_action( 'wp_enqueue_scripts', 'plainmark_enqueue_content_bridge_assets', 20 );
 
 /** Sanitize post ID arrays. */
 function plainmark_sanitize_id_array( $value ) {
@@ -75,6 +89,17 @@ function plainmark_get_verification_data( $post_id = 0 ) {
 	);
 }
 
+/** Get the public label for a verification status. */
+function plainmark_get_verification_label( $status ) {
+	$labels = array(
+		'verified'   => __( '動作確認済み', 'plainmark' ),
+		'unverified' => __( '未検証', 'plainmark' ),
+		'review_due' => __( '再確認が必要', 'plainmark' ),
+		'deprecated' => __( '非推奨', 'plainmark' ),
+	);
+	return $labels[ $status ] ?? $labels['unverified'];
+}
+
 /** Add verification panel before article body. */
 function plainmark_add_verification_card( $content ) {
 	if ( ! is_singular( 'post' ) || ! in_the_loop() || ! is_main_query() ) {
@@ -86,16 +111,8 @@ function plainmark_add_verification_card( $content ) {
 		return $content;
 	}
 
-	$labels = array(
-		'verified'   => __( '動作確認済み', 'plainmark' ),
-		'unverified' => __( '未検証', 'plainmark' ),
-		'review_due' => __( '再確認が必要', 'plainmark' ),
-		'deprecated' => __( '非推奨', 'plainmark' ),
-	);
-	$label = $labels[ $data['status'] ] ?? $labels['unverified'];
-
 	$html  = '<aside class="article-verification article-verification--' . esc_attr( $data['status'] ) . '">';
-	$html .= '<div class="article-verification__status"><span aria-hidden="true">' . ( 'verified' === $data['status'] ? '✓' : '!' ) . '</span><strong>' . esc_html( $label ) . '</strong></div>';
+	$html .= '<div class="article-verification__status"><span aria-hidden="true">' . ( 'verified' === $data['status'] ? '✓' : '!' ) . '</span><strong>' . esc_html( plainmark_get_verification_label( $data['status'] ) ) . '</strong></div>';
 	$html .= '<div class="article-verification__details">';
 	if ( $data['date'] ) {
 		$html .= '<span>' . sprintf( esc_html__( '最終確認: %s', 'plainmark' ), esc_html( $data['date'] ) ) . '</span>';
@@ -114,14 +131,16 @@ add_filter( 'the_content', 'plainmark_add_verification_card', 11 );
 
 /** Return related content IDs, including reverse links. */
 function plainmark_get_related_content_ids( $post_id ) {
-	$post      = get_post( $post_id );
-	$related   = array();
+	$post = get_post( $post_id );
+	if ( ! $post ) {
+		return array();
+	}
+
 	$meta_key  = 'post' === $post->post_type ? '_plainmark_related_works' : '_plainmark_related_posts';
 	$other_key = 'post' === $post->post_type ? '_plainmark_related_posts' : '_plainmark_related_works';
 	$other     = 'post' === $post->post_type ? 'portfolio' : 'post';
-
-	$related = plainmark_sanitize_id_array( get_post_meta( $post_id, $meta_key, true ) );
-	$reverse = get_posts(
+	$related   = plainmark_sanitize_id_array( get_post_meta( $post_id, $meta_key, true ) );
+	$reverse   = get_posts(
 		array(
 			'post_type'      => $other,
 			'post_status'    => 'publish',
@@ -173,6 +192,47 @@ function plainmark_append_related_content( $content ) {
 }
 add_filter( 'the_content', 'plainmark_append_related_content', 30 );
 
+/** Resolve front-matter references by post ID or slug. */
+function plainmark_resolve_content_references( $references, $post_type ) {
+	$resolved = array();
+	foreach ( is_array( $references ) ? $references : array() as $reference ) {
+		if ( is_numeric( $reference ) ) {
+			$post = get_post( absint( $reference ) );
+		} else {
+			$post = get_page_by_path( sanitize_title( $reference ), OBJECT, $post_type );
+		}
+		if ( $post && $post_type === $post->post_type ) {
+			$resolved[] = $post->ID;
+		}
+	}
+	return plainmark_sanitize_id_array( $resolved );
+}
+
+/** Apply verification and relation front matter after Markdown import. */
+function plainmark_apply_content_bridge_front_matter( $post_id, $front_matter, $post_type ) {
+	if ( 'post' === $post_type ) {
+		$map = array(
+			'verified_status' => '_plainmark_verified_status',
+			'verified_date'   => '_plainmark_verified_date',
+			'verified_env'    => '_plainmark_verified_env',
+			'review_date'     => '_plainmark_review_date',
+		);
+		foreach ( $map as $front_key => $meta_key ) {
+			if ( isset( $front_matter[ $front_key ] ) ) {
+				$value = 'verified_env' === $front_key ? sanitize_textarea_field( $front_matter[ $front_key ] ) : sanitize_text_field( $front_matter[ $front_key ] );
+				update_post_meta( $post_id, $meta_key, $value );
+			}
+		}
+		if ( ! empty( $front_matter['related_works'] ) ) {
+			update_post_meta( $post_id, '_plainmark_related_works', plainmark_resolve_content_references( $front_matter['related_works'], 'portfolio' ) );
+		}
+	}
+
+	if ( 'portfolio' === $post_type && ! empty( $front_matter['related_posts'] ) ) {
+		update_post_meta( $post_id, '_plainmark_related_posts', plainmark_resolve_content_references( $front_matter['related_posts'], 'post' ) );
+	}
+}
+
 /** Register authenticated GitHub sync REST endpoint. */
 function plainmark_register_github_sync_route() {
 	register_rest_route(
@@ -204,16 +264,29 @@ function plainmark_handle_github_sync( WP_REST_Request $request ) {
 		return new WP_Error( 'empty_content', __( 'Markdown content is required.', 'plainmark' ), array( 'status' => 400 ) );
 	}
 
+	$parsed = plainmark_parse_md_content( $markdown );
 	$result = plainmark_import_single_md( $markdown, true );
 	if ( ! $result || empty( $result['id'] ) ) {
 		return new WP_Error( 'import_failed', __( 'Markdown import failed.', 'plainmark' ), array( 'status' => 422 ) );
+	}
+
+	$post_type = get_post_type( $result['id'] );
+	if ( $parsed && ! empty( $parsed['front_matter'] ) ) {
+		plainmark_apply_content_bridge_front_matter( $result['id'], $parsed['front_matter'], $post_type );
 	}
 
 	update_post_meta( $result['id'], '_plainmark_github_path', $path );
 	update_post_meta( $result['id'], '_plainmark_github_sha', $sha );
 	update_post_meta( $result['id'], '_plainmark_github_synced_at', current_time( 'mysql' ) );
 
-	return rest_ensure_response( array( 'success' => true, 'post_id' => $result['id'], 'action' => $result['action'] ) );
+	return rest_ensure_response(
+		array(
+			'success' => true,
+			'post_id' => $result['id'],
+			'action'  => $result['action'],
+			'path'    => $path,
+		)
+	);
 }
 
 /** Add GitHub sync settings page. */
@@ -232,13 +305,56 @@ function plainmark_render_github_content_page() {
 	}
 	$secret = get_option( 'plainmark_github_sync_secret', '' );
 	?>
-	<div class="wrap"><h1><?php esc_html_e( 'GitHub Content', 'plainmark' ); ?></h1>
-	<p><?php esc_html_e( 'GitHub ActionsからMarkdownをWordPressへ同期できます。', 'plainmark' ); ?></p>
-	<form method="post"><?php wp_nonce_field( 'plainmark_generate_sync_secret' ); ?><button class="button button-primary" name="plainmark_generate_sync_secret" value="1"><?php esc_html_e( '同期シークレットを生成・更新', 'plainmark' ); ?></button></form>
-	<?php if ( $secret ) : ?>
-	<h2><?php esc_html_e( 'GitHub Secrets', 'plainmark' ); ?></h2>
-	<table class="widefat striped"><tbody><tr><th>PLAINMARK_SYNC_URL</th><td><code><?php echo esc_html( rest_url( 'plainmark/v1/github-sync' ) ); ?></code></td></tr><tr><th>PLAINMARK_SYNC_SECRET</th><td><code><?php echo esc_html( $secret ); ?></code></td></tr></tbody></table>
-	<p><strong><?php esc_html_e( '注意:', 'plainmark' ); ?></strong> <?php esc_html_e( 'シークレットはGitHubのRepository secretsに保存してください。', 'plainmark' ); ?></p>
-	<?php endif; ?></div>
+	<div class="wrap">
+		<h1><?php esc_html_e( 'GitHub Content', 'plainmark' ); ?></h1>
+		<p><?php esc_html_e( 'content/posts と content/works のMarkdownを、GitHub ActionsからWordPressへ同期できます。', 'plainmark' ); ?></p>
+		<form method="post"><?php wp_nonce_field( 'plainmark_generate_sync_secret' ); ?><button class="button button-primary" name="plainmark_generate_sync_secret" value="1"><?php esc_html_e( '同期シークレットを生成・更新', 'plainmark' ); ?></button></form>
+		<?php if ( $secret ) : ?>
+			<h2><?php esc_html_e( 'GitHub Repository secrets', 'plainmark' ); ?></h2>
+			<table class="widefat striped"><tbody>
+				<tr><th>PLAINMARK_SYNC_URL</th><td><code><?php echo esc_html( rest_url( 'plainmark/v1/github-sync' ) ); ?></code></td></tr>
+				<tr><th>PLAINMARK_SYNC_SECRET</th><td><code><?php echo esc_html( $secret ); ?></code></td></tr>
+			</tbody></table>
+			<p><strong><?php esc_html_e( '注意:', 'plainmark' ); ?></strong> <?php esc_html_e( 'シークレットはGitHubのRepository secretsに保存してください。', 'plainmark' ); ?></p>
+		<?php endif; ?>
+		<h2><?php esc_html_e( '追加front matter', 'plainmark' ); ?></h2>
+		<pre><code>verified_status: "verified"
+verified_date: "2026-06-10"
+verified_env: "Node.js 24 / TypeScript 5.9"
+review_date: "2026-09-10"
+related_works:
+  - "face-photo-sorter"
+
+# Works側
+related_posts:
+  - "typescript-guide"</code></pre>
+	</div>
 	<?php
 }
+
+/** Add verification and GitHub columns to post lists. */
+function plainmark_content_bridge_columns( $columns ) {
+	$columns['plainmark_verified'] = __( '検証', 'plainmark' );
+	$columns['plainmark_source']   = __( 'Source', 'plainmark' );
+	return $columns;
+}
+add_filter( 'manage_post_posts_columns', 'plainmark_content_bridge_columns' );
+add_filter( 'manage_portfolio_posts_columns', 'plainmark_content_bridge_columns' );
+
+/** Render content bridge list columns. */
+function plainmark_render_content_bridge_column( $column, $post_id ) {
+	if ( 'plainmark_verified' === $column ) {
+		if ( 'post' !== get_post_type( $post_id ) ) {
+			echo '—';
+			return;
+		}
+		$data = plainmark_get_verification_data( $post_id );
+		echo esc_html( plainmark_get_verification_label( $data['status'] ) );
+	}
+	if ( 'plainmark_source' === $column ) {
+		$path = get_post_meta( $post_id, '_plainmark_github_path', true );
+		echo $path ? '<code>' . esc_html( $path ) . '</code>' : 'WordPress';
+	}
+}
+add_action( 'manage_post_posts_custom_column', 'plainmark_render_content_bridge_column', 10, 2 );
+add_action( 'manage_portfolio_posts_custom_column', 'plainmark_render_content_bridge_column', 10, 2 );
