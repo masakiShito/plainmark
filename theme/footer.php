@@ -62,6 +62,17 @@
 
     </div>
 
+    <nav class="site-footer__feature-links" aria-label="<?php esc_attr_e( '機能ページ', 'plainmark' ); ?>">
+      <a href="<?php echo esc_url( home_url( '/skills/' ) ); ?>">
+        <?php esc_html_e( 'Skills', 'plainmark' ); ?>
+        <span aria-hidden="true">→</span>
+      </a>
+      <a href="<?php echo esc_url( home_url( '/knowledge-map/' ) ); ?>">
+        <?php esc_html_e( 'Knowledge Map', 'plainmark' ); ?>
+        <span aria-hidden="true">→</span>
+      </a>
+    </nav>
+
     <!-- Footer bottom: Copyright -->
     <div class="site-footer__bottom">
       <p class="site-footer__copy">
