@@ -10,19 +10,21 @@ content/
 └── works/   # Portfolio posts
 ```
 
-Only `.md` files under `content/posts/` and `content/works/` are synchronized by `.github/workflows/sync-content.yml`.
+Only `.md` files under `content/posts/` and `content/works/` are synchronized by WordPress **GitHub Pull Sync**.
 
 ## Setup
 
-1. In WordPress, open **Tools → GitHub Content**.
-2. Generate a synchronization secret.
-3. Add the displayed values to GitHub **Settings → Secrets and variables → Actions**:
-   - `PLAINMARK_SYNC_URL`
-   - `PLAINMARK_SYNC_SECRET`
-4. Add or update a Markdown file under `content/posts/` or `content/works/`.
-5. Push to `main`, or run **Sync Markdown content to WordPress** manually from GitHub Actions.
+1. In WordPress, open **Tools → GitHub Pull Sync**.
+2. Confirm the repository is `masakiShito/plainmark` and the branch is `main`.
+3. Confirm content paths are:
+   - `content/posts`
+   - `content/works`
+4. Leave GitHub token empty for a public repository. Add a fine-grained token only for private repositories or API rate-limit issues.
+5. Click **GitHubから同期**.
 
-The workflow sends changed Markdown files to the authenticated WordPress REST endpoint. Existing content with the same `slug` and `post_type` is updated.
+WordPress fetches Markdown from GitHub and imports it. Existing content with the same `slug` and `post_type` is updated.
+
+This pull model avoids inbound POST requests from GitHub Actions to WordPress, which can be blocked by shared hosting WAF/nginx rules.
 
 ## Article front matter
 
@@ -79,8 +81,7 @@ related_posts:
 
 `related_posts` accepts post slugs or numeric IDs.
 
-## Security
+## Notes
 
-- Never commit `PLAINMARK_SYNC_SECRET` to the repository.
-- Store it only as a GitHub Actions repository secret.
-- Regenerate it from WordPress immediately if it is exposed.
+- The old push model using GitHub Actions secrets is no longer required for Lolipop environments.
+- If you use a private repository, store the GitHub token only in WordPress settings and never commit it.
