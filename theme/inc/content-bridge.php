@@ -77,7 +77,7 @@ function plainmark_get_verification_data( $post_id = 0 ) {
 	$date    = get_post_meta( $post_id, '_plainmark_verified_date', true );
 	$review  = get_post_meta( $post_id, '_plainmark_review_date', true );
 
-	if ( $review && strtotime( $review ) < current_time( 'timestamp' ) && 'deprecated' !== $status ) {
+	if ( $review && strtotime( $review ) < current_datetime()->getTimestamp() && 'deprecated' !== $status ) {
 		$status = 'review_due';
 	}
 
@@ -100,19 +100,34 @@ function plainmark_get_verification_label( $status ) {
 	return $labels[ $status ] ?? $labels['unverified'];
 }
 
-/** Add verification panel before article body. */
+/** Add verification panel (with freshness score) before article body. */
 function plainmark_add_verification_card( $content ) {
 	if ( ! is_singular( 'post' ) || ! in_the_loop() || ! is_main_query() ) {
 		return $content;
 	}
 
-	$data = plainmark_get_verification_data();
-	if ( 'unverified' === $data['status'] && ! $data['env'] && ! $data['date'] ) {
+	$data      = plainmark_get_verification_data();
+	$freshness = function_exists( 'plainmark_get_freshness_score' ) ? plainmark_get_freshness_score() : null;
+
+	if ( 'unverified' === $data['status'] && ! $data['env'] && ! $data['date'] && ! $freshness ) {
 		return $content;
 	}
 
 	$html  = '<aside class="article-verification article-verification--' . esc_attr( $data['status'] ) . '">';
-	$html .= '<div class="article-verification__status"><span aria-hidden="true">' . ( 'verified' === $data['status'] ? '✓' : '!' ) . '</span><strong>' . esc_html( plainmark_get_verification_label( $data['status'] ) ) . '</strong></div>';
+	$html .= '<div class="article-verification__header">';
+	$html .= '<div class="article-verification__status">';
+	$html .= '<span aria-hidden="true">' . ( 'verified' === $data['status'] ? '✓' : '!' ) . '</span>';
+	$html .= '<strong>' . esc_html( plainmark_get_verification_label( $data['status'] ) ) . '</strong>';
+	$html .= '</div>';
+
+	if ( $freshness ) {
+		$html .= '<span class="article-verification__freshness article-verification__freshness--' . esc_attr( $freshness['rank'] ) . '">';
+		$html .= '<span>' . esc_html__( 'Freshness', 'plainmark' ) . '</span> ';
+		$html .= '<strong>' . esc_html( (string) $freshness['score'] ) . '</strong>';
+		$html .= '</span>';
+	}
+
+	$html .= '</div>';
 	$html .= '<div class="article-verification__details">';
 	if ( $data['date'] ) {
 		$html .= '<span>' . sprintf( esc_html__( '最終確認: %s', 'plainmark' ), esc_html( $data['date'] ) ) . '</span>';
@@ -121,7 +136,12 @@ function plainmark_add_verification_card( $content ) {
 		$html .= '<span>' . nl2br( esc_html( $data['env'] ) ) . '</span>';
 	}
 	if ( $data['review'] ) {
-		$html .= '<span>' . sprintf( esc_html__( '次回レビュー: %s', 'plainmark' ), esc_html( $data['review'] ) ) . '</span>';
+		$html .= '<span>' . sprintf( esc_html__( 'レビュー: %s', 'plainmark' ), esc_html( $data['review'] ) ) . '</span>';
+	}
+	if ( $freshness && ! empty( $freshness['reasons'] ) ) {
+		foreach ( array_slice( $freshness['reasons'], 0, 2 ) as $reason ) {
+			$html .= '<span class="article-verification__reason">' . esc_html( $reason ) . '</span>';
+		}
 	}
 	$html .= '</div></aside>';
 
