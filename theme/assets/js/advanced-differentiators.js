@@ -35,12 +35,22 @@
 		} );
 
 		window.addEventListener( 'message', function ( event ) {
+			if ( event.origin !== 'null' ) {
+				return;
+			}
 			if ( ! event.data || event.data.type !== 'plainmark-playground-log' ) {
 				return;
 			}
-			var focused = document.querySelector( '.code-playground:hover pre' ) || document.querySelector( '.code-playground pre' );
-			if ( focused ) {
-				focused.textContent += event.data.message + '\n';
+			var playgrounds = document.querySelectorAll( '[data-code-playground]' );
+			for ( var i = 0; i < playgrounds.length; i++ ) {
+				var iframe = playgrounds[ i ].querySelector( 'iframe' );
+				if ( iframe && iframe.contentWindow === event.source ) {
+					var pre = playgrounds[ i ].querySelector( 'pre' );
+					if ( pre ) {
+						pre.textContent += event.data.message + '\n';
+					}
+					break;
+				}
 			}
 		} );
 	}
@@ -68,7 +78,13 @@
 		var controls = document.createElement( 'div' );
 		controls.className = 'reader-persona-switcher';
 		controls.innerHTML = '<label>Level <select data-persona-level-select></select></label><label>Framework <select data-persona-framework-select></select></label>';
-		blocks[ 0 ].parentNode.insertBefore( controls, blocks[ 0 ] );
+
+		var contentContainer = document.querySelector( '.entry-content' ) || document.querySelector( '.article__body' );
+		if ( contentContainer ) {
+			contentContainer.insertBefore( controls, contentContainer.firstChild );
+		} else {
+			blocks[ 0 ].parentNode.insertBefore( controls, blocks[ 0 ] );
+		}
 
 		var levelSelect = controls.querySelector( '[data-persona-level-select]' );
 		var frameworkSelect = controls.querySelector( '[data-persona-framework-select]' );
