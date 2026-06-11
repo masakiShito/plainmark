@@ -4,7 +4,7 @@
  *
  * Adds:
  * - Code Playground shortcode.
- * - Freshness score display.
+ * - Freshness score utilities.
  * - Revision diff UI.
  * - Reader persona shortcode.
  * - Technology graph route.
@@ -36,8 +36,12 @@ function plainmark_register_advanced_differentiator_meta() {
 }
 add_action( 'init', 'plainmark_register_advanced_differentiator_meta' );
 
-/** Enqueue assets. */
+/** Enqueue assets only on pages that need them. */
 function plainmark_enqueue_advanced_differentiator_assets() {
+	if ( ! is_singular( 'post' ) && ! get_query_var( 'plainmark_technology_map' ) ) {
+		return;
+	}
+
 	$css = PLAINMARK_DIR . '/assets/css/advanced-differentiators.css';
 	$js  = PLAINMARK_DIR . '/assets/js/advanced-differentiators.js';
 
@@ -138,6 +142,7 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 	$score   = 100;
 	$reasons = array();
 	$status  = $data['status'] ?? 'unverified';
+	$now     = current_datetime()->getTimestamp();
 
 	if ( 'verified' !== $status ) {
 		$score    -= 'deprecated' === $status ? 55 : 25;
@@ -146,7 +151,7 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 
 	$verified_date = ! empty( $data['date'] ) ? strtotime( $data['date'] ) : false;
 	if ( $verified_date ) {
-		$days = floor( ( current_time( 'timestamp' ) - $verified_date ) / DAY_IN_SECONDS );
+		$days = floor( ( $now - $verified_date ) / DAY_IN_SECONDS );
 		if ( $days > 365 ) {
 			$score    -= 35;
 			$reasons[] = __( '最終確認から1年以上経過しています。', 'plainmark' );
@@ -162,7 +167,7 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 		$reasons[] = __( '最終確認日が未設定です。', 'plainmark' );
 	}
 
-	if ( ! empty( $data['review'] ) && strtotime( $data['review'] ) < current_time( 'timestamp' ) ) {
+	if ( ! empty( $data['review'] ) && strtotime( $data['review'] ) < $now ) {
 		$score    -= 25;
 		$reasons[] = __( 'レビュー期限を過ぎています。', 'plainmark' );
 	}
@@ -183,27 +188,10 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 	);
 }
 
-/** Display freshness score. */
-function plainmark_prepend_freshness_score( $content ) {
-	if ( ! is_singular( 'post' ) || ! in_the_loop() || ! is_main_query() ) {
-		return $content;
-	}
-
-	$freshness = plainmark_get_freshness_score();
-	$html      = '<aside class="article-freshness article-freshness--' . esc_attr( $freshness['rank'] ) . '">';
-	$html     .= '<div><span>' . esc_html__( 'Freshness', 'plainmark' ) . '</span><strong>' . esc_html( (string) $freshness['score'] ) . '</strong></div>';
-	$html     .= '<ul>';
-	foreach ( array_slice( $freshness['reasons'], 0, 3 ) as $reason ) {
-		$html .= '<li>' . esc_html( $reason ) . '</li>';
-	}
-	if ( empty( $freshness['reasons'] ) ) {
-		$html .= '<li>' . esc_html__( '検証情報が新しく、記事の鮮度は良好です。', 'plainmark' ) . '</li>';
-	}
-	$html .= '</ul></aside>';
-
-	return $html . $content;
-}
-add_filter( 'the_content', 'plainmark_prepend_freshness_score', 10 );
+/**
+ * Freshness score is intentionally not attached to the_content here.
+ * It is embedded into the verification card by content-bridge.php.
+ */
 
 /** Append latest revision diff UI. */
 function plainmark_append_revision_diff_ui( $content ) {
@@ -271,7 +259,7 @@ add_action( 'pre_get_posts', 'plainmark_prepare_technology_graph_route' );
 
 /** Add RSS namespace. */
 function plainmark_add_rss_tech_namespace() {
-	echo ' xmlns:plainmark="https://plainmark.dev/ns/1.0"';
+	echo ' xmlns:plainmark="https://github.com/masakiShito/plainmark/wiki/rss-ns/1.0"';
 }
 add_action( 'rss2_ns', 'plainmark_add_rss_tech_namespace' );
 
