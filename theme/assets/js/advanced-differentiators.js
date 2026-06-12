@@ -14,7 +14,7 @@
 					return code;
 				}
 
-				return '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:ui-monospace,Menlo,monospace;padding:16px;line-height:1.6}button{font:inherit}</style></head><body><script>var log=function(){parent.postMessage({type:"plainmark-playground-log",message:Array.from(arguments).join(" ")},"*");};console.log=log;console.error=log;try{' + code.replace( /<\/script/gi, '<\\/script' ) + '}catch(error){log(error && error.stack ? error.stack : String(error));}<\/script></body></html>';
+				return '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:ui-monospace,Menlo,monospace;padding:16px;line-height:1.6}button{font:inherit}</style></head><body><script>var log=function(){parent.postMessage({type:"plainmark-playground-log",message:Array.from(arguments).join(" ")},location.origin);};console.log=log;console.error=log;try{' + code.replace( /<\/script/gi, '<\\/script' ) + '}catch(error){log(error && error.stack ? error.stack : String(error));}<\/script></body></html>';
 			}
 
 			function run() {
