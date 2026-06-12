@@ -8,14 +8,17 @@
 
 get_header();
 
-$posts = get_posts(
+$query = new WP_Query(
 	array(
-		'post_type'      => array( 'post', 'portfolio' ),
-		'post_status'    => 'publish',
-		'posts_per_page' => 200,
+		'post_type'              => array( 'post', 'portfolio' ),
+		'post_status'            => 'publish',
+		'posts_per_page'         => 200,
+		'no_found_rows'          => true,
+		'update_post_meta_cache' => false,
 	)
 );
 
+$posts = $query->posts;
 $nodes = array();
 $links = array();
 
@@ -41,9 +44,12 @@ foreach ( $posts as $post ) {
 	}
 
 	$term_ids = array_values( array_unique( $term_ids ) );
-	for ( $i = 0; $i < count( $term_ids ); $i++ ) {
-		for ( $j = $i + 1; $j < count( $term_ids ); $j++ ) {
-			$key = $term_ids[ $i ] < $term_ids[ $j ] ? $term_ids[ $i ] . ':' . $term_ids[ $j ] : $term_ids[ $j ] . ':' . $term_ids[ $i ];
+	$count    = count( $term_ids );
+	for ( $i = 0; $i < $count; $i++ ) {
+		for ( $j = $i + 1; $j < $count; $j++ ) {
+			$key = $term_ids[ $i ] < $term_ids[ $j ]
+				? $term_ids[ $i ] . ':' . $term_ids[ $j ]
+				: $term_ids[ $j ] . ':' . $term_ids[ $i ];
 			if ( empty( $links[ $key ] ) ) {
 				$links[ $key ] = array(
 					'source' => $term_ids[ $i ],
@@ -55,6 +61,8 @@ foreach ( $posts as $post ) {
 		}
 	}
 }
+
+wp_reset_postdata();
 
 $graph = array(
 	'nodes' => array_values( $nodes ),
