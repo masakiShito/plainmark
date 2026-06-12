@@ -15,7 +15,13 @@
 			'<button type="button" data-context-mode="all">すべて</button>' +
 			'<button type="button" data-context-mode="beginner">初心者向け</button>' +
 			'<button type="button" data-context-mode="advanced">経験者向け</button>';
-		first.parentNode.insertBefore( controls, first );
+
+		var contentContainer = document.querySelector( '.entry-content' ) || document.querySelector( '.article__body' );
+		if ( contentContainer ) {
+			contentContainer.insertBefore( controls, contentContainer.firstChild );
+		} else {
+			first.parentNode.insertBefore( controls, first );
+		}
 
 		function setMode( mode ) {
 			contexts.forEach( function ( element ) {
