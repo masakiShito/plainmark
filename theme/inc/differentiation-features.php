@@ -115,9 +115,10 @@ function plainmark_prepend_changelog( $content ) {
 add_filter( 'the_content', 'plainmark_prepend_changelog', 12 );
 
 /**
- * Reader context shortcode.
+ * Reader context shortcode (legacy alias for [persona]).
  *
  * Usage: [context level="beginner"]...[/context]
+ * Internally delegates to [persona].
  *
  * @param array  $atts    Shortcode attributes.
  * @param string $content Inner content.
@@ -133,21 +134,13 @@ function plainmark_context_shortcode( $atts, $content = '' ) {
 		'context'
 	);
 
-	$allowed = array( 'beginner', 'advanced', 'all' );
-	$level   = sanitize_key( $atts['level'] );
-	$level   = in_array( $level, $allowed, true ) ? $level : 'beginner';
-	$labels  = array(
-		'beginner' => __( '初心者向け', 'plainmark' ),
-		'advanced' => __( '経験者向け', 'plainmark' ),
-		'all'      => __( '共通', 'plainmark' ),
-	);
-	$label   = $atts['label'] ? sanitize_text_field( $atts['label'] ) : $labels[ $level ];
-
-	return sprintf(
-		'<section class="reader-context reader-context--%1$s" data-reader-context="%1$s"><p class="reader-context__label">%2$s</p><div class="reader-context__body">%3$s</div></section>',
-		esc_attr( $level ),
-		esc_html( $label ),
-		do_shortcode( shortcode_unautop( $content ) )
+	return plainmark_persona_shortcode(
+		array(
+			'level'     => $atts['level'],
+			'framework' => 'all',
+			'label'     => $atts['label'],
+		),
+		$content
 	);
 }
 add_shortcode( 'context', 'plainmark_context_shortcode' );
