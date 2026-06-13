@@ -84,43 +84,62 @@ get_header();
         </div>
     </section>
 
+    <?php
+    $tech_terms = get_terms(
+        array(
+            'taxonomy'   => 'technology',
+            'hide_empty' => true,
+            'orderby'    => 'count',
+            'order'      => 'DESC',
+            'number'     => 15,
+        )
+    );
+
+    $tech_groups = array();
+    if ( ! is_wp_error( $tech_terms ) ) {
+        foreach ( $tech_terms as $term ) {
+            $group = trim( $term->description ) ?: 'Other';
+            $tech_groups[ $group ][] = $term;
+        }
+    }
+
+    $show_group_names = count( $tech_groups ) > 1;
+    ?>
     <section class="about-section about-skills">
         <div class="container container--wide about-skills__grid">
             <div>
                 <p class="about-eyebrow"><?php esc_html_e( 'TECH STACK', 'plainmark' ); ?></p>
                 <h2><?php esc_html_e( '技術', 'plainmark' ); ?></h2>
+                <p class="about-skills__note"><?php esc_html_e( '記事と Portfolio のタグから自動集計', 'plainmark' ); ?></p>
             </div>
             <div class="about-skill-groups">
-                <div class="about-skill-group">
-                    <h3><?php esc_html_e( 'Frontend', 'plainmark' ); ?></h3>
-                    <ul>
-                        <li>TypeScript</li>
-                        <li>React</li>
-                        <li>Vue.js</li>
-                        <li>Next.js</li>
-                        <li>UI Design</li>
-                    </ul>
-                </div>
-                <div class="about-skill-group">
-                    <h3><?php esc_html_e( 'Backend', 'plainmark' ); ?></h3>
-                    <ul>
-                        <li>Python</li>
-                        <li>FastAPI</li>
-                        <li>Java</li>
-                        <li>API Design</li>
-                        <li>Authorization</li>
-                    </ul>
-                </div>
-                <div class="about-skill-group">
-                    <h3><?php esc_html_e( 'Workflow', 'plainmark' ); ?></h3>
-                    <ul>
-                        <li>PostgreSQL</li>
-                        <li>MySQL</li>
-                        <li>AWS Lambda</li>
-                        <li>Docker</li>
-                        <li>Git</li>
-                    </ul>
-                </div>
+                <?php if ( ! empty( $tech_groups ) ) : ?>
+                    <?php foreach ( $tech_groups as $group_name => $terms ) : ?>
+                        <div class="about-skill-group">
+                            <?php if ( $show_group_names ) : ?>
+                                <h3><?php echo esc_html( $group_name ); ?></h3>
+                            <?php endif; ?>
+                            <ul>
+                                <?php foreach ( $terms as $term ) : ?>
+                                    <?php
+                                    $term_url = get_term_link( $term );
+                                    if ( is_wp_error( $term_url ) ) {
+                                        continue;
+                                    }
+                                    ?>
+                                    <li>
+                                        <a href="<?php echo esc_url( $term_url ); ?>">
+                                            <?php echo esc_html( $term->name ); ?>
+                                        </a>
+                                        <span class="about-skill-count">(<?php echo esc_html( (string) $term->count ); ?>)</span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <p class="about-skills__empty"><?php esc_html_e( '技術タグを記事に設定すると、ここに自動表示されます。', 'plainmark' ); ?></p>
+                <?php endif; ?>
             </div>
         </div>
     </section>
