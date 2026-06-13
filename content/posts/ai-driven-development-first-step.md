@@ -5,7 +5,7 @@ post_type: "post"
 status: "publish"
 date: "2026-06-13"
 article_type: "tech_note"
-difficulty: "intermediate"
+difficulty: "beginner"
 categories:
   - "AI"
   - "開発プロセス"
@@ -14,6 +14,8 @@ technologies:
   - "AI駆動開発"
 verified_status: "unverified"
 review_date: "2026-09-13"
+series_name: "AI駆動開発実践入門"
+series_order: 1
 ---
 
 AI駆動開発は、AIにすべての実装を丸投げすることではありません。
