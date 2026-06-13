@@ -67,6 +67,7 @@ add_action( 'wp_enqueue_scripts', 'plainmark_enqueue_advanced_differentiator_ass
  *
  * Usage:
  * [playground title="Counter demo" language="javascript"]console.log('Hi')[/playground]
+ * [playground title="Array flat" language="javascript" verified="true" env="Node.js 24" result="[1,2,3,4,5,6]"]nested.flat()[/playground]
  *
  * @param array  $atts Shortcode attributes.
  * @param string $content Code.
@@ -78,6 +79,9 @@ function plainmark_playground_shortcode( $atts, $content = '' ) {
 			'title'    => __( 'Code Playground', 'plainmark' ),
 			'language' => 'javascript',
 			'height'   => '260',
+			'verified' => '',
+			'env'      => '',
+			'result'   => '',
 		),
 		$atts,
 		'playground'
@@ -89,15 +93,50 @@ function plainmark_playground_shortcode( $atts, $content = '' ) {
 	$height   = max( 180, min( 720, absint( $atts['height'] ) ) );
 	$code     = trim( html_entity_decode( shortcode_unautop( $content ), ENT_QUOTES, get_bloginfo( 'charset' ) ) );
 
-	return sprintf(
-		'<section class="code-playground" data-code-playground data-language="%1$s"><div class="code-playground__header"><strong>%2$s</strong><button type="button" data-playground-run>%3$s</button></div><textarea class="code-playground__editor" spellcheck="false">%4$s</textarea><div class="code-playground__result" style="min-height:%5$dpx"><iframe sandbox="allow-scripts" title="%6$s"></iframe><pre aria-live="polite"></pre></div></section>',
-		esc_attr( $language ),
-		esc_html( $atts['title'] ),
-		esc_html__( 'Run', 'plainmark' ),
-		esc_textarea( $code ),
-		$height,
-		esc_attr__( 'Code playground result', 'plainmark' )
-	);
+	$is_verified = 'true' === $atts['verified'];
+	$env         = sanitize_text_field( $atts['env'] );
+	$result      = sanitize_text_field( $atts['result'] );
+
+	$badge_html = '';
+	if ( $is_verified ) {
+		if ( '' === $env && function_exists( 'plainmark_get_verification_data' ) ) {
+			$data = plainmark_get_verification_data();
+			$env  = $data['env'] ?? '';
+		}
+
+		$badge_html = '<div class="code-playground__verified">'
+			. '<span class="code-playground__verified-badge">✓ ' . esc_html__( '検証済み', 'plainmark' ) . '</span>';
+		if ( $env ) {
+			$badge_html .= '<span class="code-playground__verified-env">' . esc_html( $env ) . '</span>';
+		}
+		$badge_html .= '</div>';
+	}
+
+	$result_html = '';
+	if ( '' !== $result ) {
+		$result_html = '<div class="code-playground__expected">'
+			. '<span class="code-playground__expected-label">' . esc_html__( '期待される出力', 'plainmark' ) . '</span>'
+			. '<code>' . esc_html( $result ) . '</code>'
+			. '</div>';
+	}
+
+	$section_class = 'code-playground' . ( $is_verified ? ' code-playground--verified' : '' );
+
+	$html  = '<section class="' . esc_attr( $section_class ) . '" data-code-playground data-language="' . esc_attr( $language ) . '">';
+	$html .= $badge_html;
+	$html .= '<div class="code-playground__header">';
+	$html .= '<strong>' . esc_html( $atts['title'] ) . '</strong>';
+	$html .= '<button type="button" data-playground-run>' . esc_html__( 'Run', 'plainmark' ) . '</button>';
+	$html .= '</div>';
+	$html .= '<textarea class="code-playground__editor" spellcheck="false">' . esc_textarea( $code ) . '</textarea>';
+	$html .= '<div class="code-playground__result" style="min-height:' . esc_attr( (string) $height ) . 'px">';
+	$html .= '<iframe sandbox="allow-scripts" title="' . esc_attr__( 'Code playground result', 'plainmark' ) . '"></iframe>';
+	$html .= '<pre aria-live="polite"></pre>';
+	$html .= '</div>';
+	$html .= $result_html;
+	$html .= '</section>';
+
+	return $html;
 }
 add_shortcode( 'playground', 'plainmark_playground_shortcode' );
 
