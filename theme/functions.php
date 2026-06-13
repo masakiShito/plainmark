@@ -48,6 +48,7 @@ require_once PLAINMARK_DIR . '/inc/learning-paths.php';
  * Register custom theme routes.
  */
 function plainmark_register_custom_routes() {
+    add_rewrite_rule( '^blog/page/([0-9]+)/?$', 'index.php?plainmark_blog_archive=1&paged=$matches[1]', 'top' );
     add_rewrite_rule( '^blog/?$', 'index.php?plainmark_blog_archive=1', 'top' );
     add_rewrite_rule( '^about/?$', 'index.php?plainmark_about_page=1', 'top' );
 }
@@ -77,8 +78,12 @@ function plainmark_blog_archive_query( $query ) {
     }
 
     if ( $query->get( 'plainmark_blog_archive' ) ) {
+        $paged = max( 1, absint( $query->get( 'paged' ) ?: get_query_var( 'paged' ) ) );
+
         $query->set( 'post_type', 'post' );
+        $query->set( 'post_status', 'publish' );
         $query->set( 'posts_per_page', get_option( 'posts_per_page' ) );
+        $query->set( 'paged', $paged );
         $query->is_home    = true;
         $query->is_archive = false;
         $query->is_page    = false;
@@ -125,7 +130,7 @@ add_filter( 'template_include', 'plainmark_custom_route_template' );
  * Flush rewrite rules once after route changes.
  */
 function plainmark_maybe_flush_rewrite_rules() {
-    $rewrite_version = '20260608_blog_about_routes';
+    $rewrite_version = '20260613_blog_pagination_routes';
 
     if ( get_option( 'plainmark_rewrite_version' ) !== $rewrite_version ) {
         flush_rewrite_rules();
