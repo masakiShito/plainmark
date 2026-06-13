@@ -29,16 +29,75 @@ function plainmark_add_github_pull_sync_page() {
 add_action( 'admin_menu', 'plainmark_add_github_pull_sync_page' );
 
 /**
+ * Parse legacy owner/name repository setting.
+ *
+ * @param string $repository Repository in owner/name format.
+ * @return array{owner:string,name:string}
+ */
+function plainmark_parse_github_repository_setting( $repository ) {
+	$repository = trim( (string) $repository );
+	$parts      = explode( '/', $repository, 2 );
+
+	return array(
+		'owner' => isset( $parts[0] ) ? trim( $parts[0] ) : '',
+		'name'  => isset( $parts[1] ) ? trim( $parts[1] ) : '',
+	);
+}
+
+/**
+ * Build repository full name from owner and repository name.
+ *
+ * @param string $owner GitHub owner.
+ * @param string $name  GitHub repository name.
+ * @return string
+ */
+function plainmark_build_github_repository_full_name( $owner, $name ) {
+	$owner = trim( (string) $owner );
+	$name  = trim( (string) $name );
+
+	if ( '' === $owner || '' === $name ) {
+		return '';
+	}
+
+	return $owner . '/' . $name;
+}
+
+/**
+ * Build encoded GitHub repository path for API URLs.
+ *
+ * @param string $owner GitHub owner.
+ * @param string $name  GitHub repository name.
+ * @return string
+ */
+function plainmark_build_github_api_repo_path( $owner, $name ) {
+	return rawurlencode( $owner ) . '/' . rawurlencode( $name );
+}
+
+/**
  * Default pull sync settings.
  *
- * @return array{repository:string,branch:string,paths:string,token:string}
+ * @return array{owner:string,repository_name:string,repository:string,branch:string,posts_path:string,works_path:string,paths:string,token:string}
  */
 function plainmark_get_github_pull_sync_settings() {
+	$legacy_repository = (string) get_option( 'plainmark_github_pull_repository', '' );
+	$legacy_parts      = plainmark_parse_github_repository_setting( $legacy_repository );
+
+	$owner           = (string) get_option( 'plainmark_github_pull_owner', $legacy_parts['owner'] ?: 'masakiShito' );
+	$repository_name = (string) get_option( 'plainmark_github_pull_repository_name', $legacy_parts['name'] ?: 'plainmark-content' );
+	$repository      = plainmark_build_github_repository_full_name( $owner, $repository_name );
+	$posts_path      = (string) get_option( 'plainmark_github_pull_posts_path', 'posts' );
+	$works_path      = (string) get_option( 'plainmark_github_pull_works_path', 'works' );
+	$paths           = (string) get_option( 'plainmark_github_pull_paths', trim( $posts_path . "\n" . $works_path ) );
+
 	return array(
-		'repository' => (string) get_option( 'plainmark_github_pull_repository', 'masakiShito/plainmark' ),
-		'branch'     => (string) get_option( 'plainmark_github_pull_branch', 'main' ),
-		'paths'      => (string) get_option( 'plainmark_github_pull_paths', "content/posts\ncontent/works" ),
-		'token'      => (string) get_option( 'plainmark_github_pull_token', '' ),
+		'owner'           => $owner,
+		'repository_name' => $repository_name,
+		'repository'      => $repository,
+		'branch'          => (string) get_option( 'plainmark_github_pull_branch', 'main' ),
+		'posts_path'      => $posts_path,
+		'works_path'      => $works_path,
+		'paths'           => $paths,
+		'token'           => (string) get_option( 'plainmark_github_pull_token', '' ),
 	);
 }
 
@@ -160,12 +219,14 @@ function plainmark_import_github_markdown_blob( $markdown, $path, $sha ) {
  * @return array{success:int,created:int,updated:int,skipped:int,errors:array<int,string>,items:array<int,array>}
  */
 function plainmark_run_github_pull_sync() {
-	$settings = plainmark_get_github_pull_sync_settings();
-	$repo     = trim( $settings['repository'] );
-	$branch   = trim( $settings['branch'] );
-	$roots    = plainmark_normalize_github_pull_paths( $settings['paths'] );
-	$token    = trim( $settings['token'] );
-	$result   = array(
+	$settings        = plainmark_get_github_pull_sync_settings();
+	$owner           = trim( $settings['owner'] );
+	$repository_name = trim( $settings['repository_name'] );
+	$repo            = trim( $settings['repository'] );
+	$branch          = trim( $settings['branch'] );
+	$roots           = plainmark_normalize_github_pull_paths( $settings['paths'] );
+	$token           = trim( $settings['token'] );
+	$result          = array(
 		'success' => 0,
 		'created' => 0,
 		'updated' => 0,
@@ -173,6 +234,16 @@ function plainmark_run_github_pull_sync() {
 		'errors'  => array(),
 		'items'   => array(),
 	);
+
+	if ( ! preg_match( '/^[A-Za-z0-9-]+$/', $owner ) ) {
+		$result['errors'][] = __( 'Owner must be a valid GitHub owner name.', 'plainmark' );
+		return $result;
+	}
+
+	if ( ! preg_match( '/^[A-Za-z0-9_.-]+$/', $repository_name ) ) {
+		$result['errors'][] = __( 'Repository name must be a valid GitHub repository name.', 'plainmark' );
+		return $result;
+	}
 
 	if ( ! preg_match( '/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/', $repo ) ) {
 		$result['errors'][] = __( 'Repository must be in owner/name format.', 'plainmark' );
@@ -189,13 +260,13 @@ function plainmark_run_github_pull_sync() {
 		return $result;
 	}
 
-	$tree_url = sprintf(
+	$repo_api_path = plainmark_build_github_api_repo_path( $owner, $repository_name );
+	$tree_url      = sprintf(
 		'https://api.github.com/repos/%1$s/git/trees/%2$s?recursive=1',
-		rawurlencode( $repo ),
+		$repo_api_path,
 		rawurlencode( $branch )
 	);
-	$tree_url = str_replace( '%2F', '/', $tree_url );
-	$tree     = plainmark_github_pull_request_json( $tree_url, $token );
+	$tree          = plainmark_github_pull_request_json( $tree_url, $token );
 
 	if ( is_wp_error( $tree ) ) {
 		$result['errors'][] = $tree->get_error_message();
@@ -234,10 +305,9 @@ function plainmark_run_github_pull_sync() {
 
 		$blob_url = sprintf(
 			'https://api.github.com/repos/%1$s/git/blobs/%2$s',
-			rawurlencode( $repo ),
+			$repo_api_path,
 			rawurlencode( $sha )
 		);
-		$blob_url = str_replace( '%2F', '/', $blob_url );
 		$blob     = plainmark_github_pull_request_json( $blob_url, $token );
 
 		if ( is_wp_error( $blob ) ) {
@@ -284,13 +354,25 @@ function plainmark_handle_github_pull_settings_save() {
 
 	check_admin_referer( 'plainmark_save_github_pull_settings' );
 
-	$repository = isset( $_POST['repository'] ) ? sanitize_text_field( wp_unslash( $_POST['repository'] ) ) : 'masakiShito/plainmark';
-	$branch     = isset( $_POST['branch'] ) ? sanitize_text_field( wp_unslash( $_POST['branch'] ) ) : 'main';
-	$paths      = isset( $_POST['paths'] ) ? sanitize_textarea_field( wp_unslash( $_POST['paths'] ) ) : "content/posts\ncontent/works";
-	$token      = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
+	$owner           = isset( $_POST['owner'] ) ? sanitize_text_field( wp_unslash( $_POST['owner'] ) ) : 'masakiShito';
+	$repository_name = isset( $_POST['repository_name'] ) ? sanitize_text_field( wp_unslash( $_POST['repository_name'] ) ) : 'plainmark-content';
+	$branch          = isset( $_POST['branch'] ) ? sanitize_text_field( wp_unslash( $_POST['branch'] ) ) : 'main';
+	$posts_path      = isset( $_POST['posts_path'] ) ? sanitize_text_field( wp_unslash( $_POST['posts_path'] ) ) : 'posts';
+	$works_path      = isset( $_POST['works_path'] ) ? sanitize_text_field( wp_unslash( $_POST['works_path'] ) ) : 'works';
+	$token           = isset( $_POST['token'] ) ? sanitize_text_field( wp_unslash( $_POST['token'] ) ) : '';
+	$owner           = preg_replace( '/[^A-Za-z0-9-]/', '', $owner );
+	$repository_name = preg_replace( '/[^A-Za-z0-9_.-]/', '', $repository_name );
+	$posts_path      = trim( preg_replace( '/[^A-Za-z0-9_\.\/-]/', '', $posts_path ), '/' );
+	$works_path      = trim( preg_replace( '/[^A-Za-z0-9_\.\/-]/', '', $works_path ), '/' );
+	$paths           = trim( $posts_path . "\n" . $works_path );
+	$repository      = plainmark_build_github_repository_full_name( $owner, $repository_name );
 
+	update_option( 'plainmark_github_pull_owner', $owner, false );
+	update_option( 'plainmark_github_pull_repository_name', $repository_name, false );
 	update_option( 'plainmark_github_pull_repository', $repository, false );
 	update_option( 'plainmark_github_pull_branch', $branch, false );
+	update_option( 'plainmark_github_pull_posts_path', $posts_path, false );
+	update_option( 'plainmark_github_pull_works_path', $works_path, false );
 	update_option( 'plainmark_github_pull_paths', $paths, false );
 	if ( '' !== $token ) {
 		update_option( 'plainmark_github_pull_token', $token, false );
@@ -335,7 +417,7 @@ function plainmark_render_github_pull_sync_page() {
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'GitHub Pull Sync', 'plainmark' ); ?></h1>
-		<p><?php esc_html_e( 'WordPressからGitHubへMarkdownを取得し、投稿とWorksへ同期します。外部からWordPressへPOSTしないため、ロリポップのWAF制限を回避しやすい方式です。', 'plainmark' ); ?></p>
+		<p><?php esc_html_e( 'WordPressから指定したGitHubリポジトリのMarkdownを取得し、投稿とWorksへ同期します。テーマ本体とは別のコンテンツ管理リポジトリを指定できます。', 'plainmark' ); ?></p>
 
 		<?php if ( isset( $_GET['settings-updated'] ) ) : ?>
 			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( '設定を保存しました。', 'plainmark' ); ?></p></div>
@@ -370,18 +452,39 @@ function plainmark_render_github_pull_sync_page() {
 			<input type="hidden" name="action" value="plainmark_save_github_pull_settings">
 			<table class="form-table" role="presentation">
 				<tr>
-					<th scope="row"><label for="plainmark-repository"><?php esc_html_e( 'Repository', 'plainmark' ); ?></label></th>
-					<td><input id="plainmark-repository" class="regular-text" name="repository" value="<?php echo esc_attr( $settings['repository'] ); ?>" placeholder="masakiShito/plainmark"></td>
+					<th scope="row"><label for="plainmark-owner"><?php esc_html_e( 'Owner', 'plainmark' ); ?></label></th>
+					<td>
+						<input id="plainmark-owner" class="regular-text" name="owner" value="<?php echo esc_attr( $settings['owner'] ); ?>" placeholder="masakiShito">
+						<p class="description"><?php esc_html_e( 'GitHubユーザー名またはOrganization名を指定します。', 'plainmark' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="plainmark-repository-name"><?php esc_html_e( 'Repository name', 'plainmark' ); ?></label></th>
+					<td>
+						<input id="plainmark-repository-name" class="regular-text" name="repository_name" value="<?php echo esc_attr( $settings['repository_name'] ); ?>" placeholder="plainmark-content">
+						<p class="description"><?php esc_html_e( '記事・WorksのMarkdownを置くコンテンツ管理リポジトリ名を指定します。', 'plainmark' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Repository', 'plainmark' ); ?></th>
+					<td><code><?php echo esc_html( $settings['repository'] ); ?></code></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="plainmark-branch"><?php esc_html_e( 'Branch', 'plainmark' ); ?></label></th>
 					<td><input id="plainmark-branch" class="regular-text" name="branch" value="<?php echo esc_attr( $settings['branch'] ); ?>" placeholder="main"></td>
 				</tr>
 				<tr>
-					<th scope="row"><label for="plainmark-paths"><?php esc_html_e( 'Content paths', 'plainmark' ); ?></label></th>
+					<th scope="row"><label for="plainmark-posts-path"><?php esc_html_e( 'Posts path', 'plainmark' ); ?></label></th>
 					<td>
-						<textarea id="plainmark-paths" class="large-text code" name="paths" rows="4"><?php echo esc_textarea( $settings['paths'] ); ?></textarea>
-						<p class="description"><?php esc_html_e( '1行に1つずつ、Markdownを置くディレクトリを指定します。', 'plainmark' ); ?></p>
+						<input id="plainmark-posts-path" class="regular-text" name="posts_path" value="<?php echo esc_attr( $settings['posts_path'] ); ?>" placeholder="posts">
+						<p class="description"><?php esc_html_e( '記事Markdownを置くディレクトリです。例: posts または content/posts', 'plainmark' ); ?></p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><label for="plainmark-works-path"><?php esc_html_e( 'Works path', 'plainmark' ); ?></label></th>
+					<td>
+						<input id="plainmark-works-path" class="regular-text" name="works_path" value="<?php echo esc_attr( $settings['works_path'] ); ?>" placeholder="works">
+						<p class="description"><?php esc_html_e( 'Works Markdownを置くディレクトリです。例: works または content/works', 'plainmark' ); ?></p>
 					</td>
 				</tr>
 				<tr>
@@ -398,6 +501,16 @@ function plainmark_render_github_pull_sync_page() {
 		<hr>
 
 		<h2><?php esc_html_e( '手動同期', 'plainmark' ); ?></h2>
+		<p>
+			<?php
+			printf(
+				esc_html__( '現在の同期元: %1$s / branch: %2$s / paths: %3$s', 'plainmark' ),
+				esc_html( $settings['repository'] ),
+				esc_html( $settings['branch'] ),
+				esc_html( str_replace( "\n", ', ', $settings['paths'] ) )
+			);
+			?>
+		</p>
 		<p><?php esc_html_e( 'GitHub上のMarkdownを取得して、同じslugの投稿を更新します。存在しない場合は新規作成します。', 'plainmark' ); ?></p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'plainmark_run_github_pull_sync' ); ?>
@@ -405,15 +518,22 @@ function plainmark_render_github_pull_sync_page() {
 			<?php submit_button( __( 'GitHubから同期', 'plainmark' ), 'primary large' ); ?>
 		</form>
 
-		<h2><?php esc_html_e( 'front matter例', 'plainmark' ); ?></h2>
-		<pre><code>verified_status: "verified"
+		<h2><?php esc_html_e( 'コンテンツリポジトリ構成例', 'plainmark' ); ?></h2>
+		<pre><code>plainmark-content/
+  posts/
+    react-state-snapshot.md
+  works/
+    plainmark.md
+
+# posts側front matter例
+verified_status: "verified"
 verified_date: "2026-06-10"
 verified_env: "Node.js 24 / TypeScript 5.9"
 review_date: "2026-09-10"
 related_works:
   - "face-photo-sorter"
 
-# Works側
+# works側front matter例
 related_posts:
   - "typescript-guide"</code></pre>
 	</div>
