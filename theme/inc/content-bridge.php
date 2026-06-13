@@ -169,12 +169,25 @@ function plainmark_get_related_content_ids( $post_id ) {
 			'meta_query'     => array(
 				array(
 					'key'     => $other_key,
-					'value'   => 'i:' . absint( $post_id ) . ';',
+					'value'   => sprintf( 'i:%d;', absint( $post_id ) ),
 					'compare' => 'LIKE',
 				),
 			),
 		)
 	);
+
+	// LIKE はシリアライズ値の部分一致なので、別の数値の一部に誤マッチしないようPHP側で厳密に確認する.
+	if ( ! empty( $reverse ) ) {
+		$reverse = array_values(
+			array_filter(
+				$reverse,
+				static function ( $candidate_id ) use ( $post_id, $other_key ) {
+					$stored = plainmark_sanitize_id_array( get_post_meta( $candidate_id, $other_key, true ) );
+					return in_array( absint( $post_id ), $stored, true );
+				}
+			)
+		);
+	}
 
 	return array_values( array_unique( array_merge( $related, $reverse ) ) );
 }
@@ -274,37 +287,68 @@ function plainmark_authorize_github_sync( WP_REST_Request $request ) {
 	return $configured && $provided && hash_equals( (string) $configured, (string) $provided );
 }
 
+/**
+ * Import Markdown content and update GitHub sync metadata.
+ *
+ * Shared logic for all GitHub sync endpoints (REST, AJAX, pull).
+ *
+ * @param string $markdown Raw Markdown content.
+ * @param string $path     Repository file path.
+ * @param string $sha      Git blob SHA.
+ * @return array{id:int,action:string,path:string}|WP_Error
+ */
+function plainmark_sync_markdown( $markdown, $path, $sha ) {
+	if ( '' === trim( $markdown ) ) {
+		return new WP_Error( 'plainmark_empty_content', __( 'Markdown content is required.', 'plainmark' ), array( 'status' => 400 ) );
+	}
+
+	if ( ! function_exists( 'plainmark_parse_md_content' ) || ! function_exists( 'plainmark_import_single_md' ) ) {
+		return new WP_Error( 'plainmark_importer_unavailable', __( 'Markdown importer is unavailable.', 'plainmark' ), array( 'status' => 500 ) );
+	}
+
+	$parsed = plainmark_parse_md_content( $markdown );
+	$result = plainmark_import_single_md( $markdown, true );
+
+	if ( ! $result || empty( $result['id'] ) ) {
+		return new WP_Error( 'plainmark_import_failed', __( 'Markdown import failed.', 'plainmark' ), array( 'status' => 422 ) );
+	}
+
+	$post_id   = absint( $result['id'] );
+	$post_type = get_post_type( $post_id );
+
+	if ( $parsed && ! empty( $parsed['front_matter'] ) && function_exists( 'plainmark_apply_content_bridge_front_matter' ) ) {
+		plainmark_apply_content_bridge_front_matter( $post_id, $parsed['front_matter'], $post_type );
+	}
+
+	update_post_meta( $post_id, '_plainmark_github_path', sanitize_text_field( $path ) );
+	update_post_meta( $post_id, '_plainmark_github_sha', sanitize_text_field( $sha ) );
+	update_post_meta( $post_id, '_plainmark_github_synced_at', current_time( 'mysql' ) );
+
+	return array(
+		'id'     => $post_id,
+		'action' => sanitize_key( $result['action'] ?? 'updated' ),
+		'path'   => $path,
+	);
+}
+
 /** Import Markdown sent by GitHub Actions. */
 function plainmark_handle_github_sync( WP_REST_Request $request ) {
 	$markdown = (string) $request->get_param( 'content' );
 	$path     = sanitize_text_field( (string) $request->get_param( 'path' ) );
 	$sha      = sanitize_text_field( (string) $request->get_param( 'sha' ) );
 
-	if ( '' === trim( $markdown ) ) {
-		return new WP_Error( 'empty_content', __( 'Markdown content is required.', 'plainmark' ), array( 'status' => 400 ) );
-	}
+	$result = plainmark_sync_markdown( $markdown, $path, $sha );
 
-	$parsed = plainmark_parse_md_content( $markdown );
-	$result = plainmark_import_single_md( $markdown, true );
-	if ( ! $result || empty( $result['id'] ) ) {
-		return new WP_Error( 'import_failed', __( 'Markdown import failed.', 'plainmark' ), array( 'status' => 422 ) );
+	if ( is_wp_error( $result ) ) {
+		return $result;
 	}
-
-	$post_type = get_post_type( $result['id'] );
-	if ( $parsed && ! empty( $parsed['front_matter'] ) ) {
-		plainmark_apply_content_bridge_front_matter( $result['id'], $parsed['front_matter'], $post_type );
-	}
-
-	update_post_meta( $result['id'], '_plainmark_github_path', $path );
-	update_post_meta( $result['id'], '_plainmark_github_sha', $sha );
-	update_post_meta( $result['id'], '_plainmark_github_synced_at', current_time( 'mysql' ) );
 
 	return rest_ensure_response(
 		array(
 			'success' => true,
 			'post_id' => $result['id'],
 			'action'  => $result['action'],
-			'path'    => $path,
+			'path'    => $result['path'],
 		)
 	);
 }

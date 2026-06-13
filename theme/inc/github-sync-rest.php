@@ -14,28 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Register the hosting-compatible REST route.
- */
-function plainmark_register_github_sync_form_route() {
-	register_rest_route(
-		'plainmark/v1',
-		'/github-sync-form',
-		array(
-			'methods'             => WP_REST_Server::CREATABLE,
-			'callback'            => 'plainmark_handle_github_sync_form',
-			'permission_callback' => '__return_true',
-		)
-	);
-}
-add_action( 'rest_api_init', 'plainmark_register_github_sync_form_route' );
-
-/**
- * Handle a Base64 form-encoded Markdown synchronization request.
+ * Validate the GitHub sync secret from request parameters.
  *
  * @param WP_REST_Request $request REST request.
- * @return WP_REST_Response|WP_Error
+ * @return bool|WP_Error
  */
-function plainmark_handle_github_sync_form( WP_REST_Request $request ) {
+function plainmark_authorize_github_sync_form( WP_REST_Request $request ) {
 	$configured_secret = function_exists( 'plainmark_get_github_sync_secret' )
 		? plainmark_get_github_sync_secret()
 		: (string) get_option( 'plainmark_github_sync_secret', '' );
@@ -49,55 +33,57 @@ function plainmark_handle_github_sync_form( WP_REST_Request $request ) {
 		);
 	}
 
+	return true;
+}
+
+/**
+ * Register the hosting-compatible REST route.
+ */
+function plainmark_register_github_sync_form_route() {
+	register_rest_route(
+		'plainmark/v1',
+		'/github-sync-form',
+		array(
+			'methods'             => WP_REST_Server::CREATABLE,
+			'callback'            => 'plainmark_handle_github_sync_form',
+			'permission_callback' => 'plainmark_authorize_github_sync_form',
+		)
+	);
+}
+add_action( 'rest_api_init', 'plainmark_register_github_sync_form_route' );
+
+/**
+ * Handle a Base64 form-encoded Markdown synchronization request.
+ *
+ * @param WP_REST_Request $request REST request.
+ * @return WP_REST_Response|WP_Error
+ */
+function plainmark_handle_github_sync_form( WP_REST_Request $request ) {
 	$content_base64 = preg_replace( '/\s+/', '', (string) $request->get_param( 'content_base64' ) );
 	$markdown       = base64_decode( $content_base64, true );
 	$path           = sanitize_text_field( (string) $request->get_param( 'path' ) );
 	$sha            = sanitize_text_field( (string) $request->get_param( 'sha' ) );
 
-	if ( false === $markdown || '' === trim( $markdown ) ) {
+	if ( false === $markdown ) {
 		return new WP_Error(
-			'plainmark_empty_sync_content',
-			__( 'Markdown content is required.', 'plainmark' ),
+			'plainmark_invalid_base64',
+			__( 'Invalid Base64 content.', 'plainmark' ),
 			array( 'status' => 400 )
 		);
 	}
 
-	if ( ! function_exists( 'plainmark_parse_md_content' ) || ! function_exists( 'plainmark_import_single_md' ) ) {
-		return new WP_Error(
-			'plainmark_importer_unavailable',
-			__( 'Markdown importer is unavailable.', 'plainmark' ),
-			array( 'status' => 500 )
-		);
+	$result = plainmark_sync_markdown( $markdown, $path, $sha );
+
+	if ( is_wp_error( $result ) ) {
+		return $result;
 	}
-
-	$parsed = plainmark_parse_md_content( $markdown );
-	$result = plainmark_import_single_md( $markdown, true );
-
-	if ( ! $result || empty( $result['id'] ) ) {
-		return new WP_Error(
-			'plainmark_sync_import_failed',
-			__( 'Markdown import failed.', 'plainmark' ),
-			array( 'status' => 422 )
-		);
-	}
-
-	$post_id   = absint( $result['id'] );
-	$post_type = get_post_type( $post_id );
-
-	if ( $parsed && ! empty( $parsed['front_matter'] ) && function_exists( 'plainmark_apply_content_bridge_front_matter' ) ) {
-		plainmark_apply_content_bridge_front_matter( $post_id, $parsed['front_matter'], $post_type );
-	}
-
-	update_post_meta( $post_id, '_plainmark_github_path', $path );
-	update_post_meta( $post_id, '_plainmark_github_sha', $sha );
-	update_post_meta( $post_id, '_plainmark_github_synced_at', current_time( 'mysql' ) );
 
 	return rest_ensure_response(
 		array(
 			'success' => true,
-			'post_id' => $post_id,
-			'action'  => sanitize_key( $result['action'] ?? 'updated' ),
-			'path'    => $path,
+			'post_id' => $result['id'],
+			'action'  => $result['action'],
+			'path'    => $result['path'],
 		)
 	);
 }

@@ -37,6 +37,8 @@ require_once PLAINMARK_DIR . '/inc/article-functions.php';
 require_once PLAINMARK_DIR . '/inc/blocks.php';
 require_once PLAINMARK_DIR . '/inc/differentiation-features.php';
 require_once PLAINMARK_DIR . '/inc/content-bridge.php';
+require_once PLAINMARK_DIR . '/inc/github-sync-ajax.php';
+require_once PLAINMARK_DIR . '/inc/github-sync-rest.php';
 require_once PLAINMARK_DIR . '/inc/github-pull-sync.php';
 require_once PLAINMARK_DIR . '/inc/advanced-differentiators.php';
 

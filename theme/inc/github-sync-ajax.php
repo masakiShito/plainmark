@@ -51,46 +51,24 @@ function plainmark_handle_github_sync_ajax() {
 		? sanitize_text_field( wp_unslash( $_POST['sha'] ) )
 		: '';
 
-	if ( false === $markdown || '' === trim( $markdown ) ) {
+	if ( false === $markdown ) {
 		wp_send_json_error(
-			array( 'message' => __( 'Markdown content is required.', 'plainmark' ) ),
+			array( 'message' => __( 'Invalid Base64 content.', 'plainmark' ) ),
 			400
 		);
 	}
 
-	if ( ! function_exists( 'plainmark_parse_md_content' ) || ! function_exists( 'plainmark_import_single_md' ) ) {
-		wp_send_json_error(
-			array( 'message' => __( 'Markdown importer is unavailable.', 'plainmark' ) ),
-			500
-		);
+	$result = plainmark_sync_markdown( $markdown, $path, $sha );
+
+	if ( is_wp_error( $result ) ) {
+		wp_send_json_error( array( 'message' => $result->get_error_message() ), $result->get_error_data()['status'] ?? 500 );
 	}
-
-	$parsed = plainmark_parse_md_content( $markdown );
-	$result = plainmark_import_single_md( $markdown, true );
-
-	if ( ! $result || empty( $result['id'] ) ) {
-		wp_send_json_error(
-			array( 'message' => __( 'Markdown import failed.', 'plainmark' ) ),
-			422
-		);
-	}
-
-	$post_id   = absint( $result['id'] );
-	$post_type = get_post_type( $post_id );
-
-	if ( $parsed && ! empty( $parsed['front_matter'] ) && function_exists( 'plainmark_apply_content_bridge_front_matter' ) ) {
-		plainmark_apply_content_bridge_front_matter( $post_id, $parsed['front_matter'], $post_type );
-	}
-
-	update_post_meta( $post_id, '_plainmark_github_path', $path );
-	update_post_meta( $post_id, '_plainmark_github_sha', $sha );
-	update_post_meta( $post_id, '_plainmark_github_synced_at', current_time( 'mysql' ) );
 
 	wp_send_json_success(
 		array(
-			'post_id' => $post_id,
-			'action'  => sanitize_key( $result['action'] ?? 'updated' ),
-			'path'    => $path,
+			'post_id' => $result['id'],
+			'action'  => $result['action'],
+			'path'    => $result['path'],
 		)
 	);
 }

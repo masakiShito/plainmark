@@ -19,43 +19,43 @@ $technologies = get_terms(
 
 $skills = array();
 
-if ( ! is_wp_error( $technologies ) ) {
-	foreach ( $technologies as $term ) {
-		$post_count = count(
-			get_posts(
-				array(
-					'post_type'      => 'post',
-					'post_status'    => 'publish',
-					'posts_per_page' => -1,
-					'fields'         => 'ids',
-					'tax_query'      => array(
-						array(
-							'taxonomy' => 'technology',
-							'field'    => 'term_id',
-							'terms'    => $term->term_id,
-						),
-					),
-				)
-			)
-		);
+if ( ! is_wp_error( $technologies ) && ! empty( $technologies ) ) {
+	global $wpdb;
 
-		$work_count = count(
-			get_posts(
-				array(
-					'post_type'      => 'portfolio',
-					'post_status'    => 'publish',
-					'posts_per_page' => -1,
-					'fields'         => 'ids',
-					'tax_query'      => array(
-						array(
-							'taxonomy' => 'technology',
-							'field'    => 'term_id',
-							'terms'    => $term->term_id,
-						),
-					),
-				)
-			)
-		);
+	// 1回のクエリで全technologyタームの post_type 別カウントを取得.
+	$term_ids     = wp_list_pluck( $technologies, 'term_id' );
+	$placeholders = implode( ',', array_fill( 0, count( $term_ids ), '%d' ) );
+
+	// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+	$counts_query = $wpdb->prepare(
+		"SELECT tt.term_id, p.post_type, COUNT(*) AS cnt
+		 FROM {$wpdb->term_relationships} tr
+		 INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+		 INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
+		 WHERE tt.taxonomy = 'technology'
+		   AND tt.term_id IN ({$placeholders})
+		   AND p.post_status = 'publish'
+		   AND p.post_type IN ('post', 'portfolio')
+		 GROUP BY tt.term_id, p.post_type",
+		...$term_ids
+	);
+
+	$rows = $wpdb->get_results( $counts_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+	// term_id => { post => N, portfolio => N } のマップを構築.
+	$count_map = array();
+	foreach ( $rows as $row ) {
+		$tid = (int) $row->term_id;
+		if ( ! isset( $count_map[ $tid ] ) ) {
+			$count_map[ $tid ] = array( 'post' => 0, 'portfolio' => 0 );
+		}
+		$count_map[ $tid ][ $row->post_type ] = (int) $row->cnt;
+	}
+
+	foreach ( $technologies as $term ) {
+		$tid        = (int) $term->term_id;
+		$post_count = $count_map[ $tid ]['post'] ?? 0;
+		$work_count = $count_map[ $tid ]['portfolio'] ?? 0;
 
 		$skills[] = array(
 			'term'       => $term,

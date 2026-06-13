@@ -18,6 +18,12 @@ $items = get_posts(
 	)
 );
 
+// 全投稿のタームキャッシュを一括プリロード（N+1回避）.
+if ( ! empty( $items ) ) {
+	$item_ids = wp_list_pluck( $items, 'ID' );
+	update_object_term_cache( $item_ids, array( 'post', 'portfolio' ) );
+}
+
 $nodes        = array();
 $links        = array();
 $term_buckets = array();
