@@ -108,6 +108,16 @@ $portfolio_items = new WP_Query(
                     </div>
                     <span class="front-tool-card__arrow" aria-hidden="true">→</span>
                 </a>
+
+                <a class="front-tool-card" href="<?php echo esc_url( home_url( '/learning-paths/' ) ); ?>">
+                    <span class="front-tool-card__number">03</span>
+                    <div>
+                        <p class="front-tool-card__eyebrow">LEARNING PATHS</p>
+                        <h3><?php esc_html_e( 'Learning Paths', 'plainmark' ); ?></h3>
+                        <p><?php esc_html_e( '技術タグ・難易度・シリーズから、おすすめの読む順番を自動提案します。', 'plainmark' ); ?></p>
+                    </div>
+                    <span class="front-tool-card__arrow" aria-hidden="true">→</span>
+                </a>
             </div>
         </div>
     </section>
