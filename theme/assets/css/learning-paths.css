@@ -1,0 +1,15 @@
+/* Learning paths styles */
+.learning-paths-section {
+  padding: 64px 0 96px;
+}
+
+.learning-paths-list {
+  display: grid;
+  gap: 48px;
+}
+
+.learning-path {
+  border: 1px solid var(--color-border-light);
+  border-radius: 22px;
+  padding: 32px;
+}
