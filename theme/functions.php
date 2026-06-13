@@ -41,6 +41,7 @@ require_once PLAINMARK_DIR . '/inc/github-sync-ajax.php';
 require_once PLAINMARK_DIR . '/inc/github-sync-rest.php';
 require_once PLAINMARK_DIR . '/inc/github-pull-sync.php';
 require_once PLAINMARK_DIR . '/inc/advanced-differentiators.php';
+require_once PLAINMARK_DIR . '/inc/freshness-dashboard.php';
 
 /**
  * Register custom theme routes.
