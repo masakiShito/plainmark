@@ -14,8 +14,6 @@ technologies:
   - "AI駆動開発"
 verified_status: "unverified"
 review_date: "2026-09-13"
-series_name: "開発の進め方"
-series_order: 2
 ---
 
 AI駆動開発は、AIにすべての実装を丸投げすることではありません。
