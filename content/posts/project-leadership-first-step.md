@@ -14,6 +14,8 @@ technologies:
   - "プロジェクトリード"
 verified_status: "unverified"
 review_date: "2026-09-13"
+series_name: "PL実践入門"
+series_order: 1
 ---
 
 PL、つまりプロジェクトリーダーの役割は、単にタスクを割り振る人ではありません。
