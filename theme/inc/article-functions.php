@@ -31,10 +31,12 @@ function plainmark_get_related_posts( $post_id = null, $limit = 3 ) {
 	$args = array(
 		'post_type'           => 'post',
 		'post_status'         => 'publish',
-		'posts_per_page'      => $limit,
+		'posts_per_page'      => $limit * 3,
 		'post__not_in'        => array( $post_id ),
 		'ignore_sticky_posts' => true,
-		'orderby'             => 'rand',
+		'orderby'             => 'date',
+		'order'               => 'DESC',
+		'no_found_rows'       => true,
 	);
 
 	// Build tax query.
@@ -60,9 +62,15 @@ function plainmark_get_related_posts( $post_id = null, $limit = 3 ) {
 		$args['tax_query'] = $tax_query;
 	}
 
-	$query = new WP_Query( $args );
+	$query      = new WP_Query( $args );
+	$candidates = $query->posts;
 
-	return $query->posts;
+	if ( count( $candidates ) > $limit ) {
+		shuffle( $candidates );
+		$candidates = array_slice( $candidates, 0, $limit );
+	}
+
+	return $candidates;
 }
 
 /**

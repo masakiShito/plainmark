@@ -146,11 +146,29 @@ function plainmark_context_shortcode( $atts, $content = '' ) {
 add_shortcode( 'context', 'plainmark_context_shortcode' );
 
 /**
- * Store code tabs during shortcode parsing.
+ * Manage the code tabs buffer using a static variable.
  *
- * @var array<int,array{file:string,language:string,content:string}>
+ * @param string     $action 'get', 'add', or 'reset'.
+ * @param array|null $tab    Tab data for 'add' action.
+ * @return array Current buffer (for 'get') or empty array.
  */
-$GLOBALS['plainmark_code_tabs_buffer'] = array();
+function plainmark_code_tabs_buffer( $action = 'get', $tab = null ) {
+	static $buffer = array();
+
+	switch ( $action ) {
+		case 'reset':
+			$buffer = array();
+			return $buffer;
+		case 'add':
+			if ( is_array( $tab ) ) {
+				$buffer[] = $tab;
+			}
+			return $buffer;
+		case 'get':
+		default:
+			return $buffer;
+	}
+}
 
 /**
  * Individual code tab shortcode.
@@ -169,10 +187,13 @@ function plainmark_code_tab_shortcode( $atts, $content = '' ) {
 		'code_tab'
 	);
 
-	$GLOBALS['plainmark_code_tabs_buffer'][] = array(
-		'file'     => sanitize_text_field( $atts['file'] ),
-		'language' => sanitize_key( $atts['language'] ),
-		'content'  => trim( html_entity_decode( $content, ENT_QUOTES, get_bloginfo( 'charset' ) ) ),
+	plainmark_code_tabs_buffer(
+		'add',
+		array(
+			'file'     => sanitize_text_field( $atts['file'] ),
+			'language' => sanitize_key( $atts['language'] ),
+			'content'  => trim( html_entity_decode( $content, ENT_QUOTES, get_bloginfo( 'charset' ) ) ),
+		)
 	);
 
 	return '';
@@ -187,10 +208,10 @@ add_shortcode( 'code_tab', 'plainmark_code_tab_shortcode' );
  * @return string
  */
 function plainmark_code_tabs_shortcode( $atts, $content = '' ) {
-	$GLOBALS['plainmark_code_tabs_buffer'] = array();
+	plainmark_code_tabs_buffer( 'reset' );
 	do_shortcode( shortcode_unautop( $content ) );
-	$tabs = $GLOBALS['plainmark_code_tabs_buffer'];
-	$GLOBALS['plainmark_code_tabs_buffer'] = array();
+	$tabs = plainmark_code_tabs_buffer( 'get' );
+	plainmark_code_tabs_buffer( 'reset' );
 
 	if ( empty( $tabs ) ) {
 		return '';

@@ -141,33 +141,17 @@ function plainmark_github_pull_request_json( $url, $token = '' ) {
  * @return array|WP_Error
  */
 function plainmark_import_github_markdown_blob( $markdown, $path, $sha ) {
-	if ( ! function_exists( 'plainmark_parse_md_content' ) || ! function_exists( 'plainmark_import_single_md' ) ) {
-		return new WP_Error( 'plainmark_importer_unavailable', __( 'Markdown importer is unavailable.', 'plainmark' ) );
+	if ( ! function_exists( 'plainmark_sync_markdown' ) ) {
+		return new WP_Error( 'plainmark_sync_unavailable', __( 'Sync function is unavailable.', 'plainmark' ) );
 	}
 
-	$parsed = plainmark_parse_md_content( $markdown );
-	$result = plainmark_import_single_md( $markdown, true );
+	$result = plainmark_sync_markdown( $markdown, $path, $sha );
 
-	if ( ! $result || empty( $result['id'] ) ) {
-		return new WP_Error( 'plainmark_import_failed', sprintf( 'Failed to import %s.', $path ) );
+	if ( is_wp_error( $result ) ) {
+		return new WP_Error( $result->get_error_code(), sprintf( 'Failed to import %s: %s', $path, $result->get_error_message() ) );
 	}
 
-	$post_id   = absint( $result['id'] );
-	$post_type = get_post_type( $post_id );
-
-	if ( $parsed && ! empty( $parsed['front_matter'] ) && function_exists( 'plainmark_apply_content_bridge_front_matter' ) ) {
-		plainmark_apply_content_bridge_front_matter( $post_id, $parsed['front_matter'], $post_type );
-	}
-
-	update_post_meta( $post_id, '_plainmark_github_path', $path );
-	update_post_meta( $post_id, '_plainmark_github_sha', $sha );
-	update_post_meta( $post_id, '_plainmark_github_synced_at', current_time( 'mysql' ) );
-
-	return array(
-		'id'     => $post_id,
-		'action' => sanitize_key( $result['action'] ?? 'updated' ),
-		'path'   => $path,
-	);
+	return $result;
 }
 
 /**

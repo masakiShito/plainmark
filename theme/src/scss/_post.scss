@@ -21,7 +21,7 @@
   &__title {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-black);
+    color: var(--color-text-primary);
     letter-spacing: -0.02em;
     margin: 0;
 
@@ -49,7 +49,7 @@
   padding: var(--space-2) var(--space-4);
   border: 1px solid var(--color-gray-200);
   border-radius: var(--border-radius-full);
-  background: var(--color-white);
+  background: var(--color-bg-primary);
   color: var(--color-gray-600);
   font-size: var(--font-size-sm);
   text-decoration: none;
@@ -65,20 +65,20 @@
   }
 
   &--active {
-    background: var(--color-gray-900);
-    border-color: var(--color-gray-900);
-    color: var(--color-white);
+    background: var(--color-bg-inverse);
+    border-color: var(--color-bg-inverse);
+    color: var(--color-text-inverse);
 
     &:hover,
     &:focus {
-      background: var(--color-black);
-      border-color: var(--color-black);
-      color: var(--color-white);
+      background: var(--color-bg-primary);
+      border-color: var(--color-bg-primary);
+      color: var(--color-text-primary);
     }
 
     .blog-filter__count {
       background: rgba(255, 255, 255, 0.2);
-      color: var(--color-white);
+      color: var(--color-text-inverse);
     }
   }
 
@@ -107,7 +107,7 @@
   &__title {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    color: var(--color-black);
+    color: var(--color-text-primary);
     letter-spacing: -0.02em;
     margin: 0;
   }
@@ -159,7 +159,7 @@
       }
 
       .post-item__title {
-        color: var(--color-black);
+        color: var(--color-text-primary);
         text-decoration: underline;
         text-decoration-color: var(--color-gray-300);
         text-underline-offset: 3px;
@@ -307,8 +307,8 @@
     }
 
     &.current {
-      background: var(--color-black);
-      color: var(--color-white);
+      background: var(--color-bg-inverse);
+      color: var(--color-text-inverse);
     }
 
     &.dots {
@@ -322,7 +322,7 @@
       font-size: var(--font-size-base);
 
       &:hover {
-        color: var(--color-black);
+        color: var(--color-text-primary);
         background: var(--color-gray-100);
       }
     }
@@ -589,8 +589,8 @@
 
     &:hover,
     &:focus {
-      background-color: var(--color-gray-900);
-      color: var(--color-white);
+      background-color: var(--color-bg-inverse);
+      color: var(--color-text-inverse);
     }
   }
 }
