@@ -271,6 +271,14 @@
     var(--color-bg-secondary);
 }
 
+.about-skills__note {
+  margin-top: 8px;
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.04em;
+}
+
 .about-skill-groups {
   display: grid;
   gap: 14px;
@@ -310,6 +318,27 @@
   background: var(--color-bg-primary);
   font-size: 0.83rem;
   font-weight: 700;
+}
+
+.about-skill-group ul a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.about-skill-group ul a:hover {
+  text-decoration: underline;
+}
+
+.about-skill-count {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-secondary);
+  font-family: var(--font-family-mono);
+  margin-left: 2px;
+}
+
+.about-skills__empty {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm, 0.875rem);
 }
 
 .about-timeline__list {
