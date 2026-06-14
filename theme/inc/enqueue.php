@@ -96,12 +96,14 @@ function plainmark_scripts() {
     // Blog index / archive card stylesheet.
     if ( is_home() || is_archive() || get_query_var( 'plainmark_blog_archive' ) ) {
         $blog_index_css = PLAINMARK_DIR . '/assets/css/blog-index.css';
+        $blog_index_ver = file_exists( $blog_index_css ) ? (string) filemtime( $blog_index_css ) : PLAINMARK_VERSION;
+        $blog_index_ver .= '-mono-light-default-20260614';
 
         wp_enqueue_style(
             'plainmark-blog-index',
             PLAINMARK_URI . '/assets/css/blog-index.css',
             array( 'plainmark-style' ),
-            file_exists( $blog_index_css ) ? (string) filemtime( $blog_index_css ) : PLAINMARK_VERSION
+            $blog_index_ver
         );
     }
 
