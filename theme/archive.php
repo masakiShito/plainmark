@@ -94,64 +94,104 @@ $current_term = get_queried_object();
 	</section>
 
 	<section class="blog-index-section">
-		<div class="container">
-			<?php if ( ! empty( $categories ) || ( ! is_wp_error( $technologies ) && ! empty( $technologies ) ) ) : ?>
-				<aside class="blog-filter-panel" aria-label="<?php esc_attr_e( '記事フィルター', 'plainmark' ); ?>">
-					<div class="blog-filter-panel__row">
-						<span class="blog-filter-panel__label"><?php esc_html_e( 'Category', 'plainmark' ); ?></span>
-						<div class="blog-filter-panel__items">
-							<a class="blog-filter-pill" href="<?php echo esc_url( home_url( '/blog/' ) ); ?>">
-								<?php esc_html_e( 'すべて', 'plainmark' ); ?>
-							</a>
+		<div class="container container--with-sidebar">
+
+			<div class="blog-main">
+				<?php if ( have_posts() ) : ?>
+					<div class="post-list post-list--cards">
+						<?php
+						while ( have_posts() ) :
+							the_post();
+							get_template_part( 'template-parts/content', get_post_type() );
+						endwhile;
+						?>
+					</div>
+
+					<?php
+					the_posts_pagination(
+						array(
+							'mid_size'  => 2,
+							'prev_text' => '&larr;',
+							'next_text' => '&rarr;',
+							'class'     => 'pagination',
+						)
+					);
+					?>
+				<?php else : ?>
+					<?php get_template_part( 'template-parts/content', 'none' ); ?>
+				<?php endif; ?>
+			</div><!-- .blog-main -->
+
+			<aside class="blog-sidebar" aria-label="<?php esc_attr_e( '記事ナビゲーション', 'plainmark' ); ?>">
+
+				<!-- カテゴリ -->
+				<?php if ( ! empty( $categories ) ) : ?>
+					<div class="blog-sidebar__section">
+						<h2 class="blog-sidebar__heading"><?php esc_html_e( 'Category', 'plainmark' ); ?></h2>
+						<ul class="blog-sidebar__list">
+							<li>
+								<a class="blog-sidebar__link"
+								   href="<?php echo esc_url( home_url( '/blog/' ) ); ?>">
+									<?php esc_html_e( 'すべて', 'plainmark' ); ?>
+								</a>
+							</li>
 							<?php foreach ( $categories as $category ) : ?>
-								<a class="blog-filter-pill <?php echo is_category( $category->term_id ) ? 'blog-filter-pill--active' : ''; ?>" href="<?php echo esc_url( get_category_link( $category->term_id ) ); ?>">
-									<?php echo esc_html( $category->name ); ?>
-									<span><?php echo esc_html( $category->count ); ?></span>
+								<li>
+									<a class="blog-sidebar__link <?php echo is_category( $category->term_id ) ? 'blog-sidebar__link--active' : ''; ?>"
+									   href="<?php echo esc_url( get_category_link( $category->term_id ) ); ?>">
+										<?php echo esc_html( $category->name ); ?>
+										<span class="blog-sidebar__count"><?php echo esc_html( $category->count ); ?></span>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php endif; ?>
+
+				<!-- Technology -->
+				<?php if ( ! is_wp_error( $technologies ) && ! empty( $technologies ) ) : ?>
+					<div class="blog-sidebar__section">
+						<h2 class="blog-sidebar__heading"><?php esc_html_e( 'Technology', 'plainmark' ); ?></h2>
+						<ul class="blog-sidebar__list">
+							<?php foreach ( $technologies as $technology ) : ?>
+								<li>
+									<a class="blog-sidebar__link <?php echo ( is_tax( 'technology' ) && isset( $current_term->term_id ) && (int) $current_term->term_id === (int) $technology->term_id ) ? 'blog-sidebar__link--active' : ''; ?>"
+									   href="<?php echo esc_url( get_term_link( $technology ) ); ?>">
+										<?php echo esc_html( $technology->name ); ?>
+										<span class="blog-sidebar__count"><?php echo esc_html( $technology->count ); ?></span>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php endif; ?>
+
+				<!-- タグ（上位10件） -->
+				<?php
+				$tags = get_tags( array(
+					'hide_empty' => true,
+					'orderby'    => 'count',
+					'order'      => 'DESC',
+					'number'     => 10,
+				) );
+				if ( ! empty( $tags ) && ! is_wp_error( $tags ) ) : ?>
+					<div class="blog-sidebar__section">
+						<h2 class="blog-sidebar__heading"><?php esc_html_e( 'Tag', 'plainmark' ); ?></h2>
+						<div class="blog-sidebar__tags">
+							<?php foreach ( $tags as $tag ) : ?>
+								<a class="blog-sidebar__tag <?php echo ( is_tag( $tag->term_id ) ) ? 'blog-sidebar__tag--active' : ''; ?>"
+								   href="<?php echo esc_url( get_tag_link( $tag->term_id ) ); ?>">
+									#<?php echo esc_html( $tag->name ); ?>
+									<span class="blog-sidebar__count"><?php echo esc_html( $tag->count ); ?></span>
 								</a>
 							<?php endforeach; ?>
 						</div>
 					</div>
+				<?php endif; ?>
 
-					<?php if ( ! is_wp_error( $technologies ) && ! empty( $technologies ) ) : ?>
-						<div class="blog-filter-panel__row">
-							<span class="blog-filter-panel__label"><?php esc_html_e( 'Technology', 'plainmark' ); ?></span>
-							<div class="blog-filter-panel__items">
-								<?php foreach ( $technologies as $technology ) : ?>
-									<a class="blog-filter-pill blog-filter-pill--tech <?php echo ( is_tax( 'technology' ) && isset( $current_term->term_id ) && (int) $current_term->term_id === (int) $technology->term_id ) ? 'blog-filter-pill--active' : ''; ?>" href="<?php echo esc_url( get_term_link( $technology ) ); ?>">
-										<?php echo esc_html( $technology->name ); ?>
-										<span><?php echo esc_html( $technology->count ); ?></span>
-									</a>
-								<?php endforeach; ?>
-							</div>
-						</div>
-					<?php endif; ?>
-				</aside>
-			<?php endif; ?>
+			</aside><!-- .blog-sidebar -->
 
-			<?php if ( have_posts() ) : ?>
-				<div class="post-list post-list--cards">
-					<?php
-					while ( have_posts() ) :
-						the_post();
-						get_template_part( 'template-parts/content', get_post_type() );
-					endwhile;
-					?>
-				</div>
-
-				<?php
-				the_posts_pagination(
-					array(
-						'mid_size'  => 2,
-						'prev_text' => '&larr;',
-						'next_text' => '&rarr;',
-						'class'     => 'pagination',
-					)
-				);
-				?>
-			<?php else : ?>
-				<?php get_template_part( 'template-parts/content', 'none' ); ?>
-			<?php endif; ?>
-		</div>
+		</div><!-- .container--with-sidebar -->
 	</section>
 </main>
 
