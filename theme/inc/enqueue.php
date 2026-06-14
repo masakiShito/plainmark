@@ -93,6 +93,18 @@ function plainmark_scripts() {
         );
     }
 
+    // Blog index / archive card stylesheet.
+    if ( is_home() || is_archive() || get_query_var( 'plainmark_blog_archive' ) ) {
+        $blog_index_css = PLAINMARK_DIR . '/assets/css/blog-index.css';
+
+        wp_enqueue_style(
+            'plainmark-blog-index',
+            PLAINMARK_URI . '/assets/css/blog-index.css',
+            array( 'plainmark-style' ),
+            file_exists( $blog_index_css ) ? (string) filemtime( $blog_index_css ) : PLAINMARK_VERSION
+        );
+    }
+
     // About page stylesheet.
     if ( is_page( 'about' ) || get_query_var( 'plainmark_about_page' ) ) {
         $about_css        = PLAINMARK_DIR . '/assets/css/about.css';
@@ -220,93 +232,33 @@ function plainmark_scripts() {
     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
         wp_enqueue_script( 'comment-reply' );
     }
-
-    // Localize script with data
-    wp_localize_script( 'plainmark-script', 'plainmarkData', array(
-        'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-        'nonce'    => wp_create_nonce( 'plainmark_nonce' ),
-        'homeUrl'  => home_url(),
-        'themeUrl' => PLAINMARK_URI,
-        'i18n'     => array(
-            'menu'   => esc_html__( 'Menu', 'plainmark' ),
-            'search' => esc_html__( 'Search', 'plainmark' ),
-            'close'  => esc_html__( 'Close', 'plainmark' ),
-        ),
-    ) );
 }
 add_action( 'wp_enqueue_scripts', 'plainmark_scripts' );
 
 /**
- * Enqueue block editor assets
+ * Add preload for critical fonts
  */
-function plainmark_editor_assets() {
-    wp_enqueue_style(
-        'plainmark-editor-style',
-        PLAINMARK_URI . '/assets/css/editor-style.css',
-        array(),
-        PLAINMARK_VERSION
-    );
-
-    wp_enqueue_script(
-        'plainmark-code-language-editor',
-        PLAINMARK_URI . '/assets/js/code-language-editor.js',
-        array( 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-compose', 'wp-element', 'wp-hooks', 'wp-i18n' ),
-        PLAINMARK_VERSION,
-        true
-    );
-
-    // Series settings sidebar panel.
-    wp_enqueue_script(
-        'plainmark-series-sidebar',
-        PLAINMARK_URI . '/assets/js/series-sidebar.js',
-        array( 'wp-plugins', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n' ),
-        PLAINMARK_VERSION,
-        true
-    );
-
-    $code_tabs_block_js = PLAINMARK_DIR . '/assets/js/code-tabs-block.js';
-    wp_enqueue_script(
-        'plainmark-code-tabs-block',
-        PLAINMARK_URI . '/assets/js/code-tabs-block.js',
-        array( 'wp-blocks', 'wp-block-editor', 'wp-components', 'wp-element', 'wp-i18n' ),
-        file_exists( $code_tabs_block_js ) ? (string) filemtime( $code_tabs_block_js ) : PLAINMARK_VERSION,
-        true
-    );
-
-    $screen = get_current_screen();
-    if ( $screen && 'post' === $screen->post_type ) {
-        $article_extras_sidebar_js = PLAINMARK_DIR . '/assets/js/article-extras-sidebar.js';
-
-        wp_enqueue_script(
-            'plainmark-article-extras-sidebar',
-            PLAINMARK_URI . '/assets/js/article-extras-sidebar.js',
-            array( 'wp-plugins', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n' ),
-            file_exists( $article_extras_sidebar_js ) ? (string) filemtime( $article_extras_sidebar_js ) : PLAINMARK_VERSION,
-            true
-        );
-    }
-
-    if ( $screen && 'portfolio' === $screen->post_type ) {
-        $work_settings_sidebar_js = PLAINMARK_DIR . '/assets/js/work-settings-sidebar.js';
-
-        wp_enqueue_script(
-            'plainmark-work-settings-sidebar',
-            PLAINMARK_URI . '/assets/js/work-settings-sidebar.js',
-            array( 'wp-plugins', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-element', 'wp-i18n' ),
-            file_exists( $work_settings_sidebar_js ) ? (string) filemtime( $work_settings_sidebar_js ) : PLAINMARK_VERSION,
-            true
-        );
-    }
-}
-add_action( 'enqueue_block_editor_assets', 'plainmark_editor_assets' );
-
-/**
- * Add preload for critical assets
- */
-function plainmark_preload_assets() {
+function plainmark_preload_fonts() {
     ?>
-    <link rel="preload" href="<?php echo esc_url( PLAINMARK_URI . '/assets/css/main.css' ); ?>" as="style">
-    <link rel="preload" href="<?php echo esc_url( PLAINMARK_URI . '/assets/js/main.js' ); ?>" as="script">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <?php
 }
-add_action( 'wp_head', 'plainmark_preload_assets', 1 );
+add_action( 'wp_head', 'plainmark_preload_fonts', 1 );
+
+/**
+ * Add inline script for dark mode initialization
+ */
+function plainmark_dark_mode_init() {
+    ?>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('plainmark-theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <?php
+}
+add_action( 'wp_head', 'plainmark_dark_mode_init', 0 );
