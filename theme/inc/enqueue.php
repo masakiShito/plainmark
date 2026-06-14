@@ -97,7 +97,7 @@ function plainmark_scripts() {
     if ( is_home() || is_archive() || get_query_var( 'plainmark_blog_archive' ) ) {
         $blog_index_css = PLAINMARK_DIR . '/assets/css/blog-index.css';
         $blog_index_ver = file_exists( $blog_index_css ) ? (string) filemtime( $blog_index_css ) : PLAINMARK_VERSION;
-        $blog_index_ver .= '-mono-light-default-20260614';
+        $blog_index_ver .= '-darkmode-fix-20260615';
 
         wp_enqueue_style(
             'plainmark-blog-index',
@@ -255,10 +255,13 @@ function plainmark_dark_mode_init() {
     ?>
     <script>
         (function() {
-            const savedTheme = localStorage.getItem('plainmark-theme');
+            const saved = localStorage.getItem('plainmark-color-scheme');
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-            document.documentElement.setAttribute('data-theme', theme);
+            const effective = (saved === 'dark' || saved === 'light') ? saved : (systemPrefersDark ? 'dark' : 'light');
+            if (effective === 'dark') {
+                document.documentElement.classList.add('is-dark-mode');
+            }
+            document.documentElement.setAttribute('data-color-scheme', effective);
         })();
     </script>
     <?php
