@@ -29,7 +29,7 @@
 }
 
 .blog-filter-panel__label {
-  color: var(--color-gray-500);
+  color: #737373;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -51,7 +51,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--color-gray-700);
+  color: #404040;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.6;
@@ -65,7 +65,7 @@
   padding: 0;
   border-radius: 0;
   background: transparent;
-  color: var(--color-gray-500);
+  color: #737373;
   font-size: 12px;
   font-weight: 800;
 }
@@ -73,7 +73,7 @@
 .blog-filter-pill:hover,
 .blog-filter-pill:focus,
 .blog-filter-pill--active {
-  color: var(--color-gray-900);
+  color: #0a0a0a;
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -81,7 +81,7 @@
 .blog-filter-pill:hover span,
 .blog-filter-pill:focus span,
 .blog-filter-pill--active span {
-  color: var(--color-gray-600);
+  color: #525252;
 }
 
 .blog-filter-pill--active {
@@ -160,7 +160,7 @@
   border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 999px;
   background: transparent;
-  color: var(--color-gray-700);
+  color: #404040;
   font-size: 12px;
   font-weight: 800;
   line-height: 1.4;
@@ -172,11 +172,11 @@
 .post-card__category:hover,
 .post-card__category:focus {
   border-color: rgba(15, 15, 15, 0.28);
-  color: var(--color-gray-900);
+  color: #0a0a0a;
 }
 
 .post-card__date {
-  color: var(--color-gray-500);
+  color: #737373;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -184,7 +184,7 @@
 
 .post-card__title {
   margin: 0;
-  color: var(--color-gray-900);
+  color: #0a0a0a;
   font-size: clamp(18px, 2.2vw, 24px);
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -208,7 +208,7 @@
   min-height: 3.2em;
   margin: 0;
   overflow: hidden;
-  color: var(--color-gray-600);
+  color: #525252;
   font-size: 14px;
   line-height: 1.72;
   -webkit-box-orient: vertical;
@@ -229,7 +229,7 @@
   border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 999px;
   background: transparent;
-  color: var(--color-gray-700);
+  color: #404040;
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
@@ -239,7 +239,7 @@
 .post-card__tech:hover,
 .post-card__tech:focus {
   border-color: rgba(15, 15, 15, 0.28);
-  color: var(--color-gray-900);
+  color: #0a0a0a;
 }
 
 .post-card__footer {
@@ -264,7 +264,7 @@
   border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 999px;
   background: transparent;
-  color: var(--color-gray-700);
+  color: #404040;
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -276,7 +276,7 @@
 .post-card__badge--series,
 .post-card__badge--difficulty {
   background: transparent;
-  color: var(--color-gray-700);
+  color: #404040;
 }
 
 .post-card__badge--verified::before {
@@ -296,7 +296,7 @@
 
 .post-card__readtime {
   flex-shrink: 0;
-  color: var(--color-gray-500);
+  color: #737373;
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
