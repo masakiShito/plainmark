@@ -12,7 +12,7 @@
   gap: 14px;
   margin-bottom: clamp(28px, 4vw, 40px);
   padding: 0 0 clamp(20px, 3vw, 28px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(15, 15, 15, 0.12);
   background: transparent;
   box-shadow: none;
 }
@@ -29,7 +29,7 @@
 }
 
 .blog-filter-panel__label {
-  color: rgba(255, 255, 255, 0.48);
+  color: var(--color-gray-500);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.14em;
@@ -51,7 +51,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-gray-700);
   font-size: 14px;
   font-weight: 700;
   line-height: 1.6;
@@ -65,32 +65,28 @@
   padding: 0;
   border-radius: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.42);
+  color: var(--color-gray-500);
   font-size: 12px;
   font-weight: 800;
 }
 
 .blog-filter-pill:hover,
-.blog-filter-pill:focus {
-  color: #fff;
+.blog-filter-pill:focus,
+.blog-filter-pill--active {
+  color: var(--color-gray-900);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
 
 .blog-filter-pill:hover span,
-.blog-filter-pill:focus span {
-  color: rgba(255, 255, 255, 0.64);
+.blog-filter-pill:focus span,
+.blog-filter-pill--active span {
+  color: var(--color-gray-600);
 }
 
 .blog-filter-pill--active {
-  color: #fff;
-  text-decoration: underline;
   text-decoration-thickness: 2px;
   text-underline-offset: 5px;
-}
-
-.blog-filter-pill--active span {
-  color: rgba(255, 255, 255, 0.64);
 }
 
 .post-list--cards {
@@ -109,7 +105,7 @@
   grid-template-rows: auto 1fr;
   height: 100%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 22px;
   background: transparent;
   box-shadow: none;
@@ -118,15 +114,15 @@
 
 .post-card__inner:hover {
   transform: translateY(-3px);
-  border-color: rgba(255, 255, 255, 0.32);
-  background: rgba(255, 255, 255, 0.035);
+  border-color: rgba(15, 15, 15, 0.28);
+  background: rgba(15, 15, 15, 0.025);
 }
 
 .post-card__thumb {
   display: block;
   aspect-ratio: 16 / 9;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(15, 15, 15, 0.04);
   filter: grayscale(1);
 }
 
@@ -161,10 +157,10 @@
   max-width: 70%;
   overflow: hidden;
   padding: 3px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 999px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-gray-700);
   font-size: 12px;
   font-weight: 800;
   line-height: 1.4;
@@ -175,12 +171,12 @@
 
 .post-card__category:hover,
 .post-card__category:focus {
-  border-color: rgba(255, 255, 255, 0.28);
-  color: #fff;
+  border-color: rgba(15, 15, 15, 0.28);
+  color: var(--color-gray-900);
 }
 
 .post-card__date {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-gray-500);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -188,7 +184,7 @@
 
 .post-card__title {
   margin: 0;
-  color: #fff;
+  color: var(--color-gray-900);
   font-size: clamp(18px, 2.2vw, 24px);
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -212,7 +208,7 @@
   min-height: 3.2em;
   margin: 0;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.64);
+  color: var(--color-gray-600);
   font-size: 14px;
   line-height: 1.72;
   -webkit-box-orient: vertical;
@@ -230,10 +226,10 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 999px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-gray-700);
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
@@ -242,8 +238,8 @@
 
 .post-card__tech:hover,
 .post-card__tech:focus {
-  border-color: rgba(255, 255, 255, 0.28);
-  color: #fff;
+  border-color: rgba(15, 15, 15, 0.28);
+  color: var(--color-gray-900);
 }
 
 .post-card__footer {
@@ -265,10 +261,10 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(15, 15, 15, 0.12);
   border-radius: 999px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-gray-700);
   font-size: 11px;
   font-weight: 800;
   line-height: 1;
@@ -280,7 +276,7 @@
 .post-card__badge--series,
 .post-card__badge--difficulty {
   background: transparent;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--color-gray-700);
 }
 
 .post-card__badge--verified::before {
@@ -300,78 +296,88 @@
 
 .post-card__readtime {
   flex-shrink: 0;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-gray-500);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
 }
 
-[data-theme="light"] .blog-filter-panel {
-  border-bottom-color: rgba(15, 15, 15, 0.12);
+[data-theme="dark"] .blog-filter-panel {
+  border-bottom-color: rgba(255, 255, 255, 0.14);
 }
 
-[data-theme="light"] .blog-filter-panel__label {
-  color: var(--color-gray-500);
+[data-theme="dark"] .blog-filter-panel__label {
+  color: rgba(255, 255, 255, 0.48);
 }
 
-[data-theme="light"] .blog-filter-pill {
-  color: var(--color-gray-700);
+[data-theme="dark"] .blog-filter-pill {
+  color: rgba(255, 255, 255, 0.68);
 }
 
-[data-theme="light"] .blog-filter-pill span {
-  color: var(--color-gray-500);
+[data-theme="dark"] .blog-filter-pill span {
+  color: rgba(255, 255, 255, 0.42);
 }
 
-[data-theme="light"] .blog-filter-pill:hover,
-[data-theme="light"] .blog-filter-pill:focus,
-[data-theme="light"] .blog-filter-pill--active {
-  color: var(--color-gray-900);
+[data-theme="dark"] .blog-filter-pill:hover,
+[data-theme="dark"] .blog-filter-pill:focus,
+[data-theme="dark"] .blog-filter-pill--active {
+  color: #fff;
 }
 
-[data-theme="light"] .blog-filter-pill--active span {
-  color: var(--color-gray-600);
+[data-theme="dark"] .blog-filter-pill:hover span,
+[data-theme="dark"] .blog-filter-pill:focus span,
+[data-theme="dark"] .blog-filter-pill--active span {
+  color: rgba(255, 255, 255, 0.64);
 }
 
-[data-theme="light"] .post-card__inner {
-  border-color: rgba(15, 15, 15, 0.12);
+[data-theme="dark"] .post-card__inner {
+  border-color: rgba(255, 255, 255, 0.14);
   background: transparent;
 }
 
-[data-theme="light"] .post-card__inner:hover {
-  border-color: rgba(15, 15, 15, 0.28);
-  background: rgba(15, 15, 15, 0.025);
+[data-theme="dark"] .post-card__inner:hover {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.035);
 }
 
-[data-theme="light"] .post-card__thumb {
-  background: rgba(15, 15, 15, 0.04);
+[data-theme="dark"] .post-card__thumb {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-[data-theme="light"] .post-card__category,
-[data-theme="light"] .post-card__tech,
-[data-theme="light"] .post-card__badge {
-  border-color: rgba(15, 15, 15, 0.12);
-  color: var(--color-gray-700);
+[data-theme="dark"] .post-card__category,
+[data-theme="dark"] .post-card__tech,
+[data-theme="dark"] .post-card__badge {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.68);
 }
 
-[data-theme="light"] .post-card__category:hover,
-[data-theme="light"] .post-card__category:focus,
-[data-theme="light"] .post-card__tech:hover,
-[data-theme="light"] .post-card__tech:focus {
-  border-color: rgba(15, 15, 15, 0.28);
-  color: var(--color-gray-900);
+[data-theme="dark"] .post-card__category:hover,
+[data-theme="dark"] .post-card__category:focus,
+[data-theme="dark"] .post-card__tech:hover,
+[data-theme="dark"] .post-card__tech:focus {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
 }
 
-[data-theme="light"] .post-card__date,
-[data-theme="light"] .post-card__readtime {
-  color: var(--color-gray-500);
+[data-theme="dark"] .post-card__date,
+[data-theme="dark"] .post-card__readtime {
+  color: rgba(255, 255, 255, 0.5);
 }
 
-[data-theme="light"] .post-card__title {
-  color: var(--color-gray-900);
+[data-theme="dark"] .post-card__title {
+  color: #fff;
 }
 
-[data-theme="light"] .post-card__excerpt {
-  color: var(--color-gray-600);
+[data-theme="dark"] .post-card__excerpt {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+[data-theme="dark"] .post-card__badge--verified,
+[data-theme="dark"] .post-card__badge--unverified,
+[data-theme="dark"] .post-card__badge--deprecated,
+[data-theme="dark"] .post-card__badge--series,
+[data-theme="dark"] .post-card__badge--difficulty {
+  color: rgba(255, 255, 255, 0.68);
 }
 
 @media (max-width: 900px) {
