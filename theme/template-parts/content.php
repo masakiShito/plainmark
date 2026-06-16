@@ -8,15 +8,16 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$verification = function_exists( 'plainmark_get_verification_data' ) ? plainmark_get_verification_data( get_the_ID() ) : null;
-$categories   = get_the_category();
-$technologies = get_the_terms( get_the_ID(), 'technology' );
-$difficulty   = get_post_meta( get_the_ID(), '_plainmark_difficulty', true );
-$series_name  = get_post_meta( get_the_ID(), '_plainmark_series_name', true );
-$content      = get_the_content();
-$word_count   = mb_strlen( wp_strip_all_tags( $content ) );
-$minutes      = max( 1, ceil( $word_count / 400 ) );
-$excerpt      = get_the_excerpt() ?: wp_strip_all_tags( $content );
+$verification    = function_exists( 'plainmark_get_verification_data' ) ? plainmark_get_verification_data( get_the_ID() ) : null;
+$freshness_badge = function_exists( 'plainmark_render_freshness_badge' ) ? plainmark_render_freshness_badge( get_the_ID() ) : '';
+$categories      = get_the_category();
+$technologies    = get_the_terms( get_the_ID(), 'technology' );
+$difficulty      = get_post_meta( get_the_ID(), '_plainmark_difficulty', true );
+$series_name     = get_post_meta( get_the_ID(), '_plainmark_series_name', true );
+$content         = get_the_content();
+$word_count      = mb_strlen( wp_strip_all_tags( $content ) );
+$minutes         = max( 1, ceil( $word_count / 400 ) );
+$excerpt         = get_the_excerpt() ?: wp_strip_all_tags( $content );
 ?>
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'post-card' ); ?>>
@@ -44,9 +45,12 @@ $excerpt      = get_the_excerpt() ?: wp_strip_all_tags( $content );
 					</a>
 				<?php endif; ?>
 
-				<time class="post-card__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
-					<?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?>
-				</time>
+				<span>
+					<time class="post-card__date" datetime="<?php echo esc_attr( get_the_date( 'Y-m-d' ) ); ?>">
+						<?php echo esc_html( get_the_date( 'Y.m.d' ) ); ?>
+					</time>
+					<?php echo wp_kses_post( $freshness_badge ); ?>
+				</span>
 			</div>
 
 			<h2 class="post-card__title">
