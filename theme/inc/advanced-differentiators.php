@@ -18,7 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/** Register advanced metadata. */
+/**
+ * Register advanced metadata fields for advanced differentiator features.
+ */
 function plainmark_register_advanced_differentiator_meta() {
 	register_post_meta(
 		'post',
@@ -36,7 +38,9 @@ function plainmark_register_advanced_differentiator_meta() {
 }
 add_action( 'init', 'plainmark_register_advanced_differentiator_meta' );
 
-/** Enqueue assets only on pages that need them. */
+/**
+ * Enqueue assets only on pages that need them.
+ */
 function plainmark_enqueue_advanced_differentiator_assets() {
 	if ( ! is_singular( 'post' ) && ! get_query_var( 'plainmark_technology_map' ) ) {
 		return;
@@ -174,7 +178,12 @@ function plainmark_persona_shortcode( $atts, $content = '' ) {
 }
 add_shortcode( 'persona', 'plainmark_persona_shortcode' );
 
-/** Calculate article freshness score. */
+/**
+ * Calculate article freshness score.
+ *
+ * @param int $post_id Post ID.
+ * @return array{score:int,rank:string,reasons:array}
+ */
 function plainmark_get_freshness_score( $post_id = 0 ) {
 	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
 	$data    = function_exists( 'plainmark_get_verification_data' ) ? plainmark_get_verification_data( $post_id ) : array();
@@ -232,7 +241,12 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
  * It is embedded into the verification card by content-bridge.php.
  */
 
-/** Append latest revision diff UI. */
+/**
+ * Append latest revision diff UI.
+ *
+ * @param string $content Post content.
+ * @return string
+ */
 function plainmark_append_revision_diff_ui( $content ) {
 	if ( ! is_singular( 'post' ) || ! in_the_loop() || ! is_main_query() ) {
 		return $content;
@@ -261,20 +275,32 @@ function plainmark_append_revision_diff_ui( $content ) {
 }
 add_filter( 'the_content', 'plainmark_append_revision_diff_ui', 31 );
 
-/** Register technology graph route. */
+/**
+ * Register technology graph route.
+ */
 function plainmark_register_technology_graph_route() {
 	add_rewrite_rule( '^technology-map/?$', 'index.php?plainmark_technology_map=1', 'top' );
 }
 add_action( 'init', 'plainmark_register_technology_graph_route' );
 
-/** Add technology graph query var. */
+/**
+ * Add technology graph query var.
+ *
+ * @param array $vars Query vars.
+ * @return array
+ */
 function plainmark_add_technology_graph_query_var( $vars ) {
 	$vars[] = 'plainmark_technology_map';
 	return $vars;
 }
 add_filter( 'query_vars', 'plainmark_add_technology_graph_query_var' );
 
-/** Resolve technology graph template. */
+/**
+ * Resolve technology graph template.
+ *
+ * @param string $template Current template path.
+ * @return string
+ */
 function plainmark_technology_graph_template_include( $template ) {
 	if ( get_query_var( 'plainmark_technology_map' ) ) {
 		$custom = locate_template( 'page-technology-map.php' );
@@ -284,7 +310,11 @@ function plainmark_technology_graph_template_include( $template ) {
 }
 add_filter( 'template_include', 'plainmark_technology_graph_template_include' );
 
-/** Make technology graph route valid. */
+/**
+ * Make technology graph route valid.
+ *
+ * @param WP_Query $query Main query.
+ */
 function plainmark_prepare_technology_graph_route( $query ) {
 	if ( is_admin() || ! $query->is_main_query() ) {
 		return;
@@ -296,13 +326,17 @@ function plainmark_prepare_technology_graph_route( $query ) {
 }
 add_action( 'pre_get_posts', 'plainmark_prepare_technology_graph_route' );
 
-/** Add RSS namespace. */
+/**
+ * Add RSS namespace.
+ */
 function plainmark_add_rss_tech_namespace() {
 	echo ' xmlns:plainmark="https://github.com/masakiShito/plainmark/wiki/rss-ns/1.0"';
 }
 add_action( 'rss2_ns', 'plainmark_add_rss_tech_namespace' );
 
-/** Add RSS metadata. */
+/**
+ * Add RSS metadata.
+ */
 function plainmark_add_rss_tech_metadata() {
 	if ( 'post' !== get_post_type() ) {
 		return;
