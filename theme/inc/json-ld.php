@@ -7,6 +7,7 @@
  *   - tutorial                           → TechArticle + HowTo (if h2 headings exist)
  *   - error_solution                     → TechArticle + FAQPage
  *   - portfolio (CPT)                    → CreativeWork
+ *   - Learning Paths route               → Course + ItemList
  *   - Default post                       → Article
  *
  * @package plainmark
@@ -25,6 +26,8 @@ function plainmark_output_jsonld() {
         plainmark_jsonld_single_post();
     } elseif ( is_singular( 'portfolio' ) ) {
         plainmark_jsonld_single_portfolio();
+    } elseif ( get_query_var( 'plainmark_learning_paths' ) ) {
+        plainmark_jsonld_learning_paths();
     } elseif ( is_front_page() ) {
         plainmark_jsonld_website();
     }
@@ -392,6 +395,85 @@ function plainmark_jsonld_single_portfolio() {
     }
 
     plainmark_print_jsonld( $schema );
+}
+
+/**
+ * JSON-LD for the learning paths route.
+ */
+function plainmark_jsonld_learning_paths() {
+    if ( ! function_exists( 'plainmark_generate_learning_paths' ) ) {
+        return;
+    }
+
+    $paths = plainmark_generate_learning_paths();
+    if ( empty( $paths ) ) {
+        return;
+    }
+
+    $items = array();
+
+    foreach ( $paths as $path_index => $path ) {
+        if ( empty( $path['term'] ) || empty( $path['posts'] ) ) {
+            continue;
+        }
+
+        $course_items = array();
+        foreach ( $path['posts'] as $post_index => $entry ) {
+            $post = isset( $entry['post'] ) && $entry['post'] instanceof WP_Post ? $entry['post'] : null;
+            if ( ! $post ) {
+                continue;
+            }
+
+            $course_items[] = array(
+                '@type'    => 'ListItem',
+                'position' => $post_index + 1,
+                'name'     => get_the_title( $post ),
+                'url'      => get_permalink( $post ),
+            );
+        }
+
+        if ( empty( $course_items ) ) {
+            continue;
+        }
+
+        $term = $path['term'];
+        $items[] = array(
+            '@type'    => 'ListItem',
+            'position' => $path_index + 1,
+            'item'     => array(
+                '@type'       => 'Course',
+                'name'        => sprintf( __( '%s Learning Path', 'plainmark' ), $term->name ),
+                'description' => sprintf( __( '%s articles ordered by difficulty, series, and freshness.', 'plainmark' ), $term->name ),
+                'url'         => home_url( '/learning-paths/' ) . '#' . sanitize_title( $term->slug ),
+                'provider'    => plainmark_jsonld_publisher(),
+                'hasCourseInstance' => array(
+                    '@type'      => 'CourseInstance',
+                    'courseMode' => 'online',
+                    'courseWorkload' => 'PT' . max( 1, count( $course_items ) * 10 ) . 'M',
+                ),
+                'hasPart'     => array(
+                    '@type'           => 'ItemList',
+                    'numberOfItems'   => count( $course_items ),
+                    'itemListElement' => $course_items,
+                ),
+            ),
+        );
+    }
+
+    if ( empty( $items ) ) {
+        return;
+    }
+
+    plainmark_print_jsonld(
+        array(
+            '@context'        => 'https://schema.org',
+            '@type'           => 'ItemList',
+            'name'            => __( 'Learning Paths', 'plainmark' ),
+            'url'             => home_url( '/learning-paths/' ),
+            'numberOfItems'   => count( $items ),
+            'itemListElement' => $items,
+        )
+    );
 }
 
 /**
