@@ -33,10 +33,82 @@
 				iframe.srcdoc = buildDocument( editor.value );
 			}
 
+			function addSaveButton() {
+				var postId = playground.getAttribute( 'data-post-id' );
+				if ( ! postId ) {
+					return;
+				}
+
+				var title = playground.querySelector( 'strong' );
+				var header = playground.querySelector( '.code-playground__header' );
+				if ( ! header || header.querySelector( '[data-playground-save]' ) ) {
+					return;
+				}
+
+				var saveBtn = document.createElement( 'button' );
+				saveBtn.type = 'button';
+				saveBtn.setAttribute( 'data-playground-save', '' );
+				saveBtn.textContent = '✓ 検証済みとして保存';
+				saveBtn.style.cssText = 'font-size:11px;padding:2px 8px;margin-left:6px;cursor:pointer;';
+				header.appendChild( saveBtn );
+
+				saveBtn.addEventListener( 'click', function () {
+					var code = editor ? editor.value : '';
+					var output = log ? log.textContent : '';
+					if ( ! output.trim() ) {
+						window.alert( '先に Run してから保存してください。' );
+						return;
+					}
+
+					saveBtn.disabled = true;
+					saveBtn.textContent = '保存中...';
+
+					var data = window.plainmarkData || {};
+					var restUrl = data.restUrl || '/wp-json/';
+					var nonce = data.nonce || '';
+
+					window.fetch( restUrl + 'plainmark/v1/execution-snapshot', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-WP-Nonce': nonce,
+						},
+						body: JSON.stringify( {
+							post_id: parseInt( postId, 10 ),
+							playground_title: title ? title.textContent : 'untitled',
+							code: code,
+							output: output,
+							language: language,
+						} ),
+					} )
+						.then( function ( response ) {
+							return response.json();
+						} )
+						.then( function ( responseData ) {
+							if ( responseData && responseData.success ) {
+								saveBtn.textContent = '✓ 保存しました';
+								window.setTimeout( function () {
+									saveBtn.disabled = false;
+									saveBtn.textContent = '✓ 検証済みとして保存';
+								}, 2000 );
+								return;
+							}
+
+							saveBtn.disabled = false;
+							saveBtn.textContent = '保存失敗';
+						} )
+						.catch( function () {
+							saveBtn.disabled = false;
+							saveBtn.textContent = '保存失敗';
+						} );
+				} );
+			}
+
 			if ( button ) {
 				button.addEventListener( 'click', run );
 			}
 
+			addSaveButton();
 			run();
 		} );
 
