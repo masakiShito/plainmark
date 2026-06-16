@@ -1,0 +1,87 @@
+<?php
+/**
+ * Freshness badge for article cards and single posts.
+ *
+ * @package plainmark
+ * @since 0.8.0
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Render the Freshness badge HTML.
+ *
+ * @param int $post_id Post ID.
+ * @return string HTML string.
+ */
+function plainmark_render_freshness_badge( $post_id = 0 ) {
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+
+	if ( ! $post_id ) {
+		return '';
+	}
+
+	$raw_score = get_post_meta( $post_id, '_plainmark_freshness_score', true );
+	$score     = '' === $raw_score ? 0 : (int) $raw_score;
+	$rank      = (string) get_post_meta( $post_id, '_plainmark_freshness_rank', true );
+
+	if ( '' === $rank && function_exists( 'plainmark_get_freshness_score' ) ) {
+		$data  = plainmark_get_freshness_score( $post_id );
+		$score = (int) $data['score'];
+		$rank  = (string) $data['rank'];
+	}
+
+	if ( '' === $rank ) {
+		return '';
+	}
+
+	$labels = array(
+		'fresh' => __( 'Fresh', 'plainmark' ),
+		'watch' => __( 'Watch', 'plainmark' ),
+		'stale' => __( 'Stale', 'plainmark' ),
+	);
+
+	$icons = array(
+		'fresh' => '✓',
+		'watch' => '△',
+		'stale' => '!',
+	);
+
+	$label = $labels[ $rank ] ?? $rank;
+	$icon  = $icons[ $rank ] ?? '';
+
+	$verified_date = (string) get_post_meta( $post_id, '_plainmark_verified_date', true );
+	$verified_env  = (string) get_post_meta( $post_id, '_plainmark_verified_env', true );
+	$tooltip       = '';
+
+	if ( $verified_date ) {
+		$verified_month = date_i18n( 'Y-m', strtotime( $verified_date ) );
+		$tooltip        = sprintf(
+			/* translators: %s: date. */
+			esc_attr__( '最終確認: %s', 'plainmark' ),
+			esc_attr( $verified_month )
+		);
+
+		if ( $verified_env ) {
+			$tooltip .= ' / ' . esc_attr( $verified_env );
+		}
+	}
+
+	return sprintf(
+		'<span class="freshness-badge freshness-badge--%1$s" aria-label="%2$s"%3$s><span class="freshness-badge__icon" aria-hidden="true">%4$s</span><span class="freshness-badge__label">%5$s</span></span>',
+		esc_attr( $rank ),
+		esc_attr(
+			sprintf(
+				/* translators: 1: rank label, 2: score. */
+				__( 'Freshness: %1$s (%2$d/100)', 'plainmark' ),
+				$label,
+				$score
+			)
+		),
+		$tooltip ? ' title="' . $tooltip . '"' : '',
+		esc_html( $icon ),
+		esc_html( $label )
+	);
+}
