@@ -88,6 +88,8 @@ get_header();
 
 	<section class="skills-section">
 		<div class="container container--wide">
+			<?php do_action( 'plainmark_after_skills_page_content' ); ?>
+
 			<?php if ( $skills ) : ?>
 				<div class="skills-summary">
 					<div><strong><?php echo esc_html( count( $skills ) ); ?></strong><span><?php esc_html_e( '技術', 'plainmark' ); ?></span></div>
