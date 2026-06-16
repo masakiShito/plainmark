@@ -1,0 +1,30 @@
+name: PHPCS
+
+on:
+  pull_request:
+    paths:
+      - 'theme/**/*.php'
+      - 'theme/style.css'
+      - 'phpcs.xml.dist'
+      - 'composer.json'
+      - 'composer.lock'
+      - '.github/workflows/phpcs.yml'
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for unreplaced placeholders
+        run: |
+          if grep -r '\[username\]\|\[your-site\]' theme/; then
+            echo "ERROR: Unreplaced placeholders found"
+            exit 1
+          fi
+
+      - name: Install Composer dependencies
+        run: composer install --no-progress
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs --standard=phpcs.xml.dist theme/inc/
