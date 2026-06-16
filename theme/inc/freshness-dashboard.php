@@ -16,6 +16,65 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Register cached freshness metadata.
+ */
+function plainmark_register_freshness_cache_meta() {
+	register_post_meta(
+		'post',
+		'_plainmark_freshness_score',
+		array(
+			'type'              => 'integer',
+			'single'            => true,
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'absint',
+			'auth_callback'     => static function() {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+
+	register_post_meta(
+		'post',
+		'_plainmark_freshness_rank',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'sanitize_key',
+			'auth_callback'     => static function() {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+}
+add_action( 'init', 'plainmark_register_freshness_cache_meta' );
+
+/**
+ * Cache the Freshness score when an article is saved.
+ *
+ * @param int $post_id Post ID.
+ */
+function plainmark_cache_freshness_score( $post_id ) {
+	if ( wp_is_post_revision( $post_id ) || wp_is_post_autosave( $post_id ) ) {
+		return;
+	}
+
+	if ( 'post' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	if ( ! function_exists( 'plainmark_get_freshness_score' ) ) {
+		return;
+	}
+
+	$freshness = plainmark_get_freshness_score( $post_id );
+
+	update_post_meta( $post_id, '_plainmark_freshness_score', (int) $freshness['score'] );
+	update_post_meta( $post_id, '_plainmark_freshness_rank', sanitize_key( $freshness['rank'] ) );
+}
+add_action( 'save_post', 'plainmark_cache_freshness_score' );
+
+/**
  * Register the Freshness dashboard widget.
  */
 function plainmark_register_freshness_widget() {
@@ -28,45 +87,123 @@ function plainmark_register_freshness_widget() {
 add_action( 'wp_dashboard_setup', 'plainmark_register_freshness_widget' );
 
 /**
+ * Count published posts by cached freshness rank.
+ *
+ * @param string $rank Freshness rank.
+ * @return int
+ */
+function plainmark_count_posts_by_freshness_rank( $rank ) {
+	global $wpdb;
+
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(1)
+			FROM {$wpdb->postmeta} pm
+			JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE pm.meta_key = %s
+			AND pm.meta_value = %s
+			AND p.post_status = 'publish'
+			AND p.post_type = 'post'",
+			'_plainmark_freshness_rank',
+			$rank
+		)
+	);
+}
+
+/**
+ * Get the average cached freshness score for published posts.
+ *
+ * @return int
+ */
+function plainmark_get_average_freshness_score() {
+	global $wpdb;
+
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT ROUND(AVG(pm.meta_value))
+			FROM {$wpdb->postmeta} pm
+			JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE pm.meta_key = %s
+			AND p.post_status = 'publish'
+			AND p.post_type = 'post'",
+			'_plainmark_freshness_score'
+		)
+	);
+}
+
+/**
+ * Build dashboard list items from cached freshness post IDs.
+ *
+ * @param int[] $post_ids Post IDs.
+ * @return array<int,array{id:int,score:int,reasons:array,reports:array}>
+ */
+function plainmark_build_freshness_widget_items( $post_ids ) {
+	$items = array();
+
+	foreach ( $post_ids as $post_id ) {
+		$freshness = function_exists( 'plainmark_get_freshness_score' ) ? plainmark_get_freshness_score( $post_id ) : array( 'reasons' => array() );
+		$score     = get_post_meta( $post_id, '_plainmark_freshness_score', true );
+
+		$items[] = array(
+			'id'      => $post_id,
+			'score'   => '' === $score ? (int) ( $freshness['score'] ?? 0 ) : (int) $score,
+			'reasons' => $freshness['reasons'] ?? array(),
+			'reports' => plainmark_get_freshness_reports( $post_id ),
+		);
+	}
+
+	return $items;
+}
+
+/**
  * Render the Freshness dashboard widget.
  */
 function plainmark_render_freshness_widget() {
-	$post_ids = get_posts(
+	$stale_posts = get_posts(
 		array(
 			'post_type'      => 'post',
 			'post_status'    => 'publish',
-			'posts_per_page' => -1,
+			'posts_per_page' => 20,
 			'fields'         => 'ids',
 			'no_found_rows'  => true,
+			'meta_query'     => array(
+				array(
+					'key'   => '_plainmark_freshness_rank',
+					'value' => 'stale',
+				),
+			),
+			'meta_key'       => '_plainmark_freshness_score',
+			'orderby'        => 'meta_value_num',
+			'order'          => 'ASC',
 		)
 	);
 
-	$stale       = array();
-	$watch       = array();
-	$total_score = 0;
+	$watch_posts = get_posts(
+		array(
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'posts_per_page' => 10,
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+			'meta_query'     => array(
+				array(
+					'key'   => '_plainmark_freshness_rank',
+					'value' => 'watch',
+				),
+			),
+			'meta_key'       => '_plainmark_freshness_score',
+			'orderby'        => 'meta_value_num',
+			'order'          => 'ASC',
+		)
+	);
 
-	foreach ( $post_ids as $post_id ) {
-		$freshness = plainmark_get_freshness_score( $post_id );
-		$reports   = plainmark_get_freshness_reports( $post_id );
-		$total_score += $freshness['score'];
-
-		$item = array(
-			'id'      => $post_id,
-			'score'   => $freshness['score'],
-			'reasons' => $freshness['reasons'],
-			'reports' => $reports,
-		);
-
-		if ( 'stale' === $freshness['rank'] ) {
-			$stale[] = $item;
-		} elseif ( 'watch' === $freshness['rank'] ) {
-			$watch[] = $item;
-		}
-	}
-
-	$count   = count( $post_ids );
-	$avg     = $count > 0 ? round( $total_score / $count ) : 0;
-	$healthy = $count - count( $stale ) - count( $watch );
+	$total       = (int) wp_count_posts( 'post' )->publish;
+	$stale_count = plainmark_count_posts_by_freshness_rank( 'stale' );
+	$watch_count = plainmark_count_posts_by_freshness_rank( 'watch' );
+	$healthy     = max( 0, $total - $stale_count - $watch_count );
+	$avg         = plainmark_get_average_freshness_score();
+	$stale       = plainmark_build_freshness_widget_items( $stale_posts );
+	$watch       = plainmark_build_freshness_widget_items( $watch_posts );
 	?>
 	<div class="plainmark-freshness-widget">
 		<style>
@@ -89,11 +226,11 @@ function plainmark_render_freshness_widget() {
 
 		<div class="plainmark-fw-summary">
 			<div class="is-stale">
-				<strong><?php echo esc_html( (string) count( $stale ) ); ?></strong>
+				<strong><?php echo esc_html( (string) $stale_count ); ?></strong>
 				<span><?php esc_html_e( '要対応', 'plainmark' ); ?></span>
 			</div>
 			<div class="is-watch">
-				<strong><?php echo esc_html( (string) count( $watch ) ); ?></strong>
+				<strong><?php echo esc_html( (string) $watch_count ); ?></strong>
 				<span><?php esc_html_e( '注意', 'plainmark' ); ?></span>
 			</div>
 			<div class="is-healthy">
@@ -108,7 +245,7 @@ function plainmark_render_freshness_widget() {
 		<?php plainmark_render_freshness_widget_list( __( '注意（Freshness 55-79）', 'plainmark' ), $watch, 'watch', 5 ); ?>
 
 		<?php if ( empty( $stale ) && empty( $watch ) ) : ?>
-			<p style="color: #1a6b2a;">🎉 <?php esc_html_e( 'すべての記事が良好な状態です。', 'plainmark' ); ?></p>
+			<p style="color: #1a6b2a;"><?php esc_html_e( 'すべての記事が良好な状態です。', 'plainmark' ); ?></p>
 		<?php endif; ?>
 	</div>
 	<?php
@@ -170,6 +307,7 @@ function plainmark_run_freshness_check() {
 			'post_type'      => 'post',
 			'post_status'    => 'publish',
 			'posts_per_page' => 50,
+			'no_found_rows'  => true,
 			'meta_query'     => array(
 				array(
 					'key'     => '_plainmark_review_date',
@@ -195,7 +333,7 @@ function plainmark_run_freshness_check() {
 		$review_date = get_post_meta( $post->ID, '_plainmark_review_date', true );
 		$freshness   = plainmark_get_freshness_score( $post->ID );
 		$lines[]     = sprintf(
-			'- [%s] (Freshness: %d) — レビュー期限: %s — %s',
+			'- [%s] (Freshness: %d) - レビュー期限: %s - %s',
 			$post->post_title,
 			$freshness['score'],
 			$review_date,
@@ -308,6 +446,7 @@ function plainmark_handle_freshness_report() {
 		if ( $outdated_count >= 3 && 'verified' === $status ) {
 			update_post_meta( $post_id, '_plainmark_verified_status', 'unverified' );
 			update_post_meta( $post_id, '_plainmark_review_date', current_time( 'Y-m-d' ) );
+			plainmark_cache_freshness_score( $post_id );
 		}
 	}
 
