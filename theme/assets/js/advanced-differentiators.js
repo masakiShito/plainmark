@@ -1,6 +1,8 @@
 ( function () {
 	'use strict';
 
+	var iframeMap = new WeakMap();
+
 	function initPlaygrounds() {
 		document.querySelectorAll( '[data-code-playground]' ).forEach( function ( playground ) {
 			var editor = playground.querySelector( '.code-playground__editor' );
@@ -9,12 +11,16 @@
 			var log = playground.querySelector( 'pre' );
 			var language = playground.getAttribute( 'data-language' ) || 'javascript';
 
+			if ( iframe ) {
+				iframeMap.set( iframe, { playground: playground, log: log } );
+			}
+
 			function buildDocument( code ) {
 				if ( language === 'html' ) {
 					return code;
 				}
 
-				return '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:ui-monospace,Menlo,monospace;padding:16px;line-height:1.6}button{font:inherit}</style></head><body><script>var log=function(){parent.postMessage({type:"plainmark-playground-log",message:Array.from(arguments).join(" ")},location.origin);};console.log=log;console.error=log;try{' + code.replace( /<\/script/gi, '<\\/script' ) + '}catch(error){log(error && error.stack ? error.stack : String(error));}<\/script></body></html>';
+				return '<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:ui-monospace,Menlo,monospace;padding:16px;line-height:1.6}button{font:inherit}</style></head><body><script>var log=function(){parent.postMessage({type:"plainmark-playground-log",message:Array.from(arguments).join(" ")},"*");};console.log=log;console.error=log;try{' + code.replace( /<\/script/gi, '<\\/script' ) + '}catch(error){log(error && error.stack ? error.stack : String(error));}<\/script></body></html>';
 			}
 
 			function run() {
@@ -38,16 +44,16 @@
 			if ( event.origin !== 'null' ) {
 				return;
 			}
-			if ( ! event.data || event.data.type !== 'plainmark-playground-log' ) {
+			if ( ! event.source || ! event.data || event.data.type !== 'plainmark-playground-log' ) {
 				return;
 			}
-			var playgrounds = document.querySelectorAll( '[data-code-playground]' );
-			for ( var i = 0; i < playgrounds.length; i++ ) {
-				var iframe = playgrounds[ i ].querySelector( 'iframe' );
-				if ( iframe && iframe.contentWindow === event.source ) {
-					var pre = playgrounds[ i ].querySelector( 'pre' );
-					if ( pre ) {
-						pre.textContent += event.data.message + '\n';
+
+			var iframes = document.querySelectorAll( '[data-code-playground] iframe' );
+			for ( var i = 0; i < iframes.length; i++ ) {
+				if ( iframes[ i ].contentWindow === event.source ) {
+					var entry = iframeMap.get( iframes[ i ] );
+					if ( entry && entry.log ) {
+						entry.log.textContent += event.data.message + '\n';
 					}
 					break;
 				}
