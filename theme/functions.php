@@ -23,6 +23,7 @@ require_once PLAINMARK_DIR . '/inc/setup.php';
 require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
 require_once PLAINMARK_DIR . '/inc/toc-functions.php';
 require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';
+require_once PLAINMARK_DIR . '/inc/admin/article-inventory.php';
 require_once PLAINMARK_DIR . '/inc/admin/work-settings.php';
 require_once PLAINMARK_DIR . '/inc/admin/github-works-sync.php';
 require_once PLAINMARK_DIR . '/inc/admin/sample-works.php';
