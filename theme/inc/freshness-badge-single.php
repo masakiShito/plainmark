@@ -11,7 +11,36 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Add a rendered Freshness badge to the single post title area.
+ * Register the small DOM placement script through WordPress' script API.
+ */
+function plainmark_enqueue_single_freshness_badge_script() {
+	if ( ! is_singular( 'post' ) ) {
+		return;
+	}
+
+	$script = <<<'JS'
+(function() {
+	var template = document.getElementById('plainmark-single-freshness-badge');
+	if (!template) {
+		return;
+	}
+
+	var header = document.querySelector('.single-post__header');
+	var title = header ? header.querySelector('.single-post__title') : null;
+	if (!header || !title || header.querySelector('.single-post__freshness')) {
+		return;
+	}
+
+	title.insertAdjacentElement('afterend', template.content.firstElementChild.cloneNode(true));
+})();
+JS;
+
+	wp_add_inline_script( 'plainmark-article-enhancements', $script );
+}
+add_action( 'wp_enqueue_scripts', 'plainmark_enqueue_single_freshness_badge_script', 30 );
+
+/**
+ * Add the rendered Freshness badge template to the footer.
  */
 function plainmark_output_single_freshness_badge_template() {
 	if ( ! is_singular( 'post' ) || ! function_exists( 'plainmark_render_freshness_badge' ) ) {
@@ -26,22 +55,6 @@ function plainmark_output_single_freshness_badge_template() {
 	<template id="plainmark-single-freshness-badge">
 		<div class="single-post__freshness"><?php echo wp_kses_post( $badge ); ?></div>
 	</template>
-	<script>
-	(function() {
-		var template = document.getElementById('plainmark-single-freshness-badge');
-		if (!template) {
-			return;
-		}
-
-		var header = document.querySelector('.single-post__header');
-		var title = header ? header.querySelector('.single-post__title') : null;
-		if (!header || !title || header.querySelector('.single-post__freshness')) {
-			return;
-		}
-
-		title.insertAdjacentElement('afterend', template.content.firstElementChild.cloneNode(true));
-	})();
-	</script>
 	<?php
 }
 add_action( 'wp_footer', 'plainmark_output_single_freshness_badge_template', 20 );
