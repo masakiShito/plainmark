@@ -34,6 +34,7 @@ require_once PLAINMARK_DIR . '/inc/shortcodes.php';
 require_once PLAINMARK_DIR . '/inc/json-ld.php';
 require_once PLAINMARK_DIR . '/inc/ogp.php';
 require_once PLAINMARK_DIR . '/inc/markdown-export.php';
+require_once PLAINMARK_DIR . '/inc/front-matter-normalizer.php';
 require_once PLAINMARK_DIR . '/inc/markdown-import.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
 require_once PLAINMARK_DIR . '/inc/blocks.php';
@@ -45,6 +46,7 @@ require_once PLAINMARK_DIR . '/inc/github-pull-sync.php';
 require_once PLAINMARK_DIR . '/inc/advanced-differentiators.php';
 require_once PLAINMARK_DIR . '/inc/freshness-dashboard.php';
 require_once PLAINMARK_DIR . '/inc/freshness-badge.php';
+require_once PLAINMARK_DIR . '/inc/freshness-badge-single.php';
 require_once PLAINMARK_DIR . '/inc/learning-paths.php';
 require_once PLAINMARK_DIR . '/inc/skills-export.php';
 
