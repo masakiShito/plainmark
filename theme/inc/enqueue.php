@@ -55,6 +55,14 @@ function plainmark_scripts() {
         file_exists( $differentiation_css ) ? (string) filemtime( $differentiation_css ) : PLAINMARK_VERSION
     );
 
+    $snippet_library_css = PLAINMARK_DIR . '/assets/css/snippet-library.css';
+    wp_enqueue_style(
+        'plainmark-snippet-library',
+        PLAINMARK_URI . '/assets/css/snippet-library.css',
+        array( 'plainmark-style' ),
+        file_exists( $snippet_library_css ) ? (string) filemtime( $snippet_library_css ) : PLAINMARK_VERSION
+    );
+
     $feature_navigation_css = PLAINMARK_DIR . '/assets/css/feature-navigation.css';
     wp_enqueue_style(
         'plainmark-feature-navigation',
