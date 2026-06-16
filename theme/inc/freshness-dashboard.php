@@ -87,6 +87,21 @@ function plainmark_register_freshness_widget() {
 add_action( 'wp_dashboard_setup', 'plainmark_register_freshness_widget' );
 
 /**
+ * Enqueue Freshness widget admin styles.
+ */
+function plainmark_enqueue_freshness_widget_styles() {
+	$css = PLAINMARK_DIR . '/assets/css/admin-freshness-widget.css';
+
+	wp_enqueue_style(
+		'plainmark-freshness-widget',
+		PLAINMARK_URI . '/assets/css/admin-freshness-widget.css',
+		array(),
+		file_exists( $css ) ? (string) filemtime( $css ) : PLAINMARK_VERSION
+	);
+}
+add_action( 'admin_enqueue_scripts', 'plainmark_enqueue_freshness_widget_styles' );
+
+/**
  * Count published posts by cached freshness rank.
  *
  * @param string $rank Freshness rank.
@@ -206,24 +221,6 @@ function plainmark_render_freshness_widget() {
 	$watch       = plainmark_build_freshness_widget_items( $watch_posts );
 	?>
 	<div class="plainmark-freshness-widget">
-		<style>
-			.plainmark-freshness-widget { font-size: 13px; }
-			.plainmark-fw-summary { display: flex; gap: 16px; margin-bottom: 16px; }
-			.plainmark-fw-summary div { flex: 1; text-align: center; padding: 10px; border-radius: 4px; background: #f0f0f1; }
-			.plainmark-fw-summary strong { display: block; font-size: 24px; line-height: 1.2; }
-			.plainmark-fw-summary .is-stale { background: #fcf0f1; color: #8b1a1a; }
-			.plainmark-fw-summary .is-watch { background: #fef8ee; color: #8a6800; }
-			.plainmark-fw-summary .is-healthy { background: #edfaef; color: #1a6b2a; }
-			.plainmark-fw-list { margin: 0; }
-			.plainmark-fw-list li { padding: 6px 0; border-bottom: 1px solid #f0f0f1; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-			.plainmark-fw-list li:last-child { border: 0; }
-			.plainmark-fw-score { flex: none; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
-			.plainmark-fw-score.is-stale { background: #fcf0f1; color: #8b1a1a; }
-			.plainmark-fw-score.is-watch { background: #fef8ee; color: #8a6800; }
-			.plainmark-fw-reason { display: block; font-size: 11px; color: #646970; }
-			.plainmark-fw-reports { display: block; font-size: 11px; color: #646970; }
-		</style>
-
 		<div class="plainmark-fw-summary">
 			<div class="is-stale">
 				<strong><?php echo esc_html( (string) $stale_count ); ?></strong>
