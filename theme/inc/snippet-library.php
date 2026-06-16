@@ -10,25 +10,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Sanitize an array of positive IDs.
- *
- * @param mixed $value Raw value.
- * @return int[]
- */
-function plainmark_sanitize_id_array( $value ) {
-	if ( is_string( $value ) ) {
-		$value = preg_split( '/[\s,]+/', $value );
+if ( ! function_exists( 'plainmark_sanitize_id_array' ) ) {
+	/**
+	 * Sanitize an array of positive IDs.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return int[]
+	 */
+	function plainmark_sanitize_id_array( $value ) {
+		if ( is_string( $value ) ) {
+			$value = preg_split( '/[\s,]+/', $value );
+		}
+
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$ids = array_map( 'absint', $value );
+		$ids = array_filter( $ids );
+
+		return array_values( array_unique( $ids ) );
 	}
-
-	if ( ! is_array( $value ) ) {
-		return array();
-	}
-
-	$ids = array_map( 'absint', $value );
-	$ids = array_filter( $ids );
-
-	return array_values( array_unique( $ids ) );
 }
 
 /**
