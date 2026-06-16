@@ -1,0 +1,66 @@
+.freshness-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	cursor: default;
+	white-space: nowrap;
+}
+
+.freshness-badge--fresh {
+	border: 1px solid #c3e6cb;
+	background: #edfaef;
+	color: #1a6b2a;
+}
+
+.freshness-badge--watch {
+	border: 1px solid #f5dfa0;
+	background: #fef8ee;
+	color: #8a6800;
+}
+
+.freshness-badge--stale {
+	border: 1px solid #f5c6cb;
+	background: #fcf0f1;
+	color: #8b1a1a;
+}
+
+.freshness-badge__icon {
+	font-size: 10px;
+}
+
+.post-card__meta .freshness-badge,
+.post-card__topline .freshness-badge,
+.entry-meta .freshness-badge,
+.single-post__meta .freshness-badge {
+	vertical-align: middle;
+	margin-left: 6px;
+}
+
+.single-post__header .freshness-badge {
+	margin-top: 8px;
+}
+
+[data-theme="dark"] .freshness-badge--fresh {
+	border-color: rgba(111, 220, 132, 0.35);
+	background: rgba(63, 185, 80, 0.14);
+	color: #9be9a8;
+}
+
+[data-theme="dark"] .freshness-badge--watch {
+	border-color: rgba(245, 197, 24, 0.36);
+	background: rgba(245, 197, 24, 0.14);
+	color: #f7d774;
+}
+
+[data-theme="dark"] .freshness-badge--stale {
+	border-color: rgba(248, 81, 73, 0.36);
+	background: rgba(248, 81, 73, 0.14);
+	color: #ffaba8;
+}
