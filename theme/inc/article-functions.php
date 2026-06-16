@@ -20,6 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function plainmark_get_related_posts( $post_id = null, $limit = 3 ) {
 	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+	$limit   = max( 1, absint( $limit ) );
 
 	if ( ! $post_id ) {
 		return array();
@@ -28,49 +29,73 @@ function plainmark_get_related_posts( $post_id = null, $limit = 3 ) {
 	$categories = wp_get_post_categories( $post_id, array( 'fields' => 'ids' ) );
 	$tags       = wp_get_post_tags( $post_id, array( 'fields' => 'ids' ) );
 
-	$args = array(
+	$base_args = array(
 		'post_type'           => 'post',
 		'post_status'         => 'publish',
-		'posts_per_page'      => $limit * 3,
+		'posts_per_page'      => $limit * 4,
 		'post__not_in'        => array( $post_id ),
 		'ignore_sticky_posts' => true,
-		'orderby'             => 'date',
-		'order'               => 'DESC',
+		'fields'              => 'ids',
 		'no_found_rows'       => true,
 	);
 
-	// Build tax query.
-	$tax_query = array( 'relation' => 'OR' );
+	$candidate_ids = array();
 
 	if ( ! empty( $categories ) ) {
-		$tax_query[] = array(
-			'taxonomy' => 'category',
-			'field'    => 'term_id',
-			'terms'    => $categories,
+		$category_query = new WP_Query(
+			array_merge(
+				$base_args,
+				array(
+					'tax_query' => array(
+						array(
+							'taxonomy' => 'category',
+							'field'    => 'term_id',
+							'terms'    => $categories,
+						),
+					),
+				)
+			)
 		);
+		$candidate_ids = array_merge( $candidate_ids, $category_query->posts );
 	}
 
 	if ( ! empty( $tags ) ) {
-		$tax_query[] = array(
-			'taxonomy' => 'post_tag',
-			'field'    => 'term_id',
-			'terms'    => $tags,
+		$tag_query = new WP_Query(
+			array_merge(
+				$base_args,
+				array(
+					'tax_query' => array(
+						array(
+							'taxonomy' => 'post_tag',
+							'field'    => 'term_id',
+							'terms'    => $tags,
+						),
+					),
+				)
+			)
 		);
+		$candidate_ids = array_merge( $candidate_ids, $tag_query->posts );
 	}
 
-	if ( count( $tax_query ) > 1 ) {
-		$args['tax_query'] = $tax_query;
+	$candidate_ids = array_values( array_unique( array_map( 'absint', $candidate_ids ) ) );
+
+	if ( empty( $candidate_ids ) ) {
+		return array();
 	}
 
-	$query      = new WP_Query( $args );
-	$candidates = $query->posts;
+	shuffle( $candidate_ids );
+	$selected_ids = array_slice( $candidate_ids, 0, $limit );
 
-	if ( count( $candidates ) > $limit ) {
-		shuffle( $candidates );
-		$candidates = array_slice( $candidates, 0, $limit );
-	}
-
-	return $candidates;
+	return get_posts(
+		array(
+			'post_type'      => 'post',
+			'post_status'    => 'publish',
+			'post__in'       => $selected_ids,
+			'orderby'        => 'post__in',
+			'posts_per_page' => $limit,
+			'no_found_rows'  => true,
+		)
+	);
 }
 
 /**
@@ -95,8 +120,10 @@ function plainmark_get_series_posts( $post_id = null ) {
 	$args = array(
 		'post_type'      => 'post',
 		'post_status'    => 'publish',
-		'posts_per_page' => -1,
+		'posts_per_page' => 50,
+		'no_found_rows'  => true,
 		'meta_query'     => array(
+			'relation'     => 'AND',
 			'series_name'  => array(
 				'key'   => '_plainmark_series_name',
 				'value' => $series_name,
@@ -239,10 +266,8 @@ function plainmark_get_github_edit_url( $post_id = null ) {
 	// Get the post slug for the file path.
 	$post      = get_post( $post_id );
 	$post_slug = $post->post_name;
-	$post_date = get_the_date( 'Y/m/d', $post_id );
 
-	// Build the edit URL (assuming common blog structure).
-	// This can be customized based on your content structure.
+	// Build the edit URL. This can be customized based on your content structure.
 	$edit_url = trailingslashit( $repo_url ) . 'edit/main/content/posts/' . $post_slug . '.md';
 
 	return apply_filters( 'plainmark_github_edit_url', $edit_url, $post_id );
@@ -267,7 +292,7 @@ function plainmark_is_post_modified( $post_id = null ) {
 		return false;
 	}
 
-	// Compare dates (with 1 day tolerance).
+	// Compare dates with 1 day tolerance.
 	$published = strtotime( $post->post_date );
 	$modified  = strtotime( $post->post_modified );
 
