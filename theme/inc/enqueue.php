@@ -31,6 +31,14 @@ function plainmark_scripts() {
         PLAINMARK_VERSION
     );
 
+    $freshness_badge_css = PLAINMARK_DIR . '/assets/css/freshness-badge.css';
+    wp_enqueue_style(
+        'plainmark-freshness-badge',
+        PLAINMARK_URI . '/assets/css/freshness-badge.css',
+        array( 'plainmark-style' ),
+        file_exists( $freshness_badge_css ) ? (string) filemtime( $freshness_badge_css ) : PLAINMARK_VERSION
+    );
+
     $live_search_css = PLAINMARK_DIR . '/assets/css/live-search.css';
     wp_enqueue_style(
         'plainmark-live-search',
