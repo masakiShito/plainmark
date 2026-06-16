@@ -63,6 +63,18 @@ function plainmark_enqueue_advanced_differentiator_assets() {
 		file_exists( $js ) ? (string) filemtime( $js ) : PLAINMARK_VERSION,
 		true
 	);
+
+	if ( is_singular( 'post' ) && is_user_logged_in() ) {
+		wp_localize_script(
+			'plainmark-advanced-differentiators',
+			'plainmarkData',
+			array(
+				'postId'  => get_the_ID(),
+				'nonce'   => wp_create_nonce( 'wp_rest' ),
+				'restUrl' => rest_url(),
+			)
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'plainmark_enqueue_advanced_differentiator_assets', 30 );
 
@@ -125,8 +137,11 @@ function plainmark_playground_shortcode( $atts, $content = '' ) {
 	}
 
 	$section_class = 'code-playground' . ( $is_verified ? ' code-playground--verified' : '' );
+	$post_id_attr  = is_singular( 'post' ) && is_user_logged_in()
+		? ' data-post-id="' . esc_attr( (string) get_the_ID() ) . '"'
+		: '';
 
-	$html  = '<section class="' . esc_attr( $section_class ) . '" data-code-playground data-language="' . esc_attr( $language ) . '">';
+	$html  = '<section class="' . esc_attr( $section_class ) . '" data-code-playground data-language="' . esc_attr( $language ) . '"' . $post_id_attr . '>';
 	$html .= $badge_html;
 	$html .= '<div class="code-playground__header">';
 	$html .= '<strong>' . esc_html( $atts['title'] ) . '</strong>';
@@ -224,6 +239,22 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 	if ( '' === $dependencies ) {
 		$score    -= 5;
 		$reasons[] = __( '依存ライブラリ情報が未設定です。', 'plainmark' );
+	} else {
+		$outdated_count = (int) get_post_meta( $post_id, '_plainmark_dep_outdated_count', true );
+		if ( $outdated_count > 0 ) {
+			$penalty   = min( 25, $outdated_count * 8 );
+			$score    -= $penalty;
+			$reasons[] = sprintf(
+				/* translators: %d: number of outdated packages */
+				_n(
+					'%d 件の依存パッケージのメジャーバージョンが古くなっています。',
+					'%d 件の依存パッケージのメジャーバージョンが古くなっています。',
+					$outdated_count,
+					'plainmark'
+				),
+				$outdated_count
+			);
+		}
 	}
 
 	$score = max( 0, min( 100, $score ) );
@@ -355,3 +386,115 @@ function plainmark_add_rss_tech_metadata() {
 	}
 }
 add_action( 'rss2_item', 'plainmark_add_rss_tech_metadata' );
+
+/**
+ * Register execution snapshot meta.
+ */
+function plainmark_register_execution_snapshot_meta() {
+	register_post_meta(
+		'post',
+		'_plainmark_execution_snapshots',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'show_in_rest'      => false,
+			'sanitize_callback' => 'sanitize_text_field',
+			'auth_callback'     => static function() {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+}
+add_action( 'init', 'plainmark_register_execution_snapshot_meta' );
+
+/**
+ * REST endpoint: save execution snapshot.
+ */
+function plainmark_register_execution_snapshot_rest() {
+	register_rest_route(
+		'plainmark/v1',
+		'/execution-snapshot',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'plainmark_save_execution_snapshot',
+			'permission_callback' => static function() {
+				return current_user_can( 'edit_posts' );
+			},
+			'args'                => array(
+				'post_id'          => array(
+					'type'     => 'integer',
+					'required' => true,
+					'minimum'  => 1,
+				),
+				'playground_title' => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				),
+				'code'             => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_textarea_field',
+				),
+				'output'           => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_textarea_field',
+				),
+				'language'         => array(
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_key',
+				),
+			),
+		)
+	);
+}
+add_action( 'rest_api_init', 'plainmark_register_execution_snapshot_rest' );
+
+/**
+ * Save an execution snapshot for a post.
+ *
+ * @param WP_REST_Request $request REST request.
+ * @return WP_REST_Response|WP_Error
+ */
+function plainmark_save_execution_snapshot( WP_REST_Request $request ) {
+	$post_id = (int) $request->get_param( 'post_id' );
+	$post    = get_post( $post_id );
+
+	if ( ! $post || 'post' !== $post->post_type ) {
+		return new WP_Error( 'invalid_post', __( '投稿が見つかりません。', 'plainmark' ), array( 'status' => 404 ) );
+	}
+
+	if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		return new WP_Error( 'forbidden', __( 'この投稿を編集する権限がありません。', 'plainmark' ), array( 'status' => 403 ) );
+	}
+
+	$snapshots_json = get_post_meta( $post_id, '_plainmark_execution_snapshots', true );
+	$snapshots      = $snapshots_json ? json_decode( $snapshots_json, true ) : array();
+	if ( ! is_array( $snapshots ) ) {
+		$snapshots = array();
+	}
+
+	$title = $request->get_param( 'playground_title' ) ?: 'untitled';
+	$key   = md5( $title );
+
+	$snapshots[ $key ] = array(
+		'title'    => $title,
+		'code'     => $request->get_param( 'code' ),
+		'output'   => $request->get_param( 'output' ),
+		'language' => $request->get_param( 'language' ) ?: 'javascript',
+		'saved_at' => current_time( 'Y-m-d H:i:s' ),
+	);
+
+	if ( count( $snapshots ) > 10 ) {
+		$snapshots = array_slice( $snapshots, -10, null, true );
+	}
+
+	update_post_meta( $post_id, '_plainmark_execution_snapshots', wp_json_encode( $snapshots ) );
+
+	return new WP_REST_Response(
+		array(
+			'success'  => true,
+			'snapshot' => $snapshots[ $key ],
+			'total'    => count( $snapshots ),
+		),
+		200
+	);
+}
