@@ -299,16 +299,19 @@ function plainmark_generate_front_matter( $post ) {
 			'show_code_copy'   => '_plainmark_show_code_copy',
 			'series_name'      => '_plainmark_series_name',
 			'series_order'     => '_plainmark_series_order',
+			'snippet_ids'      => '_plainmark_snippet_ids',
 		);
 
 		foreach ( $meta_fields as $key => $meta_key ) {
 			$value = get_post_meta( $post->ID, $meta_key, true );
-			if ( '' !== $value ) {
+			if ( '' !== $value && array() !== $value ) {
 				// Boolean fields.
 				if ( in_array( $key, array( 'show_toc', 'show_code_copy' ), true ) ) {
 					$yaml .= $key . ': ' . ( $value ? 'true' : 'false' ) . "\n";
 				} elseif ( 'series_order' === $key ) {
 					$yaml .= $key . ': ' . intval( $value ) . "\n";
+				} elseif ( 'snippet_ids' === $key && is_array( $value ) ) {
+					$yaml .= plainmark_yaml_array( $key, array_map( 'absint', $value ) );
 				} else {
 					$yaml .= plainmark_yaml_line( $key, $value );
 				}
@@ -393,7 +396,7 @@ function plainmark_yaml_array( $key, $items ) {
 
 	$yaml = $key . ":\n";
 	foreach ( $items as $item ) {
-		$yaml .= '  - "' . str_replace( '"', '\\"', $item ) . "\"\n";
+		$yaml .= '  - "' . str_replace( '"', '\\"', (string) $item ) . "\"\n";
 	}
 
 	return $yaml;
