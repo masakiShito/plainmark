@@ -30,9 +30,13 @@
 		<!-- Allow short array syntax -->
 		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
 		<!-- Allow file names without prefix for WP theme templates -->
+		<exclude name="WordPress.Files.FileName"/>
 		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
 		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
 	</rule>
+
+	<rule ref="Squiz.Commenting.InlineComment"/>
+	<rule ref="Squiz.Commenting.FunctionComment"/>
 
 	<!-- Allow theme text domain -->
 	<rule ref="WordPress.WP.I18n">
