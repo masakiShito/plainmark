@@ -26,21 +26,6 @@ if ( ! defined( 'PLAINMARK_CORE_URI' ) ) {
 	define( 'PLAINMARK_CORE_URI', plugin_dir_url( __FILE__ ) );
 }
 
-require_once PLAINMARK_CORE_DIR . 'includes/custom-post-types.php';
-require_once PLAINMARK_CORE_DIR . 'includes/admin/work-settings.php';
-require_once PLAINMARK_CORE_DIR . 'includes/admin/github-works-sync.php';
-require_once PLAINMARK_CORE_DIR . 'includes/admin/sample-works.php';
-require_once PLAINMARK_CORE_DIR . 'includes/front-matter-normalizer.php';
-require_once PLAINMARK_CORE_DIR . 'includes/markdown-import.php';
-require_once PLAINMARK_CORE_DIR . 'includes/markdown-export.php';
-require_once PLAINMARK_CORE_DIR . 'includes/content-bridge.php';
-require_once PLAINMARK_CORE_DIR . 'includes/snippet-library.php';
-require_once PLAINMARK_CORE_DIR . 'includes/admin/snippet-settings.php';
-require_once PLAINMARK_CORE_DIR . 'includes/github-sync-ajax.php';
-require_once PLAINMARK_CORE_DIR . 'includes/github-sync-rest.php';
-require_once PLAINMARK_CORE_DIR . 'includes/github-pull-sync.php';
-require_once PLAINMARK_CORE_DIR . 'includes/admin/article-inventory.php';
-
 /**
  * Define compatibility constants after the active theme has had a chance to set them.
  */
@@ -60,10 +45,41 @@ function plainmark_core_define_compat_constants() {
 add_action( 'after_setup_theme', 'plainmark_core_define_compat_constants', 5 );
 
 /**
- * Load article settings after the active theme defines display helpers.
+ * Require a core module only when its sentinel function is not already loaded.
+ *
+ * This keeps the bundled plugin compatible with deployments where the theme and
+ * plugin are not updated atomically.
+ *
+ * @param string $relative_path Relative include path inside the plugin.
+ * @param string $sentinel      Function expected to be defined by the module.
+ */
+function plainmark_core_require_module( $relative_path, $sentinel ) {
+	if ( function_exists( $sentinel ) ) {
+		return;
+	}
+
+	require_once PLAINMARK_CORE_DIR . $relative_path;
+}
+
+/**
+ * Load migrated modules after the active theme finishes declaring its helpers.
  */
 function plainmark_core_load_theme_integrated_modules() {
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/article-settings.php';
+	plainmark_core_require_module( 'includes/custom-post-types.php', 'plainmark_register_portfolio_post_type' );
+	plainmark_core_require_module( 'includes/admin/work-settings.php', 'plainmark_register_work_meta' );
+	plainmark_core_require_module( 'includes/admin/github-works-sync.php', 'plainmark_register_github_works_sync_page' );
+	plainmark_core_require_module( 'includes/admin/sample-works.php', 'plainmark_add_sample_works_page' );
+	plainmark_core_require_module( 'includes/front-matter-normalizer.php', 'plainmark_normalize_front_matter' );
+	plainmark_core_require_module( 'includes/markdown-import.php', 'plainmark_add_import_menu' );
+	plainmark_core_require_module( 'includes/markdown-export.php', 'plainmark_md_export_row_action' );
+	plainmark_core_require_module( 'includes/content-bridge.php', 'plainmark_register_content_bridge_meta' );
+	plainmark_core_require_module( 'includes/snippet-library.php', 'plainmark_register_snippet_post_type' );
+	plainmark_core_require_module( 'includes/admin/snippet-settings.php', 'plainmark_add_snippet_meta_boxes' );
+	plainmark_core_require_module( 'includes/github-sync-ajax.php', 'plainmark_ajax_github_sync' );
+	plainmark_core_require_module( 'includes/github-sync-rest.php', 'plainmark_register_github_sync_rest_route' );
+	plainmark_core_require_module( 'includes/github-pull-sync.php', 'plainmark_add_github_pull_sync_page' );
+	plainmark_core_require_module( 'includes/admin/article-inventory.php', 'plainmark_register_article_inventory_page' );
+	plainmark_core_require_module( 'includes/admin/article-settings.php', 'plainmark_register_article_meta' );
 }
 add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules', 20 );
 
@@ -71,6 +87,8 @@ add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules',
  * Flush rewrite rules when the core plugin is activated.
  */
 function plainmark_core_activate() {
+	plainmark_core_require_module( 'includes/custom-post-types.php', 'plainmark_register_portfolio_post_type' );
+
 	if ( function_exists( 'plainmark_register_portfolio_post_type' ) ) {
 		plainmark_register_portfolio_post_type();
 	}
