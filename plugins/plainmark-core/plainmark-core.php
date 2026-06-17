@@ -34,13 +34,14 @@ require_once PLAINMARK_CORE_DIR . 'includes/custom-post-types.php';
 function plainmark_core_load_theme_integrated_modules() {
 	require_once PLAINMARK_CORE_DIR . 'includes/admin/article-settings.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/admin/work-settings.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/snippet-settings.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/admin/github-works-sync.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/admin/sample-works.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/front-matter-normalizer.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/markdown-import.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/markdown-export.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/content-bridge.php';
+	require_once PLAINMARK_CORE_DIR . 'includes/snippet-library.php';
+	require_once PLAINMARK_CORE_DIR . 'includes/admin/snippet-settings.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/github-sync-ajax.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/github-sync-rest.php';
 	require_once PLAINMARK_CORE_DIR . 'includes/github-pull-sync.php';
