@@ -67,7 +67,6 @@ function plainmark_core_require_module( $relative_path, $sentinel ) {
 function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/custom-post-types.php', 'plainmark_register_portfolio_post_type' );
 	plainmark_core_require_module( 'includes/admin/work-settings.php', 'plainmark_register_work_meta' );
-	plainmark_core_require_module( 'includes/admin/github-works-sync.php', 'plainmark_register_github_works_sync_page' );
 	plainmark_core_require_module( 'includes/admin/sample-works.php', 'plainmark_add_sample_works_page' );
 	plainmark_core_require_module( 'includes/front-matter-normalizer.php', 'plainmark_normalize_front_matter' );
 	plainmark_core_require_module( 'includes/markdown-import.php', 'plainmark_add_import_menu' );
