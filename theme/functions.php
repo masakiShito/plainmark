@@ -12,15 +12,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define theme constants
-define( 'PLAINMARK_VERSION', '0.1.0' );
-define( 'PLAINMARK_DIR', get_template_directory() );
-define( 'PLAINMARK_URI', get_template_directory_uri() );
+if ( ! defined( 'PLAINMARK_VERSION' ) ) {
+    define( 'PLAINMARK_VERSION', '0.1.0' );
+}
+if ( ! defined( 'PLAINMARK_DIR' ) ) {
+    define( 'PLAINMARK_DIR', get_template_directory() );
+}
+if ( ! defined( 'PLAINMARK_URI' ) ) {
+    define( 'PLAINMARK_URI', get_template_directory_uri() );
+}
 
 /**
  * Include theme files
  */
 require_once PLAINMARK_DIR . '/inc/setup.php';
-require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
+if ( ! defined( 'PLAINMARK_CORE_VERSION' ) ) {
+    require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
+}
 require_once PLAINMARK_DIR . '/inc/toc-functions.php';
 require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';
 require_once PLAINMARK_DIR . '/inc/admin/article-inventory.php';
@@ -52,6 +60,20 @@ require_once PLAINMARK_DIR . '/inc/freshness-badge.php';
 require_once PLAINMARK_DIR . '/inc/freshness-badge-single.php';
 require_once PLAINMARK_DIR . '/inc/learning-paths.php';
 require_once PLAINMARK_DIR . '/inc/skills-export.php';
+
+/**
+ * Show an admin notice when the bundled core plugin is inactive.
+ */
+function plainmark_core_recommendation_notice() {
+    if ( defined( 'PLAINMARK_CORE_VERSION' ) || ! current_user_can( 'activate_plugins' ) ) {
+        return;
+    }
+
+    echo '<div class="notice notice-warning"><p>';
+    echo esc_html__( 'plainmark は、Portfolio や技術スタックなどのデータ登録を保持するために同梱プラグイン plainmark-core の有効化を推奨します。', 'plainmark' );
+    echo '</p></div>';
+}
+add_action( 'admin_notices', 'plainmark_core_recommendation_notice' );
 
 /**
  * Register custom theme routes.
