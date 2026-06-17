@@ -41,6 +41,7 @@ if ( ! defined( 'PLAINMARK_CORE_VERSION' ) ) {
     require_once PLAINMARK_DIR . '/inc/github-sync-ajax.php';
     require_once PLAINMARK_DIR . '/inc/github-sync-rest.php';
     require_once PLAINMARK_DIR . '/inc/github-pull-sync.php';
+    require_once PLAINMARK_DIR . '/inc/snippet-library.php';
 }
 require_once PLAINMARK_DIR . '/inc/toc-functions.php';
 require_once PLAINMARK_DIR . '/inc/enqueue.php';
@@ -52,7 +53,6 @@ require_once PLAINMARK_DIR . '/inc/ogp.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
 require_once PLAINMARK_DIR . '/inc/blocks.php';
 require_once PLAINMARK_DIR . '/inc/differentiation-features.php';
-require_once PLAINMARK_DIR . '/inc/snippet-library.php';
 require_once PLAINMARK_DIR . '/inc/dependency-watcher.php';
 require_once PLAINMARK_DIR . '/inc/advanced-differentiators.php';
 require_once PLAINMARK_DIR . '/inc/freshness-dashboard.php';
