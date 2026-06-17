@@ -68,16 +68,16 @@ function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/custom-post-types.php', 'plainmark_register_portfolio_post_type' );
 	plainmark_core_require_module( 'includes/admin/work-settings.php', 'plainmark_register_work_meta' );
 	plainmark_core_require_module( 'includes/admin/sample-works.php', 'plainmark_add_sample_works_page' );
-	plainmark_core_require_module( 'includes/front-matter-normalizer.php', 'plainmark_normalize_front_matter' );
+	plainmark_core_require_module( 'includes/front-matter-normalizer.php', 'plainmark_front_matter_list' );
 	plainmark_core_require_module( 'includes/markdown-import.php', 'plainmark_add_import_menu' );
 	plainmark_core_require_module( 'includes/markdown-export.php', 'plainmark_md_export_row_action' );
 	plainmark_core_require_module( 'includes/content-bridge.php', 'plainmark_register_content_bridge_meta' );
 	plainmark_core_require_module( 'includes/snippet-library.php', 'plainmark_register_snippet_post_type' );
-	plainmark_core_require_module( 'includes/admin/snippet-settings.php', 'plainmark_add_snippet_meta_boxes' );
-	plainmark_core_require_module( 'includes/github-sync-ajax.php', 'plainmark_ajax_github_sync' );
-	plainmark_core_require_module( 'includes/github-sync-rest.php', 'plainmark_register_github_sync_rest_route' );
+	plainmark_core_require_module( 'includes/admin/snippet-settings.php', 'plainmark_register_snippet_settings_meta_boxes' );
+	plainmark_core_require_module( 'includes/github-sync-ajax.php', 'plainmark_handle_github_sync_ajax' );
+	plainmark_core_require_module( 'includes/github-sync-rest.php', 'plainmark_register_github_sync_form_route' );
 	plainmark_core_require_module( 'includes/github-pull-sync.php', 'plainmark_add_github_pull_sync_page' );
-	plainmark_core_require_module( 'includes/admin/article-inventory.php', 'plainmark_register_article_inventory_page' );
+	plainmark_core_require_module( 'includes/admin/article-inventory.php', 'plainmark_add_article_inventory_page' );
 	plainmark_core_require_module( 'includes/admin/article-settings.php', 'plainmark_register_article_meta' );
 }
 add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules', 20 );
