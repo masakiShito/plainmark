@@ -54,6 +54,7 @@ jobs:
           FTP_USER: ${{ secrets.LOLIPOP_FTP_USER }}
           FTP_PASSWORD: ${{ secrets.LOLIPOP_FTP_PASSWORD }}
           FTP_SERVER_DIR: ${{ secrets.LOLIPOP_FTP_SERVER_DIR }}
+          FTP_PLUGIN_DIR: ${{ secrets.LOLIPOP_FTP_PLUGIN_DIR }}
         run: |
           test -n "$FTP_HOST"
           test -n "$FTP_USER"
@@ -81,3 +82,22 @@ jobs:
 
           bye
           EOF
+
+          if [ -n "$FTP_PLUGIN_DIR" ]; then
+            lftp <<EOF
+          set cmd:fail-exit true
+          set ftp:ssl-force true
+          set ftp:ssl-protect-data true
+          set ftp:passive-mode true
+          set net:max-retries 3
+          set net:timeout 30
+          set ssl:verify-certificate true
+
+          open -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST"
+
+          mirror --reverse --delete --verbose \
+            plugins/plainmark-core/ "$FTP_PLUGIN_DIR"
+
+          bye
+          EOF
+          fi
