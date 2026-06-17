@@ -26,44 +26,38 @@ if ( ! defined( 'PLAINMARK_CORE_URI' ) ) {
 	define( 'PLAINMARK_CORE_URI', plugin_dir_url( __FILE__ ) );
 }
 
-require_once PLAINMARK_CORE_DIR . 'includes/custom-post-types.php';
-
-/**
- * Define compatibility constants when Plainmark theme is not active.
- */
-function plainmark_core_define_compat_constants() {
-	if ( ! defined( 'PLAINMARK_VERSION' ) ) {
-		define( 'PLAINMARK_VERSION', PLAINMARK_CORE_VERSION );
-	}
-
-	if ( ! defined( 'PLAINMARK_DIR' ) ) {
-		define( 'PLAINMARK_DIR', PLAINMARK_CORE_DIR );
-	}
-
-	if ( ! defined( 'PLAINMARK_URI' ) ) {
-		define( 'PLAINMARK_URI', PLAINMARK_CORE_URI );
-	}
+if ( ! defined( 'PLAINMARK_VERSION' ) ) {
+	define( 'PLAINMARK_VERSION', PLAINMARK_CORE_VERSION );
 }
-add_action( 'after_setup_theme', 'plainmark_core_define_compat_constants', 5 );
+
+if ( ! defined( 'PLAINMARK_DIR' ) ) {
+	define( 'PLAINMARK_DIR', PLAINMARK_CORE_DIR );
+}
+
+if ( ! defined( 'PLAINMARK_URI' ) ) {
+	define( 'PLAINMARK_URI', PLAINMARK_CORE_URI );
+}
+
+require_once PLAINMARK_CORE_DIR . 'includes/custom-post-types.php';
+require_once PLAINMARK_CORE_DIR . 'includes/admin/work-settings.php';
+require_once PLAINMARK_CORE_DIR . 'includes/admin/github-works-sync.php';
+require_once PLAINMARK_CORE_DIR . 'includes/admin/sample-works.php';
+require_once PLAINMARK_CORE_DIR . 'includes/front-matter-normalizer.php';
+require_once PLAINMARK_CORE_DIR . 'includes/markdown-import.php';
+require_once PLAINMARK_CORE_DIR . 'includes/markdown-export.php';
+require_once PLAINMARK_CORE_DIR . 'includes/content-bridge.php';
+require_once PLAINMARK_CORE_DIR . 'includes/snippet-library.php';
+require_once PLAINMARK_CORE_DIR . 'includes/admin/snippet-settings.php';
+require_once PLAINMARK_CORE_DIR . 'includes/github-sync-ajax.php';
+require_once PLAINMARK_CORE_DIR . 'includes/github-sync-rest.php';
+require_once PLAINMARK_CORE_DIR . 'includes/github-pull-sync.php';
+require_once PLAINMARK_CORE_DIR . 'includes/admin/article-inventory.php';
 
 /**
- * Load modules that depend on the active theme's display helpers.
+ * Load article settings after the active theme defines display helpers.
  */
 function plainmark_core_load_theme_integrated_modules() {
 	require_once PLAINMARK_CORE_DIR . 'includes/admin/article-settings.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/work-settings.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/github-works-sync.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/sample-works.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/front-matter-normalizer.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/markdown-import.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/markdown-export.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/content-bridge.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/snippet-library.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/snippet-settings.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/github-sync-ajax.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/github-sync-rest.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/github-pull-sync.php';
-	require_once PLAINMARK_CORE_DIR . 'includes/admin/article-inventory.php';
 }
 add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules', 20 );
 
