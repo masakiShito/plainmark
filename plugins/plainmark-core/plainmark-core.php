@@ -29,6 +29,24 @@ if ( ! defined( 'PLAINMARK_CORE_URI' ) ) {
 require_once PLAINMARK_CORE_DIR . 'includes/custom-post-types.php';
 
 /**
+ * Define compatibility constants when Plainmark theme is not active.
+ */
+function plainmark_core_define_compat_constants() {
+	if ( ! defined( 'PLAINMARK_VERSION' ) ) {
+		define( 'PLAINMARK_VERSION', PLAINMARK_CORE_VERSION );
+	}
+
+	if ( ! defined( 'PLAINMARK_DIR' ) ) {
+		define( 'PLAINMARK_DIR', PLAINMARK_CORE_DIR );
+	}
+
+	if ( ! defined( 'PLAINMARK_URI' ) ) {
+		define( 'PLAINMARK_URI', PLAINMARK_CORE_URI );
+	}
+}
+add_action( 'after_setup_theme', 'plainmark_core_define_compat_constants', 5 );
+
+/**
  * Load modules that depend on the active theme's display helpers.
  */
 function plainmark_core_load_theme_integrated_modules() {
