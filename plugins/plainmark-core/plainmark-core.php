@@ -26,18 +26,6 @@ if ( ! defined( 'PLAINMARK_CORE_URI' ) ) {
 	define( 'PLAINMARK_CORE_URI', plugin_dir_url( __FILE__ ) );
 }
 
-if ( ! defined( 'PLAINMARK_VERSION' ) ) {
-	define( 'PLAINMARK_VERSION', PLAINMARK_CORE_VERSION );
-}
-
-if ( ! defined( 'PLAINMARK_DIR' ) ) {
-	define( 'PLAINMARK_DIR', PLAINMARK_CORE_DIR );
-}
-
-if ( ! defined( 'PLAINMARK_URI' ) ) {
-	define( 'PLAINMARK_URI', PLAINMARK_CORE_URI );
-}
-
 require_once PLAINMARK_CORE_DIR . 'includes/custom-post-types.php';
 require_once PLAINMARK_CORE_DIR . 'includes/admin/work-settings.php';
 require_once PLAINMARK_CORE_DIR . 'includes/admin/github-works-sync.php';
@@ -52,6 +40,24 @@ require_once PLAINMARK_CORE_DIR . 'includes/github-sync-ajax.php';
 require_once PLAINMARK_CORE_DIR . 'includes/github-sync-rest.php';
 require_once PLAINMARK_CORE_DIR . 'includes/github-pull-sync.php';
 require_once PLAINMARK_CORE_DIR . 'includes/admin/article-inventory.php';
+
+/**
+ * Define compatibility constants after the active theme has had a chance to set them.
+ */
+function plainmark_core_define_compat_constants() {
+	if ( ! defined( 'PLAINMARK_VERSION' ) ) {
+		define( 'PLAINMARK_VERSION', PLAINMARK_CORE_VERSION );
+	}
+
+	if ( ! defined( 'PLAINMARK_DIR' ) ) {
+		define( 'PLAINMARK_DIR', PLAINMARK_CORE_DIR );
+	}
+
+	if ( ! defined( 'PLAINMARK_URI' ) ) {
+		define( 'PLAINMARK_URI', PLAINMARK_CORE_URI );
+	}
+}
+add_action( 'after_setup_theme', 'plainmark_core_define_compat_constants', 5 );
 
 /**
  * Load article settings after the active theme defines display helpers.
