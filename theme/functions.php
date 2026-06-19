@@ -26,23 +26,6 @@ if ( ! defined( 'PLAINMARK_URI' ) ) {
  * Include theme files
  */
 require_once PLAINMARK_DIR . '/inc/setup.php';
-if ( ! defined( 'PLAINMARK_CORE_VERSION' ) ) {
-    require_once PLAINMARK_DIR . '/inc/custom-post-types.php';
-    require_once PLAINMARK_DIR . '/inc/admin/article-settings.php';
-    require_once PLAINMARK_DIR . '/inc/admin/article-inventory.php';
-    require_once PLAINMARK_DIR . '/inc/admin/snippet-settings.php';
-    require_once PLAINMARK_DIR . '/inc/admin/work-settings.php';
-    require_once PLAINMARK_DIR . '/inc/admin/github-works-sync.php';
-    require_once PLAINMARK_DIR . '/inc/admin/sample-works.php';
-    require_once PLAINMARK_DIR . '/inc/markdown-export.php';
-    require_once PLAINMARK_DIR . '/inc/front-matter-normalizer.php';
-    require_once PLAINMARK_DIR . '/inc/markdown-import.php';
-    require_once PLAINMARK_DIR . '/inc/content-bridge.php';
-    require_once PLAINMARK_DIR . '/inc/github-sync-ajax.php';
-    require_once PLAINMARK_DIR . '/inc/github-sync-rest.php';
-    require_once PLAINMARK_DIR . '/inc/github-pull-sync.php';
-    require_once PLAINMARK_DIR . '/inc/snippet-library.php';
-}
 require_once PLAINMARK_DIR . '/inc/toc-functions.php';
 require_once PLAINMARK_DIR . '/inc/enqueue.php';
 require_once PLAINMARK_DIR . '/inc/customizer.php';
@@ -70,7 +53,7 @@ function plainmark_core_recommendation_notice() {
     }
 
     echo '<div class="notice notice-warning"><p>';
-    echo esc_html__( 'plainmark は、Portfolio や技術スタックなどのデータ登録を保持するために同梱プラグイン plainmark-core の有効化を推奨します。', 'plainmark' );
+    echo esc_html__( 'plainmark の Portfolio・Snippet・GitHub 連携などのデータ機能には、同梱プラグイン plainmark-core の有効化が必要です。', 'plainmark' );
     echo '</p></div>';
 }
 add_action( 'admin_notices', 'plainmark_core_recommendation_notice' );

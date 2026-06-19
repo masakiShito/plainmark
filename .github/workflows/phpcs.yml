@@ -5,6 +5,7 @@ on:
     paths:
       - 'theme/**/*.php'
       - 'theme/style.css'
+      - 'plugins/plainmark-core/**/*.php'
       - 'phpcs.xml.dist'
       - 'composer.json'
       - 'composer.lock'
@@ -15,6 +16,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Guard against duplicated core modules in theme
+        shell: bash
+        run: |
+          set -euo pipefail
+          dupes=(
+            custom-post-types.php content-bridge.php front-matter-normalizer.php
+            markdown-export.php markdown-import.php snippet-library.php
+            github-pull-sync.php github-sync-ajax.php github-sync-rest.php
+            admin/article-inventory.php admin/article-settings.php
+            admin/github-works-sync.php admin/sample-works.php
+            admin/snippet-settings.php admin/work-settings.php
+          )
+          fail=0
+          for f in "${dupes[@]}"; do
+            if [[ -e "theme/inc/$f" ]]; then
+              echo "::error::theme/inc/$f re-appeared. Core modules must live only in plugins/plainmark-core/includes/." >&2
+              fail=1
+            fi
+          done
+          exit $fail
 
       - name: Check for unreplaced placeholders
         run: |
@@ -27,4 +49,4 @@ jobs:
         run: composer install --no-progress
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=phpcs.xml.dist theme/inc/
+        run: vendor/bin/phpcs --standard=phpcs.xml.dist theme/inc/ plugins/plainmark-core/includes/

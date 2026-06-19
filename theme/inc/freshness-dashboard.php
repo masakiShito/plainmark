@@ -373,7 +373,9 @@ function plainmark_append_freshness_feedback( $content ) {
 	}
 
 	$post_id   = get_the_ID();
-	$data      = plainmark_get_verification_data( $post_id );
+	$data      = function_exists( 'plainmark_get_verification_data' )
+		? plainmark_get_verification_data( $post_id )
+		: array( 'status' => 'unverified' );
 	$freshness = plainmark_get_freshness_score( $post_id );
 
 	if ( 'verified' === $data['status'] && $freshness['score'] >= 80 ) {
