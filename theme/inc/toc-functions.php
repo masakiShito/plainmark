@@ -118,49 +118,51 @@ function plainmark_build_heading_index( $content ) {
  * @param string $content Post content.
  * @return string Content with heading IDs.
  */
-function plainmark_add_heading_ids( $content ) {
-	if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
-		return $content;
+if ( ! function_exists( 'plainmark_add_heading_ids' ) ) {
+	function plainmark_add_heading_ids( $content ) {
+		if ( ! is_singular() || ! in_the_loop() || ! is_main_query() ) {
+			return $content;
+		}
+
+		$headings = plainmark_build_heading_index( $content );
+
+		if ( empty( $headings ) ) {
+			return $content;
+		}
+
+		$position = 0;
+		$pattern  = '/<h([23])([^>]*)>(.*?)<\/h\1>/is';
+
+		return preg_replace_callback(
+			$pattern,
+			function ( $match ) use ( $headings, &$position ) {
+				$heading = $headings[ $position ] ?? null;
+				$position++;
+
+				if ( ! $heading ) {
+					return $match[0];
+				}
+
+				$level = $match[1];
+				$attrs = $match[2];
+				$inner = $match[3];
+
+				if ( $heading['has_id'] ) {
+					return $match[0];
+				}
+
+				return sprintf(
+					'<h%s id="%s"%s>%s</h%s>',
+					$level,
+					esc_attr( $heading['id'] ),
+					$attrs,
+					$inner,
+					$level
+				);
+			},
+			$content
+		);
 	}
-
-	$headings = plainmark_build_heading_index( $content );
-
-	if ( empty( $headings ) ) {
-		return $content;
-	}
-
-	$position = 0;
-	$pattern  = '/<h([23])([^>]*)>(.*?)<\/h\1>/is';
-
-	return preg_replace_callback(
-		$pattern,
-		function ( $match ) use ( $headings, &$position ) {
-			$heading = $headings[ $position ] ?? null;
-			$position++;
-
-			if ( ! $heading ) {
-				return $match[0];
-			}
-
-			$level = $match[1];
-			$attrs = $match[2];
-			$inner = $match[3];
-
-			if ( $heading['has_id'] ) {
-				return $match[0];
-			}
-
-			return sprintf(
-				'<h%s id="%s"%s>%s</h%s>',
-				$level,
-				esc_attr( $heading['id'] ),
-				$attrs,
-				$inner,
-				$level
-			);
-		},
-		$content
-	);
 }
 
 /**
@@ -169,62 +171,64 @@ function plainmark_add_heading_ids( $content ) {
  * @param string $content Post content.
  * @return string TOC HTML list or empty string if no headings.
  */
-function plainmark_get_toc( $content ) {
-	if ( ! $content ) {
-		return '';
-	}
-
-	// Use the same filtered HTML source that will be rendered by the_content.
-	// This keeps block-rendered or shortcode-generated headings aligned with the output.
-	$processed_content = apply_filters( 'the_content', $content );
-	$headings          = plainmark_build_heading_index( $processed_content );
-
-	if ( empty( $headings ) ) {
-		return '';
-	}
-
-	$toc    = '<ol class="article-toc__list">';
-	$in_sub = false;
-
-	foreach ( $headings as $heading ) {
-		$level = (int) $heading['level'];
-		$text  = $heading['text'];
-		$id    = $heading['id'];
-
-		if ( '' === $text || '' === $id ) {
-			continue;
+if ( ! function_exists( 'plainmark_get_toc' ) ) {
+	function plainmark_get_toc( $content ) {
+		if ( ! $content ) {
+			return '';
 		}
 
-		if ( 2 === $level ) {
-			if ( $in_sub ) {
-				$toc   .= '</ol></li>';
-				$in_sub = false;
-			}
+		// Use the same filtered HTML source that will be rendered by the_content.
+		// This keeps block-rendered or shortcode-generated headings aligned with the output.
+		$processed_content = apply_filters( 'the_content', $content );
+		$headings          = plainmark_build_heading_index( $processed_content );
 
-			$toc .= sprintf(
-				'<li class="article-toc__item article-toc__item--h2"><a class="article-toc__link" href="#%s">%s</a>',
-				esc_attr( $id ),
-				esc_html( $text )
-			);
-		} elseif ( 3 === $level ) {
-			if ( ! $in_sub ) {
-				$toc   .= '<ol class="article-toc__sublist">';
-				$in_sub = true;
-			}
-
-			$toc .= sprintf(
-				'<li class="article-toc__item article-toc__item--h3"><a class="article-toc__link" href="#%s">%s</a></li>',
-				esc_attr( $id ),
-				esc_html( $text )
-			);
+		if ( empty( $headings ) ) {
+			return '';
 		}
+
+		$toc    = '<ol class="article-toc__list">';
+		$in_sub = false;
+
+		foreach ( $headings as $heading ) {
+			$level = (int) $heading['level'];
+			$text  = $heading['text'];
+			$id    = $heading['id'];
+
+			if ( '' === $text || '' === $id ) {
+				continue;
+			}
+
+			if ( 2 === $level ) {
+				if ( $in_sub ) {
+					$toc   .= '</ol></li>';
+					$in_sub = false;
+				}
+
+				$toc .= sprintf(
+					'<li class="article-toc__item article-toc__item--h2"><a class="article-toc__link" href="#%s">%s</a>',
+					esc_attr( $id ),
+					esc_html( $text )
+				);
+			} elseif ( 3 === $level ) {
+				if ( ! $in_sub ) {
+					$toc   .= '<ol class="article-toc__sublist">';
+					$in_sub = true;
+				}
+
+				$toc .= sprintf(
+					'<li class="article-toc__item article-toc__item--h3"><a class="article-toc__link" href="#%s">%s</a></li>',
+					esc_attr( $id ),
+					esc_html( $text )
+				);
+			}
+		}
+
+		if ( $in_sub ) {
+			$toc .= '</ol></li>';
+		}
+
+		$toc .= '</ol>';
+
+		return $toc;
 	}
-
-	if ( $in_sub ) {
-		$toc .= '</ol></li>';
-	}
-
-	$toc .= '</ol>';
-
-	return $toc;
 }
