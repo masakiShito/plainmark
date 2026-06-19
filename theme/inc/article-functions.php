@@ -162,6 +162,60 @@ function plainmark_get_series_posts( $post_id = null ) {
 }
 
 /**
+ * Update lifecycle metadata from accumulated reader feedback.
+ *
+ * Reader feedback is intentionally treated as an editorial signal. When enough
+ * readers mark an article as not helpful, the article is pulled into the normal
+ * review lifecycle by setting the review date to today. The Freshness System
+ * then lowers the score through the existing review-due calculation.
+ *
+ * @param int $post_id Current post ID.
+ */
+function plainmark_update_feedback_lifecycle_signal( $post_id ) {
+	$post_id = absint( $post_id );
+
+	if ( ! $post_id || 'post' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
+	$helpful_count     = (int) get_post_meta( $post_id, '_plainmark_helpful_count', true );
+	$not_helpful_count = (int) get_post_meta( $post_id, '_plainmark_not_helpful_count', true );
+	$total_count       = $helpful_count + $not_helpful_count;
+
+	if ( $total_count <= 0 ) {
+		delete_post_meta( $post_id, '_plainmark_reader_feedback_signal' );
+		return;
+	}
+
+	$negative_ratio = $not_helpful_count / $total_count;
+	$signal         = array(
+		'helpful'        => $helpful_count,
+		'not_helpful'    => $not_helpful_count,
+		'total'          => $total_count,
+		'negative_ratio' => round( $negative_ratio, 4 ),
+		'updated_at'     => current_time( 'mysql' ),
+	);
+
+	update_post_meta( $post_id, '_plainmark_reader_feedback_signal', wp_json_encode( $signal ) );
+
+	$min_negative_count = (int) apply_filters( 'plainmark_feedback_review_min_negative_count', 3, $post_id );
+	$min_negative_ratio = (float) apply_filters( 'plainmark_feedback_review_min_negative_ratio', 0.3, $post_id );
+
+	if ( $not_helpful_count < $min_negative_count || $negative_ratio < $min_negative_ratio ) {
+		return;
+	}
+
+	$today       = current_time( 'Y-m-d' );
+	$review_date = (string) get_post_meta( $post_id, '_plainmark_review_date', true );
+
+	if ( '' === $review_date || strtotime( $review_date ) > current_datetime()->getTimestamp() ) {
+		update_post_meta( $post_id, '_plainmark_review_date', $today );
+		update_post_meta( $post_id, '_plainmark_review_reason', 'reader_feedback' );
+		update_post_meta( $post_id, '_plainmark_review_triggered_at', current_time( 'mysql' ) );
+	}
+}
+
+/**
  * Handle article feedback AJAX.
  */
 function plainmark_handle_article_feedback() {
@@ -187,6 +241,8 @@ function plainmark_handle_article_feedback() {
 	} else {
 		update_post_meta( $post_id, '_plainmark_not_helpful_count', $not_helpful_count + 1 );
 	}
+
+	plainmark_update_feedback_lifecycle_signal( $post_id );
 
 	wp_send_json_success( array( 'message' => 'Feedback recorded' ) );
 }
