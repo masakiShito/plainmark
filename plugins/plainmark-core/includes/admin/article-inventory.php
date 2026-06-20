@@ -26,6 +26,30 @@ function plainmark_add_article_inventory_page() {
 add_action( 'admin_menu', 'plainmark_add_article_inventory_page' );
 
 /**
+ * Handle manual dismissal of a reader-feedback review flag.
+ */
+function plainmark_handle_dismiss_review_flag() {
+	$post_id = isset( $_POST['post_id'] ) ? absint( $_POST['post_id'] ) : 0;
+
+	if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
+		wp_die( esc_html__( '権限がありません。', 'plainmark' ) );
+	}
+
+	check_admin_referer( 'plainmark_dismiss_review_flag_' . $post_id );
+
+	delete_post_meta( $post_id, '_plainmark_freshness_review_flagged' );
+	delete_post_meta( $post_id, '_plainmark_freshness_review_flagged_at' );
+
+	if ( function_exists( 'plainmark_cache_freshness_score' ) ) {
+		plainmark_cache_freshness_score( $post_id );
+	}
+
+	wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url() );
+	exit;
+}
+add_action( 'admin_post_plainmark_dismiss_review_flag', 'plainmark_handle_dismiss_review_flag' );
+
+/**
  * Get allowed verification status filters.
  *
  * @return array<string,string>
@@ -425,14 +449,14 @@ function plainmark_render_article_inventory_page() {
 						<?php while ( $query->have_posts() ) : ?>
 							<?php
 							$query->the_post();
-							$post_id       = get_the_ID();
-							$article_meta  = function_exists( 'plainmark_get_article_meta' ) ? plainmark_get_article_meta( $post_id ) : array();
-							$verification  = function_exists( 'plainmark_get_verification_data' ) ? plainmark_get_verification_data( $post_id ) : array( 'status' => 'unverified', 'date' => '', 'review' => '' );
-							$freshness     = function_exists( 'plainmark_get_freshness_score' ) ? plainmark_get_freshness_score( $post_id ) : null;
-							$status        = $verification['status'] ?? 'unverified';
-							$status_tone   = 'verified' === $status ? 'success' : ( 'unverified' === $status ? 'warning' : 'danger' );
+							$post_id        = get_the_ID();
+							$article_meta   = function_exists( 'plainmark_get_article_meta' ) ? plainmark_get_article_meta( $post_id ) : array();
+							$verification   = function_exists( 'plainmark_get_verification_data' ) ? plainmark_get_verification_data( $post_id ) : array( 'status' => 'unverified', 'date' => '', 'review' => '' );
+							$freshness      = function_exists( 'plainmark_get_freshness_score' ) ? plainmark_get_freshness_score( $post_id ) : null;
+							$status         = $verification['status'] ?? 'unverified';
+							$status_tone    = 'verified' === $status ? 'success' : ( 'unverified' === $status ? 'warning' : 'danger' );
 							$freshness_tone = $freshness && 'fresh' === $freshness['rank'] ? 'success' : ( $freshness && 'watch' === $freshness['rank'] ? 'warning' : 'danger' );
-							$source_path   = (string) get_post_meta( $post_id, '_plainmark_github_path', true );
+							$source_path    = (string) get_post_meta( $post_id, '_plainmark_github_path', true );
 							?>
 							<tr>
 								<td class="plainmark-inventory-title">
@@ -464,6 +488,17 @@ function plainmark_render_article_inventory_page() {
 										<?php endif; ?>
 									<?php else : ?>
 										<span class="plainmark-inventory-empty">未計算</span>
+									<?php endif; ?>
+									<?php if ( get_post_meta( $post_id, '_plainmark_freshness_review_flagged', true ) ) : ?>
+										<div class="plainmark-inventory-muted">
+											<?php plainmark_render_article_inventory_pill( esc_html__( 'レビュー要', 'plainmark' ), 'danger' ); ?>
+											<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline;">
+												<input type="hidden" name="action" value="plainmark_dismiss_review_flag" />
+												<input type="hidden" name="post_id" value="<?php echo esc_attr( (string) $post_id ); ?>" />
+												<?php wp_nonce_field( 'plainmark_dismiss_review_flag_' . $post_id ); ?>
+												<button type="submit" class="button-link"><?php esc_html_e( '解除', 'plainmark' ); ?></button>
+											</form>
+										</div>
 									<?php endif; ?>
 								</td>
 								<td>
