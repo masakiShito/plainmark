@@ -11,6 +11,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Freshness scoring weights. All magic numbers live here and are filterable.
+ *
+ * @return array<string,mixed>
+ */
+function plainmark_get_freshness_weights() {
+	$defaults = array(
+		'status_deprecated' => 55,
+		'status_unverified' => 25,
+		'age_over_year'     => 35,
+		'age_over_half'     => 18,
+		'age_over_quarter'  => 8,
+		'age_days_year'     => 365,
+		'age_days_half'     => 180,
+		'age_days_quarter'  => 90,
+		'no_verified_date'  => 15,
+		'review_overdue'    => 25,
+		'no_dependencies'   => 5,
+		'dep_outdated_each' => 8,
+		'dep_outdated_cap'  => 25,
+		'review_flagged'    => 10,
+		'rank_fresh_min'    => 80,
+		'rank_watch_min'    => 55,
+	);
+
+	return apply_filters( 'plainmark_freshness_weights', $defaults );
+}
+
+/**
  * Calculate article freshness score.
  *
  * @param int $post_id Post ID.
@@ -23,43 +51,44 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 	$reasons = array();
 	$status  = $data['status'] ?? 'unverified';
 	$now     = current_datetime()->getTimestamp();
+	$w       = plainmark_get_freshness_weights();
 
 	if ( 'verified' !== $status ) {
-		$score    -= 'deprecated' === $status ? 55 : 25;
+		$score    -= 'deprecated' === $status ? (int) $w['status_deprecated'] : (int) $w['status_unverified'];
 		$reasons[] = 'deprecated' === $status ? __( '非推奨の記事です。', 'plainmark' ) : __( '動作確認が未完了です。', 'plainmark' );
 	}
 
 	$verified_date = ! empty( $data['date'] ) ? strtotime( $data['date'] ) : false;
 	if ( $verified_date ) {
 		$days = floor( ( $now - $verified_date ) / DAY_IN_SECONDS );
-		if ( $days > 365 ) {
-			$score    -= 35;
+		if ( $days > (int) $w['age_days_year'] ) {
+			$score    -= (int) $w['age_over_year'];
 			$reasons[] = __( '最終確認から1年以上経過しています。', 'plainmark' );
-		} elseif ( $days > 180 ) {
-			$score    -= 18;
+		} elseif ( $days > (int) $w['age_days_half'] ) {
+			$score    -= (int) $w['age_over_half'];
 			$reasons[] = __( '最終確認から半年以上経過しています。', 'plainmark' );
-		} elseif ( $days > 90 ) {
-			$score    -= 8;
+		} elseif ( $days > (int) $w['age_days_quarter'] ) {
+			$score    -= (int) $w['age_over_quarter'];
 			$reasons[] = __( '最終確認から3か月以上経過しています。', 'plainmark' );
 		}
 	} else {
-		$score    -= 15;
+		$score    -= (int) $w['no_verified_date'];
 		$reasons[] = __( '最終確認日が未設定です。', 'plainmark' );
 	}
 
 	if ( ! empty( $data['review'] ) && strtotime( $data['review'] ) < $now ) {
-		$score    -= 25;
+		$score    -= (int) $w['review_overdue'];
 		$reasons[] = __( 'レビュー期限を過ぎています。', 'plainmark' );
 	}
 
 	$dependencies = trim( (string) get_post_meta( $post_id, '_plainmark_dependencies', true ) );
 	if ( '' === $dependencies ) {
-		$score    -= 5;
+		$score    -= (int) $w['no_dependencies'];
 		$reasons[] = __( '依存ライブラリ情報が未設定です。', 'plainmark' );
 	} else {
 		$outdated_count = (int) get_post_meta( $post_id, '_plainmark_dep_outdated_count', true );
 		if ( $outdated_count > 0 ) {
-			$penalty   = min( 25, $outdated_count * 8 );
+			$penalty   = min( (int) $w['dep_outdated_cap'], $outdated_count * (int) $w['dep_outdated_each'] );
 			$score    -= $penalty;
 			$reasons[] = sprintf(
 				/* translators: %d: number of outdated packages */
@@ -74,8 +103,13 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 		}
 	}
 
+	if ( get_post_meta( $post_id, '_plainmark_freshness_review_flagged', true ) ) {
+		$score    -= (int) $w['review_flagged'];
+		$reasons[] = __( '読者から情報が古い可能性が報告されています。', 'plainmark' );
+	}
+
 	$score = max( 0, min( 100, $score ) );
-	$rank  = $score >= 80 ? 'fresh' : ( $score >= 55 ? 'watch' : 'stale' );
+	$rank  = $score >= (int) $w['rank_fresh_min'] ? 'fresh' : ( $score >= (int) $w['rank_watch_min'] ? 'watch' : 'stale' );
 
 	return array(
 		'score'   => $score,
