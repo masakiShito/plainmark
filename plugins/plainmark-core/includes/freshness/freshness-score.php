@@ -35,7 +35,10 @@ function plainmark_get_freshness_weights() {
 		'rank_watch_min'    => 55,
 	);
 
-	return apply_filters( 'plainmark_freshness_weights', $defaults );
+	return wp_parse_args(
+		(array) apply_filters( 'plainmark_freshness_weights', $defaults ),
+		$defaults
+	);
 }
 
 /**
