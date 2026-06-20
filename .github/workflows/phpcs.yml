@@ -59,4 +59,5 @@ jobs:
             plugins/plainmark-core/includes/freshness/freshness-score.php \
             plugins/plainmark-core/includes/freshness/freshness-cache.php \
             plugins/plainmark-core/includes/freshness/freshness-dashboard-widget.php \
-            plugins/plainmark-core/includes/freshness/reader-feedback.php
+            plugins/plainmark-core/includes/freshness/reader-feedback.php \
+            plugins/plainmark-core/includes/upgrade.php
