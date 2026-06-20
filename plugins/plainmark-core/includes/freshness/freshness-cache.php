@@ -105,11 +105,17 @@ function plainmark_run_freshness_check() {
 	);
 
 	if ( empty( $posts ) || ! function_exists( 'plainmark_get_freshness_score' ) ) {
+		if ( function_exists( 'plainmark_feedback_purge_expired_transients' ) ) {
+			plainmark_feedback_purge_expired_transients();
+		}
 		return;
 	}
 
 	$last_sent = get_option( 'plainmark_freshness_last_notified', '' );
 	if ( $last_sent === $today ) {
+		if ( function_exists( 'plainmark_feedback_purge_expired_transients' ) ) {
+			plainmark_feedback_purge_expired_transients();
+		}
 		return;
 	}
 
@@ -138,6 +144,10 @@ function plainmark_run_freshness_check() {
 
 	wp_mail( get_option( 'admin_email' ), $subject, $body );
 	update_option( 'plainmark_freshness_last_notified', $today, false );
+
+	if ( function_exists( 'plainmark_feedback_purge_expired_transients' ) ) {
+		plainmark_feedback_purge_expired_transients();
+	}
 }
 add_action( 'plainmark_daily_freshness_check', 'plainmark_run_freshness_check' );
 
