@@ -48,8 +48,10 @@ function plainmark_feedback_rate_limit_allows( $actor ) {
  * Handle freshness report AJAX.
  */
 function plainmark_handle_freshness_report() {
-	// Nonce remains a defense-in-depth check. For nopriv requests it should not
-	// be treated as an actor identity or abuse-prevention mechanism.
+	/*
+	 * Nonce remains a defense-in-depth check. For nopriv requests it should not
+	 * be treated as an actor identity or abuse-prevention mechanism.
+	 */
 	if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'plainmark_freshness_report' ) ) {
 		wp_send_json_error( 'Invalid nonce' );
 	}
