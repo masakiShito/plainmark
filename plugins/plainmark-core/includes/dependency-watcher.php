@@ -2,13 +2,33 @@
 /**
  * Dependency Watcher — checks npm / PyPI versions and updates Freshness.
  *
- * @package plainmark
- * @since 0.9.0
+ * @package plainmark-core
+ * @since 0.1.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+/**
+ * Register dependency metadata fields for advanced differentiator features.
+ */
+function plainmark_register_advanced_differentiator_meta() {
+	register_post_meta(
+		'post',
+		'_plainmark_dependencies',
+		array(
+			'type'              => 'string',
+			'single'            => true,
+			'show_in_rest'      => true,
+			'sanitize_callback' => 'sanitize_textarea_field',
+			'auth_callback'     => static function() {
+				return current_user_can( 'edit_posts' );
+			},
+		)
+	);
+}
+add_action( 'init', 'plainmark_register_advanced_differentiator_meta' );
 
 /**
  * Parse structured dependency lines from _plainmark_dependencies meta.

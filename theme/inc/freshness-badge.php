@@ -17,6 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string HTML string.
  */
 function plainmark_render_freshness_badge( $post_id = 0 ) {
+	if ( ! function_exists( 'plainmark_get_freshness_score' ) ) {
+		return '';
+	}
+
 	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
 
 	if ( ! $post_id ) {
@@ -27,7 +31,7 @@ function plainmark_render_freshness_badge( $post_id = 0 ) {
 	$score     = '' === $raw_score ? 0 : (int) $raw_score;
 	$rank      = (string) get_post_meta( $post_id, '_plainmark_freshness_rank', true );
 
-	if ( '' === $rank && function_exists( 'plainmark_get_freshness_score' ) ) {
+	if ( '' === $rank ) {
 		$data  = plainmark_get_freshness_score( $post_id );
 		$score = (int) $data['score'];
 		$rank  = (string) $data['rank'];

@@ -36,7 +36,6 @@ require_once PLAINMARK_DIR . '/inc/ogp.php';
 require_once PLAINMARK_DIR . '/inc/article-functions.php';
 require_once PLAINMARK_DIR . '/inc/blocks.php';
 require_once PLAINMARK_DIR . '/inc/differentiation-features.php';
-require_once PLAINMARK_DIR . '/inc/dependency-watcher.php';
 require_once PLAINMARK_DIR . '/inc/advanced-differentiators.php';
 require_once PLAINMARK_DIR . '/inc/freshness-dashboard.php';
 require_once PLAINMARK_DIR . '/inc/freshness-badge.php';
@@ -82,73 +81,55 @@ function plainmark_add_query_vars( $vars ) {
 add_filter( 'query_vars', 'plainmark_add_query_vars' );
 
 /**
- * Force /blog/ to query normal posts.
+ * Force WordPress to treat custom routes as valid pages.
  *
  * @param WP_Query $query Main query.
  */
-function plainmark_blog_archive_query( $query ) {
+function plainmark_prepare_custom_routes( $query ) {
     if ( is_admin() || ! $query->is_main_query() ) {
         return;
     }
 
-    if ( $query->get( 'plainmark_blog_archive' ) ) {
-        $paged = max( 1, absint( $query->get( 'paged' ) ?: get_query_var( 'paged' ) ) );
-
-        $query->set( 'post_type', 'post' );
-        $query->set( 'post_status', 'publish' );
-        $query->set( 'posts_per_page', get_option( 'posts_per_page' ) );
-        $query->set( 'paged', $paged );
-        $query->is_home    = true;
-        $query->is_archive = false;
-        $query->is_page    = false;
-        $query->is_404     = false;
-    }
-
-    if ( $query->get( 'plainmark_about_page' ) ) {
-        $query->is_page    = true;
-        $query->is_home    = false;
-        $query->is_archive = false;
-        $query->is_404     = false;
+    if ( $query->get( 'plainmark_blog_archive' ) || $query->get( 'plainmark_about_page' ) ) {
+        $query->is_404  = false;
+        $query->is_page = true;
+        $query->is_home = false;
     }
 }
-add_action( 'pre_get_posts', 'plainmark_blog_archive_query' );
+add_action( 'pre_get_posts', 'plainmark_prepare_custom_routes' );
 
 /**
- * Use theme templates for custom routes.
+ * Route template selection.
  *
- * @param string $template Template path.
+ * @param string $template Current template path.
  * @return string
  */
-function plainmark_custom_route_template( $template ) {
+function plainmark_template_include( $template ) {
     if ( get_query_var( 'plainmark_blog_archive' ) ) {
-        $index_template = locate_template( 'index.php' );
-
-        if ( $index_template ) {
-            return $index_template;
-        }
+        $custom = locate_template( 'page-blog.php' );
+        return $custom ?: $template;
     }
 
     if ( get_query_var( 'plainmark_about_page' ) ) {
-        $about_template = locate_template( 'page-about.php' );
-
-        if ( $about_template ) {
-            return $about_template;
-        }
+        $custom = locate_template( 'page-about.php' );
+        return $custom ?: $template;
     }
 
     return $template;
 }
-add_filter( 'template_include', 'plainmark_custom_route_template' );
+add_filter( 'template_include', 'plainmark_template_include' );
 
 /**
- * Flush rewrite rules once after route changes.
+ * Flush rewrite rules when custom route version changes.
  */
 function plainmark_maybe_flush_rewrite_rules() {
-    $rewrite_version = '20260613_blog_pagination_routes';
-
-    if ( get_option( 'plainmark_rewrite_version' ) !== $rewrite_version ) {
-        flush_rewrite_rules();
-        update_option( 'plainmark_rewrite_version', $rewrite_version );
+    $version = '2025-06-02-plainmark-routes';
+    if ( get_option( 'plainmark_rewrite_rules_version' ) === $version ) {
+        return;
     }
+
+    plainmark_register_custom_routes();
+    flush_rewrite_rules();
+    update_option( 'plainmark_rewrite_rules_version', $version, false );
 }
 add_action( 'init', 'plainmark_maybe_flush_rewrite_rules', 20 );
