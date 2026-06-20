@@ -22,7 +22,7 @@ function plainmark_register_freshness_cache_meta() {
 			'single'            => true,
 			'show_in_rest'      => true,
 			'sanitize_callback' => 'absint',
-			'auth_callback'     => static function() {
+			'auth_callback'     => static function () {
 				return current_user_can( 'edit_posts' );
 			},
 		)
@@ -36,7 +36,7 @@ function plainmark_register_freshness_cache_meta() {
 			'single'            => true,
 			'show_in_rest'      => true,
 			'sanitize_callback' => 'sanitize_key',
-			'auth_callback'     => static function() {
+			'auth_callback'     => static function () {
 				return current_user_can( 'edit_posts' );
 			},
 		)
