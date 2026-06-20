@@ -149,3 +149,43 @@ function plainmark_migrate_feedback_020() {
 		}
 	}
 }
+
+/**
+ * Clear the reader-feedback review flag when an author re-verifies an article.
+ *
+ * Verified status/date are saved via the Block Editor REST meta path, not a
+ * save_post POST handler, so this hooks the meta write directly.
+ *
+ * @param int    $meta_id    Meta ID.
+ * @param int    $post_id    Post ID.
+ * @param string $meta_key   Meta key.
+ * @param mixed  $meta_value Meta value.
+ */
+function plainmark_clear_review_flag_on_reverify( $meta_id, $post_id, $meta_key, $meta_value ) {
+	unset( $meta_id );
+
+	if ( ! in_array( $meta_key, array( '_plainmark_verified_status', '_plainmark_verified_date' ), true ) ) {
+		return;
+	}
+
+	$status = ( '_plainmark_verified_status' === $meta_key )
+		? $meta_value
+		: get_post_meta( $post_id, '_plainmark_verified_status', true );
+
+	if ( 'verified' !== $status ) {
+		return;
+	}
+
+	if ( ! get_post_meta( $post_id, '_plainmark_freshness_review_flagged', true ) ) {
+		return;
+	}
+
+	delete_post_meta( $post_id, '_plainmark_freshness_review_flagged' );
+	delete_post_meta( $post_id, '_plainmark_freshness_review_flagged_at' );
+
+	if ( function_exists( 'plainmark_cache_freshness_score' ) ) {
+		plainmark_cache_freshness_score( $post_id );
+	}
+}
+add_action( 'updated_post_meta', 'plainmark_clear_review_flag_on_reverify', 10, 4 );
+add_action( 'added_post_meta', 'plainmark_clear_review_flag_on_reverify', 10, 4 );
