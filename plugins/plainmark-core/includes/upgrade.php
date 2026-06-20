@@ -23,6 +23,7 @@ function plainmark_core_upgrade_routines() {
 	return array(
 		'0.2.0' => 'plainmark_core_upgrade_020',
 		'0.3.0' => 'plainmark_core_upgrade_030',
+		'0.3.1' => 'plainmark_core_upgrade_031',
 	);
 }
 
@@ -103,27 +104,70 @@ function plainmark_core_upgrade_020( $from ) {
 }
 
 /**
- * Upgrade routine for 0.3.0: recompute cached freshness scores.
+ * Schedule a background freshness recompute.
+ */
+function plainmark_core_schedule_freshness_recompute() {
+	update_option( 'plainmark_core_recompute_offset', 0, false );
+
+	if ( ! wp_next_scheduled( 'plainmark_core_recompute_freshness_batch' ) ) {
+		wp_schedule_single_event( time() + 30, 'plainmark_core_recompute_freshness_batch' );
+	}
+}
+
+/**
+ * Upgrade routine for 0.3.0: recompute cached freshness scores in batches.
  *
  * @param string $from Previously installed version.
  */
 function plainmark_core_upgrade_030( $from ) {
 	unset( $from );
+	plainmark_core_schedule_freshness_recompute();
+}
 
+/**
+ * Upgrade routine for 0.3.1: re-run the batched freshness recompute.
+ *
+ * @param string $from Previously installed version.
+ */
+function plainmark_core_upgrade_031( $from ) {
+	unset( $from );
+	plainmark_core_schedule_freshness_recompute();
+}
+
+/**
+ * Process one batch of freshness recomputation, rescheduling until done.
+ */
+function plainmark_core_recompute_freshness_batch() {
 	if ( ! function_exists( 'plainmark_cache_freshness_score' ) ) {
 		return;
 	}
 
+	$batch  = (int) apply_filters( 'plainmark_core_recompute_batch_size', 50 );
+	$offset = (int) get_option( 'plainmark_core_recompute_offset', 0 );
+
 	$query = new WP_Query(
 		array(
 			'post_type'      => 'post',
-			'posts_per_page' => -1,
-			'fields'         => 'ids',
 			'post_status'    => 'publish',
+			'posts_per_page' => max( 1, $batch ),
+			'offset'         => $offset,
+			'fields'         => 'ids',
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'no_found_rows'  => true,
 		)
 	);
+
+	if ( empty( $query->posts ) ) {
+		delete_option( 'plainmark_core_recompute_offset' );
+		return;
+	}
 
 	foreach ( $query->posts as $post_id ) {
 		plainmark_cache_freshness_score( $post_id );
 	}
+
+	update_option( 'plainmark_core_recompute_offset', $offset + count( $query->posts ), false );
+	wp_schedule_single_event( time() + 60, 'plainmark_core_recompute_freshness_batch' );
 }
+add_action( 'plainmark_core_recompute_freshness_batch', 'plainmark_core_recompute_freshness_batch' );

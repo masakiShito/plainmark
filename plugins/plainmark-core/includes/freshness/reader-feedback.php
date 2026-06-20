@@ -11,15 +11,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Resolve the client IP, optionally trusting X-Forwarded-For.
+ *
+ * @return string
+ */
+function plainmark_feedback_client_ip() {
+	$remote = isset( $_SERVER['REMOTE_ADDR'] )
+		? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
+		: '';
+
+	if ( ! apply_filters( 'plainmark_feedback_trust_proxy', false ) ) {
+		return $remote;
+	}
+
+	if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+		$parts = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
+		$first = trim( $parts[0] );
+
+		if ( filter_var( $first, FILTER_VALIDATE_IP ) ) {
+			return $first;
+		}
+	}
+
+	return $remote;
+}
+
+/**
  * Return an anonymous actor hash for feedback de-duplication.
  *
- * Raw IP addresses are never stored. Reverse proxy deployments should add an
- * explicit trusted proxy setting before using X-Forwarded-For.
+ * Raw IP addresses are never stored. Reverse proxy deployments can opt in to
+ * trusting X-Forwarded-For via the plainmark_feedback_trust_proxy filter.
  *
  * @return string Actor hash.
  */
 function plainmark_feedback_actor_hash() {
-	$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$ip = plainmark_feedback_client_ip();
 
 	return substr( wp_hash( $ip . '|plainmark_feedback', 'nonce' ), 0, 16 );
 }
@@ -63,6 +89,10 @@ function plainmark_handle_freshness_report() {
 		wp_send_json_error( 'Invalid data' );
 	}
 
+	if ( 'post' !== get_post_type( $post_id ) ) {
+		wp_send_json_error( 'Invalid post type' );
+	}
+
 	$actor = plainmark_feedback_actor_hash();
 
 	if ( ! plainmark_feedback_rate_limit_allows( $actor ) ) {
@@ -81,7 +111,8 @@ function plainmark_handle_freshness_report() {
 		);
 	}
 
-	set_transient( $dedupe_key, $report, 30 * DAY_IN_SECONDS );
+	$dedupe_days = (int) apply_filters( 'plainmark_feedback_dedupe_ttl_days', 14 );
+	set_transient( $dedupe_key, $report, max( 1, $dedupe_days ) * DAY_IN_SECONDS );
 
 	$meta_key = '_plainmark_freshness_report_' . $report;
 	$count    = (int) get_post_meta( $post_id, $meta_key, true );
@@ -168,6 +199,10 @@ function plainmark_clear_review_flag_on_reverify( $meta_id, $post_id, $meta_key,
 		return;
 	}
 
+	if ( 'post' !== get_post_type( $post_id ) ) {
+		return;
+	}
+
 	$status = ( '_plainmark_verified_status' === $meta_key )
 		? $meta_value
 		: get_post_meta( $post_id, '_plainmark_verified_status', true );
@@ -189,3 +224,30 @@ function plainmark_clear_review_flag_on_reverify( $meta_id, $post_id, $meta_key,
 }
 add_action( 'updated_post_meta', 'plainmark_clear_review_flag_on_reverify', 10, 4 );
 add_action( 'added_post_meta', 'plainmark_clear_review_flag_on_reverify', 10, 4 );
+
+/**
+ * Purge expired feedback transients from the options table.
+ *
+ * No-op when an external object cache is active because transients are not
+ * stored in the options table in that configuration.
+ */
+function plainmark_feedback_purge_expired_transients() {
+	if ( wp_using_ext_object_cache() ) {
+		return;
+	}
+
+	global $wpdb;
+
+	$timeout_names = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s AND option_value < %d",
+			$wpdb->esc_like( '_transient_timeout_plainmark_fb_' ) . '%',
+			time()
+		)
+	);
+
+	foreach ( $timeout_names as $timeout_name ) {
+		$key = str_replace( '_transient_timeout_', '', $timeout_name );
+		delete_transient( $key );
+	}
+}

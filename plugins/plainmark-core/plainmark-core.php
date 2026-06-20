@@ -3,7 +3,7 @@
  * Plugin Name: Plainmark Core
  * Plugin URI: https://github.com/masakiShito/plainmark
  * Description: Core data model and editorial governance features for the Plainmark theme.
- * Version: 0.3.0
+ * Version: 0.3.1
  * Author: plainmark
  * Text Domain: plainmark
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'PLAINMARK_CORE_VERSION' ) ) {
-	define( 'PLAINMARK_CORE_VERSION', '0.3.0' );
+	define( 'PLAINMARK_CORE_VERSION', '0.3.1' );
 }
 
 if ( ! defined( 'PLAINMARK_CORE_DIR' ) ) {
