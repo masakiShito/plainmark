@@ -95,9 +95,14 @@ function plainmark_build_freshness_widget_items( $post_ids ) {
 	$items = array();
 
 	foreach ( $post_ids as $post_id ) {
-		$freshness = function_exists( 'plainmark_get_freshness_score' ) ? plainmark_get_freshness_score( $post_id ) : array( 'reasons' => array() );
+		$freshness = function_exists( 'plainmark_get_freshness_score' ) ? plainmark_get_freshness_score( $post_id ) : array(
+			'reasons' => array(),
+		);
 		$score     = get_post_meta( $post_id, '_plainmark_freshness_score', true );
-		$reports   = function_exists( 'plainmark_get_freshness_reports' ) ? plainmark_get_freshness_reports( $post_id ) : array( 'accurate' => 0, 'outdated' => 0 );
+		$reports   = function_exists( 'plainmark_get_freshness_reports' ) ? plainmark_get_freshness_reports( $post_id ) : array(
+			'accurate' => 0,
+			'outdated' => 0,
+		);
 
 		$items[] = array(
 			'id'      => $post_id,
@@ -176,7 +181,7 @@ function plainmark_render_freshness_widget() {
 			</div>
 		</div>
 
-		<p><?php printf( esc_html__( 'サイト平均 Freshness: %d / 100', 'plainmark' ), esc_html( (string) $avg ) ); ?></p>
+		<p><?php /* translators: %d: average freshness score. */ printf( esc_html__( 'サイト平均 Freshness: %d / 100', 'plainmark' ), esc_html( (string) $avg ) ); ?></p>
 
 		<?php plainmark_render_freshness_widget_list( __( '要対応（Freshness < 55）', 'plainmark' ), $stale, 'stale', 10 ); ?>
 		<?php plainmark_render_freshness_widget_list( __( '注意（Freshness 55-79）', 'plainmark' ), $watch, 'watch', 5 ); ?>
@@ -211,7 +216,7 @@ function plainmark_render_freshness_widget_list( $title, $items, $rank, $limit )
 						<span class="plainmark-fw-reason"><?php echo esc_html( $item['reasons'][0] ); ?></span>
 					<?php endif; ?>
 					<?php if ( ! empty( $item['reports']['outdated'] ) ) : ?>
-						<span class="plainmark-fw-reports"><?php printf( esc_html__( '読者報告: 古い情報 %d 件', 'plainmark' ), esc_html( (string) $item['reports']['outdated'] ) ); ?></span>
+						<span class="plainmark-fw-reports"><?php /* translators: %d: number of reader reports. */ printf( esc_html__( '読者報告: 古い情報 %d 件', 'plainmark' ), esc_html( (string) $item['reports']['outdated'] ) ); ?></span>
 					<?php endif; ?>
 				</div>
 				<span class="plainmark-fw-score is-<?php echo esc_attr( $rank ); ?>"><?php echo esc_html( (string) $item['score'] ); ?></span>
