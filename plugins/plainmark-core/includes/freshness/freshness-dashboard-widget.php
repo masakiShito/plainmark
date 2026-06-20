@@ -65,6 +65,29 @@ function plainmark_count_posts_by_freshness_rank( $rank ) {
 }
 
 /**
+ * Count published posts with reader-feedback review flags.
+ *
+ * @return int
+ */
+function plainmark_count_freshness_review_flags() {
+	global $wpdb;
+
+	return (int) $wpdb->get_var(
+		$wpdb->prepare(
+			"SELECT COUNT(1)
+			FROM {$wpdb->postmeta} pm
+			JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+			WHERE pm.meta_key = %s
+			AND pm.meta_value = %s
+			AND p.post_status = 'publish'
+			AND p.post_type = 'post'",
+			'_plainmark_freshness_review_flagged',
+			'1'
+		)
+	);
+}
+
+/**
  * Get the average cached freshness score for published posts.
  *
  * @return int
@@ -157,13 +180,14 @@ function plainmark_render_freshness_widget() {
 		)
 	);
 
-	$total       = (int) wp_count_posts( 'post' )->publish;
-	$stale_count = plainmark_count_posts_by_freshness_rank( 'stale' );
-	$watch_count = plainmark_count_posts_by_freshness_rank( 'watch' );
-	$healthy     = max( 0, $total - $stale_count - $watch_count );
-	$avg         = plainmark_get_average_freshness_score();
-	$stale       = plainmark_build_freshness_widget_items( $stale_posts );
-	$watch       = plainmark_build_freshness_widget_items( $watch_posts );
+	$total        = (int) wp_count_posts( 'post' )->publish;
+	$stale_count  = plainmark_count_posts_by_freshness_rank( 'stale' );
+	$watch_count  = plainmark_count_posts_by_freshness_rank( 'watch' );
+	$flagged      = plainmark_count_freshness_review_flags();
+	$healthy      = max( 0, $total - $stale_count - $watch_count );
+	$avg          = plainmark_get_average_freshness_score();
+	$stale        = plainmark_build_freshness_widget_items( $stale_posts );
+	$watch        = plainmark_build_freshness_widget_items( $watch_posts );
 	?>
 	<div class="plainmark-freshness-widget">
 		<div class="plainmark-fw-summary">
@@ -182,6 +206,7 @@ function plainmark_render_freshness_widget() {
 		</div>
 
 		<p><?php /* translators: %d: average freshness score. */ printf( esc_html__( 'サイト平均 Freshness: %d / 100', 'plainmark' ), esc_html( (string) $avg ) ); ?></p>
+		<p><?php /* translators: %d: number of flagged posts. */ printf( esc_html__( 'レビュー要フラグ: %d件', 'plainmark' ), esc_html( (string) $flagged ) ); ?></p>
 
 		<?php plainmark_render_freshness_widget_list( __( '要対応（Freshness < 55）', 'plainmark' ), $stale, 'stale', 10 ); ?>
 		<?php plainmark_render_freshness_widget_list( __( '注意（Freshness 55-79）', 'plainmark' ), $watch, 'watch', 5 ); ?>
