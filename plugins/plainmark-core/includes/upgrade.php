@@ -22,6 +22,7 @@ if ( ! defined( 'PLAINMARK_CORE_VERSION_OPTION' ) ) {
 function plainmark_core_upgrade_routines() {
 	return array(
 		'0.2.0' => 'plainmark_core_upgrade_020',
+		'0.3.0' => 'plainmark_core_upgrade_030',
 	);
 }
 
@@ -98,5 +99,31 @@ function plainmark_core_upgrade_020( $from ) {
 
 	if ( function_exists( 'plainmark_migrate_feedback_020' ) ) {
 		plainmark_migrate_feedback_020();
+	}
+}
+
+/**
+ * Upgrade routine for 0.3.0: recompute cached freshness scores.
+ *
+ * @param string $from Previously installed version.
+ */
+function plainmark_core_upgrade_030( $from ) {
+	unset( $from );
+
+	if ( ! function_exists( 'plainmark_cache_freshness_score' ) ) {
+		return;
+	}
+
+	$query = new WP_Query(
+		array(
+			'post_type'      => 'post',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+			'post_status'    => 'publish',
+		)
+	);
+
+	foreach ( $query->posts as $post_id ) {
+		plainmark_cache_freshness_score( $post_id );
 	}
 }
