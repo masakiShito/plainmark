@@ -158,15 +158,18 @@ function plainmark_persona_shortcode( $atts, $content = '' ) {
 		'persona'
 	);
 
-	$level     = sanitize_key( $atts['level'] );
-	$framework = sanitize_key( $atts['framework'] );
-	$label     = $atts['label'] ? sanitize_text_field( $atts['label'] ) : trim( $level . ' / ' . $framework, ' /' );
+	$level      = sanitize_key( $atts['level'] );
+	$framework  = sanitize_key( $atts['framework'] );
+	$label      = $atts['label'] ? sanitize_text_field( $atts['label'] ) : trim( $level . ' / ' . $framework, ' /' );
+	$level      = '' !== $level ? $level : 'all';
+	$framework  = '' !== $framework ? $framework : 'all';
+	$label_text = '' !== $label ? $label : __( 'Personalized section', 'plainmark' );
 
 	return sprintf(
 		'<section class="reader-persona" data-reader-persona data-persona-level="%1$s" data-persona-framework="%2$s"><p class="reader-persona__label">%3$s</p><div>%4$s</div></section>',
-		esc_attr( $level ?: 'all' ),
-		esc_attr( $framework ?: 'all' ),
-		esc_html( $label ?: __( 'Personalized section', 'plainmark' ) ),
+		esc_attr( $level ),
+		esc_attr( $framework ),
+		esc_html( $label_text ),
 		do_shortcode( shortcode_unautop( $content ) )
 	);
 }
@@ -188,7 +191,14 @@ function plainmark_append_revision_diff_ui( $content ) {
 		return $content;
 	}
 
-	$revisions = wp_get_post_revisions( get_the_ID(), array( 'posts_per_page' => 2, 'orderby' => 'date', 'order' => 'DESC' ) );
+	$revisions = wp_get_post_revisions(
+		get_the_ID(),
+		array(
+			'posts_per_page' => 2,
+			'orderby'        => 'date',
+			'order'          => 'DESC',
+		)
+	);
 	if ( count( $revisions ) < 2 || ! function_exists( 'wp_text_diff' ) ) {
 		return $content;
 	}
@@ -240,7 +250,7 @@ add_filter( 'query_vars', 'plainmark_add_technology_graph_query_var' );
 function plainmark_technology_graph_template_include( $template ) {
 	if ( get_query_var( 'plainmark_technology_map' ) ) {
 		$custom = locate_template( 'page-technology-map.php' );
-		return $custom ?: $template;
+		return $custom ? $custom : $template;
 	}
 	return $template;
 }
@@ -305,7 +315,7 @@ function plainmark_register_execution_snapshot_meta() {
 			'single'            => true,
 			'show_in_rest'      => false,
 			'sanitize_callback' => 'sanitize_text_field',
-			'auth_callback'     => static function() {
+			'auth_callback'     => static function () {
 				return current_user_can( 'edit_posts' );
 			},
 		)
@@ -323,7 +333,7 @@ function plainmark_register_execution_snapshot_rest() {
 		array(
 			'methods'             => 'POST',
 			'callback'            => 'plainmark_save_execution_snapshot',
-			'permission_callback' => static function() {
+			'permission_callback' => static function () {
 				return current_user_can( 'edit_posts' );
 			},
 			'args'                => array(
@@ -378,14 +388,17 @@ function plainmark_save_execution_snapshot( WP_REST_Request $request ) {
 		$snapshots = array();
 	}
 
-	$title = $request->get_param( 'playground_title' ) ?: 'untitled';
-	$key   = md5( $title );
+	$title    = $request->get_param( 'playground_title' );
+	$title    = $title ? $title : 'untitled';
+	$key      = md5( $title );
+	$language = $request->get_param( 'language' );
+	$language = $language ? $language : 'javascript';
 
 	$snapshots[ $key ] = array(
 		'title'    => $title,
 		'code'     => $request->get_param( 'code' ),
 		'output'   => $request->get_param( 'output' ),
-		'language' => $request->get_param( 'language' ) ?: 'javascript',
+		'language' => $language,
 		'saved_at' => current_time( 'Y-m-d H:i:s' ),
 	);
 
