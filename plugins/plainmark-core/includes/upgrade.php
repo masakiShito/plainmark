@@ -69,14 +69,17 @@ function plainmark_core_render_upgrade_notice() {
 
 	delete_transient( 'plainmark_core_upgraded_notice' );
 
+	$from = isset( $notice['from'] ) ? $notice['from'] : 'unknown';
+	$to   = isset( $notice['to'] ) ? $notice['to'] : PLAINMARK_CORE_VERSION;
+
 	printf(
 		'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
 		esc_html(
 			sprintf(
 				/* translators: 1: old version, 2: new version. */
 				__( 'plainmark-core を %1$s から %2$s に更新しました。', 'plainmark' ),
-				$notice['from'] ?? 'unknown',
-				$notice['to'] ?? PLAINMARK_CORE_VERSION
+				$from,
+				$to
 			)
 		)
 	);
