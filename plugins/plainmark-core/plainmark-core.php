@@ -80,6 +80,11 @@ function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/admin/article-inventory.php', 'plainmark_add_article_inventory_page' );
 	plainmark_core_require_module( 'includes/admin/article-settings.php', 'plainmark_add_article_settings_meta_box' );
 	plainmark_core_require_module( 'includes/admin/github-works-sync.php', 'plainmark_register_github_works_sync_page' );
+	plainmark_core_require_module( 'includes/freshness/freshness-score.php', 'plainmark_get_freshness_score' );
+	plainmark_core_require_module( 'includes/freshness/freshness-cache.php', 'plainmark_cache_freshness_score' );
+	plainmark_core_require_module( 'includes/freshness/freshness-dashboard-widget.php', 'plainmark_render_freshness_widget' );
+	plainmark_core_require_module( 'includes/freshness/reader-feedback.php', 'plainmark_handle_freshness_report' );
+	plainmark_core_require_module( 'includes/dependency-watcher.php', 'plainmark_check_dependencies' );
 }
 add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules', 20 );
 
@@ -88,6 +93,7 @@ add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules',
  */
 function plainmark_core_activate() {
 	plainmark_core_require_module( 'includes/custom-post-types.php', 'plainmark_register_portfolio_post_type' );
+	plainmark_core_require_module( 'includes/freshness/freshness-cache.php', 'plainmark_cache_freshness_score' );
 
 	if ( function_exists( 'plainmark_register_portfolio_post_type' ) ) {
 		plainmark_register_portfolio_post_type();
@@ -106,9 +112,16 @@ function plainmark_core_activate() {
 register_activation_hook( __FILE__, 'plainmark_core_activate' );
 
 /**
- * Flush rewrite rules when the core plugin is deactivated.
+ * Flush rewrite rules and clear governance cron when the core plugin is deactivated.
  */
 function plainmark_core_deactivate() {
+	plainmark_core_require_module( 'includes/freshness/freshness-cache.php', 'plainmark_cache_freshness_score' );
+
+	if ( function_exists( 'plainmark_deactivate_freshness_cron' ) ) {
+		plainmark_deactivate_freshness_cron();
+	}
+
 	flush_rewrite_rules();
 }
 register_deactivation_hook( __FILE__, 'plainmark_core_deactivate' );
+register_deactivation_hook( __FILE__, 'plainmark_deactivate_freshness_cron' );
