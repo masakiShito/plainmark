@@ -3,7 +3,7 @@
  * Plugin Name: Plainmark Core
  * Plugin URI: https://github.com/masakiShito/plainmark
  * Description: Core data model and editorial governance features for the Plainmark theme.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Author: plainmark
  * Text Domain: plainmark
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'PLAINMARK_CORE_VERSION' ) ) {
-	define( 'PLAINMARK_CORE_VERSION', '0.1.0' );
+	define( 'PLAINMARK_CORE_VERSION', '0.2.0' );
 }
 
 if ( ! defined( 'PLAINMARK_CORE_DIR' ) ) {
@@ -85,6 +85,7 @@ function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/freshness/freshness-dashboard-widget.php', 'plainmark_render_freshness_widget' );
 	plainmark_core_require_module( 'includes/freshness/reader-feedback.php', 'plainmark_handle_freshness_report' );
 	plainmark_core_require_module( 'includes/dependency-watcher.php', 'plainmark_check_dependencies' );
+	plainmark_core_require_module( 'includes/upgrade.php', 'plainmark_core_maybe_upgrade' );
 }
 add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules', 20 );
 
@@ -94,6 +95,10 @@ add_action( 'after_setup_theme', 'plainmark_core_load_theme_integrated_modules',
 function plainmark_core_activate() {
 	plainmark_core_require_module( 'includes/custom-post-types.php', 'plainmark_register_portfolio_post_type' );
 	plainmark_core_require_module( 'includes/freshness/freshness-cache.php', 'plainmark_cache_freshness_score' );
+
+	if ( false === get_option( 'plainmark_core_version', false ) ) {
+		update_option( 'plainmark_core_version', PLAINMARK_CORE_VERSION );
+	}
 
 	if ( function_exists( 'plainmark_register_portfolio_post_type' ) ) {
 		plainmark_register_portfolio_post_type();
