@@ -22,7 +22,7 @@ function plainmark_register_advanced_differentiator_meta() {
 			'single'            => true,
 			'show_in_rest'      => true,
 			'sanitize_callback' => 'sanitize_textarea_field',
-			'auth_callback'     => static function() {
+			'auth_callback'     => static function () {
 				return current_user_can( 'edit_posts' );
 			},
 		)
@@ -87,7 +87,7 @@ function plainmark_fetch_npm_latest( $package ) {
 	$cached        = get_transient( $transient_key );
 
 	if ( false !== $cached ) {
-		return $cached ?: null;
+		return $cached ? $cached : null;
 	}
 
 	$response = wp_remote_get(
@@ -121,7 +121,7 @@ function plainmark_fetch_pypi_latest( $package ) {
 	$cached        = get_transient( $transient_key );
 
 	if ( false !== $cached ) {
-		return $cached ?: null;
+		return $cached ? $cached : null;
 	}
 
 	$response = wp_remote_get(
@@ -212,7 +212,7 @@ function plainmark_cache_dependency_check( $post_id ) {
 	$results  = plainmark_check_dependencies( $post_id );
 	$outdated = array_filter(
 		$results,
-		static function( $result ) {
+		static function ( $result ) {
 			return ! empty( $result['outdated'] );
 		}
 	);
@@ -242,7 +242,7 @@ function plainmark_register_dependency_meta() {
 				'single'            => true,
 				'show_in_rest'      => false,
 				'sanitize_callback' => 'integer' === $type ? 'absint' : 'sanitize_text_field',
-				'auth_callback'     => static function() {
+				'auth_callback'     => static function () {
 					return current_user_can( 'edit_posts' );
 				},
 			)
