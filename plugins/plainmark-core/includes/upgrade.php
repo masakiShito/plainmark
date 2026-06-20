@@ -53,7 +53,9 @@ function plainmark_core_maybe_upgrade() {
 		),
 		DAY_IN_SECONDS
 	);
-	error_log( sprintf( '[plainmark-core] upgraded %s -> %s', $installed, $current ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+	error_log( sprintf( '[plainmark-core] upgraded %s -> %s', $installed, $current ) );
 }
 add_action( 'admin_init', 'plainmark_core_maybe_upgrade' );
 
