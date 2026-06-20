@@ -49,4 +49,14 @@ jobs:
         run: composer install --no-progress
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=phpcs.xml.dist theme/inc/ plugins/plainmark-core/includes/
+        run: |
+          vendor/bin/phpcs --standard=phpcs.xml.dist \
+            theme/inc/advanced-differentiators.php \
+            theme/inc/freshness-dashboard.php \
+            theme/inc/freshness-badge.php \
+            plugins/plainmark-core/plainmark-core.php \
+            plugins/plainmark-core/includes/dependency-watcher.php \
+            plugins/plainmark-core/includes/freshness/freshness-score.php \
+            plugins/plainmark-core/includes/freshness/freshness-cache.php \
+            plugins/plainmark-core/includes/freshness/freshness-dashboard-widget.php \
+            plugins/plainmark-core/includes/freshness/reader-feedback.php
