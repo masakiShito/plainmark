@@ -109,9 +109,21 @@ function plainmark_render_ci_badge( $post_id = 0 ) {
 	$ci      = plainmark_get_ci_data( $post_id );
 	$status  = $ci['status'];
 	$display = array(
-		'passing' => array( 'icon' => '✓', 'label' => __( 'CI 検証済み', 'plainmark' ) ),
-		'failing' => array( 'icon' => '✗', 'label' => __( 'CI 失敗', 'plainmark' ) ),
-		'error'   => array( 'icon' => '!', 'label' => __( 'CI エラー', 'plainmark' ) ),
+		'passing' =>
+			array(
+				'icon'  => '✓',
+				'label' => __( 'CI 検証済み', 'plainmark' ),
+			),
+		'failing' =>
+			array(
+				'icon'  => 'x',
+				'label' => __( 'CI 失敗', 'plainmark' ),
+			),
+		'error'   =>
+			array(
+				'icon'  => '!',
+				'label' => __( 'CI エラー', 'plainmark' ),
+			),
 	);
 
 	if ( ! isset( $display[ $status ] ) ) {
@@ -120,7 +132,9 @@ function plainmark_render_ci_badge( $post_id = 0 ) {
 
 	$tooltip = '';
 	if ( 'passing' === $status && $ci['checked_at'] ) {
-		$tooltip = sprintf( esc_attr__( '最終成功: %s', 'plainmark' ), esc_attr( $ci['checked_at'] ) );
+		/* translators: %s: CI checked timestamp. */
+		$tooltip_format = esc_attr__( '最終成功: %s', 'plainmark' );
+		$tooltip        = sprintf( $tooltip_format, esc_attr( $ci['checked_at'] ) );
 	}
 
 	$inner = sprintf(
