@@ -30,6 +30,8 @@ function plainmark_get_freshness_weights() {
 		'no_dependencies'   => 5,
 		'dep_outdated_each' => 8,
 		'dep_outdated_cap'  => 25,
+		'ci_failing'        => 30,
+		'ci_error'          => 10,
 		'review_flagged'    => 10,
 		'rank_fresh_min'    => 80,
 		'rank_watch_min'    => 55,
@@ -104,6 +106,15 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 				$outdated_count
 			);
 		}
+	}
+
+	$ci_status = (string) get_post_meta( $post_id, '_plainmark_ci_status', true );
+	if ( 'failing' === $ci_status ) {
+		$score    -= (int) $w['ci_failing'];
+		$reasons[] = __( 'CIが失敗しています(コードが動作しない可能性があります)。', 'plainmark' );
+	} elseif ( 'error' === $ci_status ) {
+		$score    -= (int) $w['ci_error'];
+		$reasons[] = __( 'CI実行がエラーで終了しました。', 'plainmark' );
 	}
 
 	if ( get_post_meta( $post_id, '_plainmark_freshness_review_flagged', true ) ) {
