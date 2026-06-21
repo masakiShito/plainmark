@@ -3,7 +3,7 @@
  * Plugin Name: Plainmark Core
  * Plugin URI: https://github.com/masakiShito/plainmark
  * Description: Core data model and editorial governance features for the Plainmark theme.
- * Version: 0.4.0
+ * Version: 0.5.0
  * Author: plainmark
  * Text Domain: plainmark
  *
@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'PLAINMARK_CORE_VERSION' ) ) {
-	define( 'PLAINMARK_CORE_VERSION', '0.4.0' );
+	define( 'PLAINMARK_CORE_VERSION', '0.5.0' );
 }
 
 if ( ! defined( 'PLAINMARK_CORE_DIR' ) ) {
@@ -72,6 +72,7 @@ function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/markdown-import.php', 'plainmark_add_import_menu' );
 	plainmark_core_require_module( 'includes/markdown-export.php', 'plainmark_md_export_row_action' );
 	plainmark_core_require_module( 'includes/content-bridge.php', 'plainmark_register_content_bridge_meta' );
+	plainmark_core_require_module( 'includes/ci-status-label.php', 'plainmark_get_ci_status_label' );
 	plainmark_core_require_module( 'includes/snippet-library.php', 'plainmark_register_snippet_post_type' );
 	plainmark_core_require_module( 'includes/admin/snippet-settings.php', 'plainmark_register_snippet_settings_meta_boxes' );
 	plainmark_core_require_module( 'includes/github-sync-ajax.php', 'plainmark_handle_github_sync_ajax' );
