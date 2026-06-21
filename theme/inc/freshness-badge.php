@@ -89,3 +89,62 @@ function plainmark_render_freshness_badge( $post_id = 0 ) {
 		esc_html( $label )
 	);
 }
+
+/**
+ * Render the CI verification badge HTML.
+ *
+ * @param int $post_id Post ID.
+ * @return string
+ */
+function plainmark_render_ci_badge( $post_id = 0 ) {
+	if ( ! function_exists( 'plainmark_get_ci_data' ) ) {
+		return '';
+	}
+
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+	if ( ! $post_id ) {
+		return '';
+	}
+
+	$ci      = plainmark_get_ci_data( $post_id );
+	$status  = $ci['status'];
+	$display = array(
+		'passing' => array( 'icon' => '✓', 'label' => __( 'CI 検証済み', 'plainmark' ) ),
+		'failing' => array( 'icon' => '✗', 'label' => __( 'CI 失敗', 'plainmark' ) ),
+		'error'   => array( 'icon' => '!', 'label' => __( 'CI エラー', 'plainmark' ) ),
+	);
+
+	if ( ! isset( $display[ $status ] ) ) {
+		return '';
+	}
+
+	$tooltip = '';
+	if ( 'passing' === $status && $ci['checked_at'] ) {
+		$tooltip = sprintf( esc_attr__( '最終成功: %s', 'plainmark' ), esc_attr( $ci['checked_at'] ) );
+	}
+
+	$inner = sprintf(
+		'<span class="ci-badge__icon" aria-hidden="true">%1$s</span><span class="ci-badge__label">%2$s</span>',
+		esc_html( $display[ $status ]['icon'] ),
+		esc_html( $display[ $status ]['label'] )
+	);
+
+	$classes = 'ci-badge ci-badge--' . sanitize_html_class( $status );
+
+	if ( $ci['run_url'] ) {
+		return sprintf(
+			'<a class="%1$s" href="%2$s" target="_blank" rel="noopener noreferrer"%3$s>%4$s</a>',
+			esc_attr( $classes ),
+			esc_url( $ci['run_url'] ),
+			$tooltip ? ' title="' . $tooltip . '"' : '',
+			$inner
+		);
+	}
+
+	return sprintf(
+		'<span class="%1$s"%2$s>%3$s</span>',
+		esc_attr( $classes ),
+		$tooltip ? ' title="' . $tooltip . '"' : '',
+		$inner
+	);
+}
