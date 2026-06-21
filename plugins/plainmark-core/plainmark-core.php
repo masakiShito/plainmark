@@ -72,6 +72,7 @@ function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/markdown-import.php', 'plainmark_add_import_menu' );
 	plainmark_core_require_module( 'includes/markdown-export.php', 'plainmark_md_export_row_action' );
 	plainmark_core_require_module( 'includes/content-bridge.php', 'plainmark_register_content_bridge_meta' );
+	plainmark_core_require_module( 'includes/ci-status-label.php', 'plainmark_get_ci_status_label' );
 	plainmark_core_require_module( 'includes/snippet-library.php', 'plainmark_register_snippet_post_type' );
 	plainmark_core_require_module( 'includes/admin/snippet-settings.php', 'plainmark_register_snippet_settings_meta_boxes' );
 	plainmark_core_require_module( 'includes/github-sync-ajax.php', 'plainmark_handle_github_sync_ajax' );
