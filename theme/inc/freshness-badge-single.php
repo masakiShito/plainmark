@@ -40,20 +40,22 @@ JS;
 add_action( 'wp_enqueue_scripts', 'plainmark_enqueue_single_freshness_badge_script', 30 );
 
 /**
- * Add the rendered Freshness badge template to the footer.
+ * Add the rendered Freshness and CI badge template to the footer.
  */
 function plainmark_output_single_freshness_badge_template() {
-	if ( ! is_singular( 'post' ) || ! function_exists( 'plainmark_render_freshness_badge' ) ) {
+	if ( ! is_singular( 'post' ) ) {
 		return;
 	}
 
-	$badge = plainmark_render_freshness_badge( get_queried_object_id() );
-	if ( '' === $badge ) {
+	$badge    = function_exists( 'plainmark_render_freshness_badge' ) ? plainmark_render_freshness_badge( get_queried_object_id() ) : '';
+	$ci_badge = function_exists( 'plainmark_render_ci_badge' ) ? plainmark_render_ci_badge( get_queried_object_id() ) : '';
+
+	if ( '' === $badge && '' === $ci_badge ) {
 		return;
 	}
 	?>
 	<template id="plainmark-single-freshness-badge">
-		<div class="single-post__freshness"><?php echo wp_kses_post( $badge ); ?></div>
+		<div class="single-post__freshness"><?php echo wp_kses_post( $badge . $ci_badge ); ?></div>
 	</template>
 	<?php
 }

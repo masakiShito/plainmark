@@ -24,6 +24,7 @@ function plainmark_core_upgrade_routines() {
 		'0.2.0' => 'plainmark_core_upgrade_020',
 		'0.3.0' => 'plainmark_core_upgrade_030',
 		'0.3.1' => 'plainmark_core_upgrade_031',
+		'0.5.0' => 'plainmark_core_upgrade_050',
 	);
 }
 
@@ -130,6 +131,16 @@ function plainmark_core_upgrade_030( $from ) {
  * @param string $from Previously installed version.
  */
 function plainmark_core_upgrade_031( $from ) {
+	unset( $from );
+	plainmark_core_schedule_freshness_recompute();
+}
+
+/**
+ * Upgrade routine for 0.5.0: recompute freshness to reflect CI penalties.
+ *
+ * @param string $from Previously installed version.
+ */
+function plainmark_core_upgrade_050( $from ) {
 	unset( $from );
 	plainmark_core_schedule_freshness_recompute();
 }
