@@ -17,6 +17,11 @@ function plainmark_register_content_bridge_meta() {
 		'_plainmark_verified_date'   => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 		'_plainmark_verified_env'    => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_textarea_field' ),
 		'_plainmark_review_date'      => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+		'_plainmark_ci_status'        => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_key' ),
+		'_plainmark_ci_checked_at'    => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+		'_plainmark_ci_run_url'       => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ),
+		'_plainmark_tested_path'      => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+		'_plainmark_test_command'     => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 		'_plainmark_related_works'    => array( 'type' => 'array', 'sanitize_callback' => 'plainmark_sanitize_id_array' ),
 		'_plainmark_related_posts'    => array( 'type' => 'array', 'sanitize_callback' => 'plainmark_sanitize_id_array' ),
 		'_plainmark_github_path'      => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
@@ -24,9 +29,22 @@ function plainmark_register_content_bridge_meta() {
 		'_plainmark_github_synced_at' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 	);
 
+	$post_only_keys = array(
+		'_plainmark_verified_status',
+		'_plainmark_verified_date',
+		'_plainmark_verified_env',
+		'_plainmark_review_date',
+		'_plainmark_ci_status',
+		'_plainmark_ci_checked_at',
+		'_plainmark_ci_run_url',
+		'_plainmark_tested_path',
+		'_plainmark_test_command',
+		'_plainmark_related_works',
+	);
+
 	foreach ( array( 'post', 'portfolio' ) as $post_type ) {
 		foreach ( $definitions as $key => $definition ) {
-			if ( 'post' !== $post_type && in_array( $key, array( '_plainmark_verified_status', '_plainmark_verified_date', '_plainmark_verified_env', '_plainmark_review_date', '_plainmark_related_works' ), true ) ) {
+			if ( 'post' !== $post_type && in_array( $key, $post_only_keys, true ) ) {
 				continue;
 			}
 			if ( 'portfolio' !== $post_type && '_plainmark_related_posts' === $key ) {
@@ -86,6 +104,25 @@ function plainmark_get_verification_data( $post_id = 0 ) {
 		'date'   => $date,
 		'env'    => get_post_meta( $post_id, '_plainmark_verified_env', true ),
 		'review' => $review,
+	);
+}
+
+/**
+ * Get CI verification data for an article.
+ *
+ * @param int $post_id Post ID.
+ * @return array{status:string,checked_at:string,run_url:string,tested_path:string,test_command:string}
+ */
+function plainmark_get_ci_data( $post_id = 0 ) {
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+	$status  = (string) get_post_meta( $post_id, '_plainmark_ci_status', true );
+
+	return array(
+		'status'       => $status ?: 'unknown',
+		'checked_at'   => (string) get_post_meta( $post_id, '_plainmark_ci_checked_at', true ),
+		'run_url'      => (string) get_post_meta( $post_id, '_plainmark_ci_run_url', true ),
+		'tested_path'  => (string) get_post_meta( $post_id, '_plainmark_tested_path', true ),
+		'test_command' => (string) get_post_meta( $post_id, '_plainmark_test_command', true ),
 	);
 }
 
@@ -256,6 +293,33 @@ function plainmark_apply_content_bridge_front_matter( $post_id, $front_matter, $
 				update_post_meta( $post_id, $meta_key, $value );
 			}
 		}
+
+		$ci_status_allowed = array( 'passing', 'failing', 'error', 'skipped', 'unknown' );
+
+		if ( isset( $front_matter['ci_status'] ) ) {
+			$ci_status = sanitize_key( (string) $front_matter['ci_status'] );
+			if ( ! in_array( $ci_status, $ci_status_allowed, true ) ) {
+				$ci_status = 'unknown';
+			}
+			update_post_meta( $post_id, '_plainmark_ci_status', $ci_status );
+		}
+
+		if ( isset( $front_matter['ci_checked_at'] ) ) {
+			update_post_meta( $post_id, '_plainmark_ci_checked_at', sanitize_text_field( (string) $front_matter['ci_checked_at'] ) );
+		}
+
+		if ( isset( $front_matter['ci_run_url'] ) ) {
+			update_post_meta( $post_id, '_plainmark_ci_run_url', esc_url_raw( (string) $front_matter['ci_run_url'] ) );
+		}
+
+		if ( isset( $front_matter['tested_path'] ) ) {
+			update_post_meta( $post_id, '_plainmark_tested_path', sanitize_text_field( (string) $front_matter['tested_path'] ) );
+		}
+
+		if ( isset( $front_matter['test_command'] ) ) {
+			update_post_meta( $post_id, '_plainmark_test_command', sanitize_text_field( (string) $front_matter['test_command'] ) );
+		}
+
 		if ( ! empty( $front_matter['related_works'] ) ) {
 			update_post_meta( $post_id, '_plainmark_related_works', plainmark_resolve_content_references( $front_matter['related_works'], 'portfolio' ) );
 		}
@@ -386,6 +450,11 @@ function plainmark_render_github_content_page() {
 verified_date: "2026-06-10"
 verified_env: "Node.js 24 / TypeScript 5.9"
 review_date: "2026-09-10"
+ci_status: "passing"
+ci_checked_at: "2026-06-20T09:30:00Z"
+ci_run_url: "https://github.com/&lt;owner&gt;/&lt;repo&gt;/actions/runs/123456"
+tested_path: "examples/react-state"
+test_command: "npm test"
 related_works:
   - "face-photo-sorter"
 
