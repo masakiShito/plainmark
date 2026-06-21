@@ -43,6 +43,11 @@ verified_status: "verified"
 verified_date: "2026-06-10"
 verified_env: "Node.js 24 / TypeScript 5.9 / macOS"
 review_date: "2026-09-10"
+ci_status: "passing"
+ci_checked_at: "2026-06-20T09:30:00Z"
+ci_run_url: "https://github.com/<owner>/<repo>/actions/runs/123456"
+tested_path: "examples/react-state"
+test_command: "npm test"
 related_works:
   - "plainmark-wordpress-theme"
 ---
@@ -57,6 +62,18 @@ Verification statuses:
 - `deprecated`: no longer recommended
 
 When `review_date` has passed, the public status automatically becomes **再確認が必要**.
+
+### CI verification fields
+
+These fields are optional. They are normally written back automatically by the B-1 GitHub Actions workflow, but can be written manually for testing.
+
+| front matter key | Description |
+| --- | --- |
+| `ci_status` | CI result. Allowed values: `passing`, `failing`, `error`, `skipped`, `unknown`. Invalid values are stored as `unknown`. |
+| `ci_checked_at` | CI checked timestamp, for example `2026-06-20T09:30:00Z`. The time portion is preserved. |
+| `ci_run_url` | GitHub Actions run URL. |
+| `tested_path` | Directory or glob tested by CI. |
+| `test_command` | Command executed by CI. |
 
 ## Works front matter
 

@@ -14,6 +14,12 @@ verified_status: "verified"
 verified_date: "2026-06-10"
 verified_env: "Node.js 24 / TypeScript 5.9 / macOS"
 review_date: "2026-09-10"
+# Optional CI verification fields. B-1 GitHub Actions normally writes these back.
+ci_status: "passing" # passing / failing / error / skipped / unknown
+ci_checked_at: "2026-06-20T09:30:00Z" # CI run timestamp. Time is preserved.
+ci_run_url: "https://github.com/<owner>/<repo>/actions/runs/123456" # GitHub Actions run URL.
+tested_path: "examples/react-state" # Directory or glob tested by CI.
+test_command: "npm test" # Command executed by CI.
 related_works:
   - "plainmark-wordpress-theme"
 ---
