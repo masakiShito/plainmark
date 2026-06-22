@@ -32,6 +32,7 @@ function plainmark_get_freshness_weights() {
 		'dep_outdated_cap'  => 25,
 		'ci_failing'        => 30,
 		'ci_error'          => 10,
+		'ci_fresh_days'     => 90,
 		'review_flagged'    => 10,
 		'rank_fresh_min'    => 80,
 		'rank_watch_min'    => 55,
@@ -58,13 +59,25 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 	$now     = current_datetime()->getTimestamp();
 	$w       = plainmark_get_freshness_weights();
 
+	$ci_status      = (string) get_post_meta( $post_id, '_plainmark_ci_status', true );
+	$ci_checked_at  = (string) get_post_meta( $post_id, '_plainmark_ci_checked_at', true );
+	$ci_recent_pass = false;
+	if ( 'passing' === $ci_status && '' !== $ci_checked_at ) {
+		$checked_ts = strtotime( $ci_checked_at );
+		if ( $checked_ts && ( ( $now - $checked_ts ) / DAY_IN_SECONDS ) <= (int) $w['ci_fresh_days'] ) {
+			$ci_recent_pass = true;
+		}
+	}
+
 	if ( 'verified' !== $status ) {
 		$score    -= 'deprecated' === $status ? (int) $w['status_deprecated'] : (int) $w['status_unverified'];
 		$reasons[] = 'deprecated' === $status ? __( '非推奨の記事です。', 'plainmark' ) : __( '動作確認が未完了です。', 'plainmark' );
 	}
 
 	$verified_date = ! empty( $data['date'] ) ? strtotime( $data['date'] ) : false;
-	if ( $verified_date ) {
+	if ( $ci_recent_pass ) {
+		$reasons[] = __( '最近のCI成功により動作を確認済みです。', 'plainmark' );
+	} elseif ( $verified_date ) {
 		$days = floor( ( $now - $verified_date ) / DAY_IN_SECONDS );
 		if ( $days > (int) $w['age_days_year'] ) {
 			$score    -= (int) $w['age_over_year'];
@@ -108,7 +121,6 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 		}
 	}
 
-	$ci_status = (string) get_post_meta( $post_id, '_plainmark_ci_status', true );
 	if ( 'failing' === $ci_status ) {
 		$score    -= (int) $w['ci_failing'];
 		$reasons[] = __( 'CIが失敗しています(コードが動作しない可能性があります)。', 'plainmark' );
@@ -124,6 +136,10 @@ function plainmark_get_freshness_score( $post_id = 0 ) {
 
 	$score = max( 0, min( 100, $score ) );
 	$rank  = $score >= (int) $w['rank_fresh_min'] ? 'fresh' : ( $score >= (int) $w['rank_watch_min'] ? 'watch' : 'stale' );
+
+	if ( 'failing' === $ci_status && apply_filters( 'plainmark_ci_failing_forces_stale', true, $post_id ) ) {
+		$rank = 'stale';
+	}
 
 	return array(
 		'score'   => $score,

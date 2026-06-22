@@ -1,0 +1,61 @@
+name: Verify article code via CI
+
+on:
+  schedule:
+    - cron: '0 18 * * 0'
+  push:
+    branches: [ main ]
+    paths:
+      - 'examples/**'
+      - '.github/scripts/verify_examples.py'
+      - '.github/workflows/verify-code.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: plainmark-verify-code
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run verification
+        id: verify
+        run: python .github/scripts/verify_examples.py
+
+      - name: Commit results
+        if: steps.verify.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add content/posts/*.md
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+          else
+            git commit -m 'chore(ci): update article CI verification status [ci-verify]'
+            git push
+          fi
+
+      - name: Trigger content sync
+        if: steps.verify.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run sync-content.yml
