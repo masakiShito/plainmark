@@ -8,3 +8,7 @@
 - 結果は verify-code.yml が記事の front matter(`ci_status`/`ci_checked_at`/`ci_run_url`)へ書き戻す。
 
 例: 記事に `tested_path: "examples/react-state"` / `test_command: "npm test"` と書き、`examples/react-state/` にコードとテストを置く。
+
+## react-state
+
+`react-state/` は CI 連携の最初の実例。React の state スナップショット挙動を検証するテストが含まれる。
