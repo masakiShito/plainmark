@@ -55,8 +55,11 @@ $portfolio_items = new WP_Query(
                     <a class="button button--primary" href="#latest-posts">
                         <?php esc_html_e( '最新の記事を見る', 'plainmark' ); ?>
                     </a>
-                    <?php if ( post_type_exists( 'portfolio' ) ) : ?>
-                        <a class="button button--ghost" href="<?php echo esc_url( get_post_type_archive_link( 'portfolio' ) ); ?>">
+                    <?php
+                    $portfolio_archive_url = get_post_type_archive_link( 'portfolio' );
+                    if ( $portfolio_archive_url ) :
+                    ?>
+                        <a class="button button--ghost" href="<?php echo esc_url( $portfolio_archive_url ); ?>">
                             <?php esc_html_e( '制作物を見る', 'plainmark' ); ?>
                         </a>
                     <?php endif; ?>
@@ -203,10 +206,15 @@ $portfolio_items = new WP_Query(
                         <p class="front-section__eyebrow"><?php esc_html_e( 'WORKS', 'plainmark' ); ?></p>
                         <h2 id="front-portfolio-title" class="front-section__title"><?php esc_html_e( '制作物', 'plainmark' ); ?></h2>
                     </div>
-                    <a class="front-section__link" href="<?php echo esc_url( get_post_type_archive_link( 'portfolio' ) ); ?>">
-                        <?php esc_html_e( 'すべて見る', 'plainmark' ); ?>
-                        <span aria-hidden="true">→</span>
-                    </a>
+                    <?php
+                    $works_archive_url = get_post_type_archive_link( 'portfolio' );
+                    if ( $works_archive_url ) :
+                    ?>
+                        <a class="front-section__link" href="<?php echo esc_url( $works_archive_url ); ?>">
+                            <?php esc_html_e( 'すべて見る', 'plainmark' ); ?>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="front-work-grid">
