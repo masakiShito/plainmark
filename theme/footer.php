@@ -79,7 +79,7 @@
         &copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. All rights reserved.
       </p>
       <p class="site-footer__credit">
-        Built with <a href="https://github.com/YOUR_USERNAME/plainmark" target="_blank" rel="noopener noreferrer">plainmark</a>
+        Built with <a href="<?php echo esc_url( 'https://github.com/masakiShito/plainmark' ); ?>" target="_blank" rel="noopener noreferrer">plainmark</a>
       </p>
     </div>
 

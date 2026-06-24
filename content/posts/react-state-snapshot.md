@@ -13,6 +13,8 @@ technologies:
   - "JavaScript"
 verified_status: "unverified"
 review_date: "2026-09-10"
+tested_path: "examples/react-state"
+test_command: "node --test"
 ---
 
 Reactを書いていると、次のコードが直感に反して見えることがあります。
