@@ -14,9 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Add the pull sync settings page.
- */
+/** Add the pull sync settings page. */
 function plainmark_add_github_pull_sync_page() {
 	add_management_page(
 		__( 'GitHub Pull Sync', 'plainmark' ),
@@ -214,6 +212,121 @@ function plainmark_import_github_markdown_blob( $markdown, $path, $sha ) {
 }
 
 /**
+ * Fetch and decode a Markdown blob from GitHub.
+ *
+ * @param string $repo_api_path Encoded owner/repository path.
+ * @param string $sha           Blob SHA.
+ * @param string $path          Repository file path.
+ * @param string $token         Optional token.
+ * @return string|WP_Error
+ */
+function plainmark_fetch_github_markdown_blob( $repo_api_path, $sha, $path, $token = '' ) {
+	$blob_url = sprintf(
+		'https://api.github.com/repos/%1$s/git/blobs/%2$s',
+		$repo_api_path,
+		rawurlencode( $sha )
+	);
+	$blob     = plainmark_github_pull_request_json( $blob_url, $token );
+
+	if ( is_wp_error( $blob ) ) {
+		return new WP_Error( $blob->get_error_code(), $path . ': ' . $blob->get_error_message() );
+	}
+
+	if ( empty( $blob['content'] ) || 'base64' !== ( $blob['encoding'] ?? '' ) ) {
+		return new WP_Error( 'plainmark_github_pull_invalid_blob', sprintf( '%s: invalid GitHub blob response.', $path ) );
+	}
+
+	$markdown = base64_decode( preg_replace( '/\s+/', '', (string) $blob['content'] ), true );
+	if ( false === $markdown ) {
+		return new WP_Error( 'plainmark_github_pull_decode_failed', sprintf( '%s: failed to decode content.', $path ) );
+	}
+
+	return $markdown;
+}
+
+/**
+ * Sanitize an expected front matter value the same way content bridge import does.
+ *
+ * @param string $front_key Front matter key.
+ * @param mixed  $value     Raw value.
+ * @return string
+ */
+function plainmark_sanitize_github_pull_expected_meta_value( $front_key, $value ) {
+	if ( 'ci_status' === $front_key ) {
+		$ci_status         = sanitize_key( (string) $value );
+		$ci_status_allowed = array( 'passing', 'failing', 'error', 'skipped', 'unknown' );
+		return in_array( $ci_status, $ci_status_allowed, true ) ? $ci_status : 'unknown';
+	}
+
+	if ( 'ci_run_url' === $front_key ) {
+		return esc_url_raw( (string) $value );
+	}
+
+	if ( 'verified_env' === $front_key ) {
+		return sanitize_textarea_field( (string) $value );
+	}
+
+	return sanitize_text_field( (string) $value );
+}
+
+/**
+ * Determine whether a same-SHA post still needs to be re-applied for derived meta.
+ *
+ * Older deployments may have saved _plainmark_github_sha before newer front matter
+ * fields such as ci_status were supported. In that case a SHA-only skip would leave
+ * WordPress post meta stale forever. Re-import when supported front matter keys in
+ * Markdown do not match the stored post meta.
+ *
+ * @param int    $post_id  Existing post ID with the same GitHub SHA.
+ * @param string $markdown Markdown content.
+ * @return bool
+ */
+function plainmark_github_pull_needs_meta_resync( $post_id, $markdown ) {
+	if ( ! function_exists( 'plainmark_parse_md_content' ) ) {
+		return false;
+	}
+
+	$parsed = plainmark_parse_md_content( $markdown );
+	if ( empty( $parsed['front_matter'] ) || ! is_array( $parsed['front_matter'] ) ) {
+		return false;
+	}
+
+	$post_type    = get_post_type( $post_id );
+	$front_matter = $parsed['front_matter'];
+	$meta_map     = array();
+
+	if ( 'post' === $post_type ) {
+		$meta_map = array(
+			'verified_status' => '_plainmark_verified_status',
+			'verified_date'   => '_plainmark_verified_date',
+			'verified_env'    => '_plainmark_verified_env',
+			'review_date'     => '_plainmark_review_date',
+			'ci_status'       => '_plainmark_ci_status',
+			'ci_checked_at'   => '_plainmark_ci_checked_at',
+			'ci_run_url'      => '_plainmark_ci_run_url',
+			'tested_path'     => '_plainmark_tested_path',
+			'test_command'    => '_plainmark_test_command',
+		);
+	} elseif ( 'portfolio' === $post_type ) {
+		$meta_map = array();
+	}
+
+	foreach ( $meta_map as $front_key => $meta_key ) {
+		if ( ! array_key_exists( $front_key, $front_matter ) ) {
+			continue;
+		}
+
+		$expected = plainmark_sanitize_github_pull_expected_meta_value( $front_key, $front_matter[ $front_key ] );
+		$stored   = (string) get_post_meta( $post_id, $meta_key, true );
+		if ( $stored !== $expected ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Run GitHub pull synchronization.
  *
  * @return array{success:int,created:int,updated:int,skipped:int,errors:array<int,string>,items:array<int,array>}
@@ -298,31 +411,14 @@ function plainmark_run_github_pull_sync() {
 			)
 		);
 
-		if ( ! empty( $existing ) ) {
+		$markdown = plainmark_fetch_github_markdown_blob( $repo_api_path, $sha, $path, $token );
+		if ( is_wp_error( $markdown ) ) {
+			$result['errors'][] = $markdown->get_error_message();
+			continue;
+		}
+
+		if ( ! empty( $existing ) && ! plainmark_github_pull_needs_meta_resync( absint( $existing[0] ), $markdown ) ) {
 			$result['skipped']++;
-			continue;
-		}
-
-		$blob_url = sprintf(
-			'https://api.github.com/repos/%1$s/git/blobs/%2$s',
-			$repo_api_path,
-			rawurlencode( $sha )
-		);
-		$blob     = plainmark_github_pull_request_json( $blob_url, $token );
-
-		if ( is_wp_error( $blob ) ) {
-			$result['errors'][] = $path . ': ' . $blob->get_error_message();
-			continue;
-		}
-
-		if ( empty( $blob['content'] ) || 'base64' !== ( $blob['encoding'] ?? '' ) ) {
-			$result['errors'][] = sprintf( '%s: invalid GitHub blob response.', $path );
-			continue;
-		}
-
-		$markdown = base64_decode( preg_replace( '/\s+/', '', (string) $blob['content'] ), true );
-		if ( false === $markdown ) {
-			$result['errors'][] = sprintf( '%s: failed to decode content.', $path );
 			continue;
 		}
 
@@ -344,9 +440,7 @@ function plainmark_run_github_pull_sync() {
 	return $result;
 }
 
-/**
- * Save pull sync settings.
- */
+/** Save pull sync settings. */
 function plainmark_handle_github_pull_settings_save() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You do not have permission to manage this setting.', 'plainmark' ) );
@@ -383,9 +477,7 @@ function plainmark_handle_github_pull_settings_save() {
 }
 add_action( 'admin_post_plainmark_save_github_pull_settings', 'plainmark_handle_github_pull_settings_save' );
 
-/**
- * Run pull sync from admin.
- */
+/** Run pull sync from admin. */
 function plainmark_handle_github_pull_sync_run() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You do not have permission to run synchronization.', 'plainmark' ) );
@@ -401,9 +493,7 @@ function plainmark_handle_github_pull_sync_run() {
 }
 add_action( 'admin_post_plainmark_run_github_pull_sync', 'plainmark_handle_github_pull_sync_run' );
 
-/**
- * Render the pull sync settings page.
- */
+/** Render the pull sync settings page. */
 function plainmark_render_github_pull_sync_page() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		return;
@@ -511,7 +601,7 @@ function plainmark_render_github_pull_sync_page() {
 			);
 			?>
 		</p>
-		<p><?php esc_html_e( 'GitHub上のMarkdownを取得して、同じslugの投稿を更新します。存在しない場合は新規作成します。', 'plainmark' ); ?></p>
+		<p><?php esc_html_e( 'GitHub上のMarkdownを取得して、同じslugの投稿を更新します。存在しない場合は新規作成します。SHAが同じでも、CI結果などの派生メタが未反映なら再同期します。', 'plainmark' ); ?></p>
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 			<?php wp_nonce_field( 'plainmark_run_github_pull_sync' ); ?>
 			<input type="hidden" name="action" value="plainmark_run_github_pull_sync">
@@ -530,6 +620,11 @@ verified_status: "verified"
 verified_date: "2026-06-10"
 verified_env: "Node.js 24 / TypeScript 5.9"
 review_date: "2026-09-10"
+ci_status: "passing"
+ci_checked_at: "2026-06-20T09:30:00Z"
+ci_run_url: "https://github.com/&lt;owner&gt;/&lt;repo&gt;/actions/runs/123456"
+tested_path: "examples/react-state"
+test_command: "npm test"
 related_works:
   - "face-photo-sorter"
 
