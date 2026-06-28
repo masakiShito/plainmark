@@ -80,6 +80,7 @@ function plainmark_core_load_theme_integrated_modules() {
 	plainmark_core_require_module( 'includes/github-pull-sync.php', 'plainmark_add_github_pull_sync_page' );
 	plainmark_core_require_module( 'includes/admin/article-inventory.php', 'plainmark_add_article_inventory_page' );
 	plainmark_core_require_module( 'includes/admin/article-settings.php', 'plainmark_add_article_settings_meta_box' );
+	plainmark_core_require_module( 'includes/article-choice-meta-validation.php', 'plainmark_validate_choice_meta_value' );
 	plainmark_core_require_module( 'includes/admin/github-works-sync.php', 'plainmark_register_github_works_sync_page' );
 	plainmark_core_require_module( 'includes/freshness/freshness-score.php', 'plainmark_get_freshness_score' );
 	plainmark_core_require_module( 'includes/freshness/freshness-cache.php', 'plainmark_cache_freshness_score' );
