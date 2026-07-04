@@ -55,6 +55,27 @@ related_works:
 
 `related_works` accepts Portfolio slugs or numeric IDs.
 
+### Article classification fields
+
+`article_type` and `difficulty` only accept canonical values. Invalid values are stored as an empty value (`''`) during admin saves, Markdown Import, and GitHub synchronization.
+
+Allowed `article_type` values:
+
+- `tech_note`
+- `tutorial`
+- `error_solution`
+- `learning_log`
+- `review`
+- `portfolio`
+
+Allowed `difficulty` values:
+
+- `beginner`
+- `intermediate`
+- `advanced`
+
+Aliases such as `easy` or custom types such as `concept` are not accepted by the import path. Add new canonical values in code before using them in front matter.
+
 Verification statuses:
 
 - `verified`: tested and working
