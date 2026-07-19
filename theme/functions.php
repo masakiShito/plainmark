@@ -90,7 +90,14 @@ function plainmark_prepare_custom_routes( $query ) {
         return;
     }
 
-    if ( $query->get( 'plainmark_blog_archive' ) || $query->get( 'plainmark_about_page' ) ) {
+    if ( $query->get( 'plainmark_blog_archive' ) ) {
+        $query->is_404  = false;
+        $query->is_home = true;
+        $query->is_page = false;
+        return;
+    }
+
+    if ( $query->get( 'plainmark_about_page' ) ) {
         $query->is_404  = false;
         $query->is_page = true;
         $query->is_home = false;
@@ -106,7 +113,7 @@ add_action( 'pre_get_posts', 'plainmark_prepare_custom_routes' );
  */
 function plainmark_template_include( $template ) {
     if ( get_query_var( 'plainmark_blog_archive' ) ) {
-        $custom = locate_template( 'page-blog.php' );
+        $custom = locate_template( array( 'page-blog.php', 'index.php' ) );
         return $custom ?: $template;
     }
 
