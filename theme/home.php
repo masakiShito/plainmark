@@ -56,7 +56,7 @@ $current_cat = isset( $_GET['cat'] ) ? absint( $_GET['cat'] ) : 0;
 		</header>
 
 		<?php if ( have_posts() ) : ?>
-			<div class="post-list">
+			<div class="post-list post-list--cards">
 				<?php
 				while ( have_posts() ) :
 					the_post();
