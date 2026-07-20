@@ -121,6 +121,226 @@ function plainmark_customize_register( $wp_customize ) {
         'type'    => 'checkbox',
     ) );
 
+    // ─────────────────────────────────────────────────────────────
+    // About Page Settings
+    // ─────────────────────────────────────────────────────────────
+
+    // About Hero Section
+    $wp_customize->add_section( 'plainmark_about_hero', array(
+        'title'    => esc_html__( 'About: Hero', 'plainmark' ),
+        'panel'    => 'plainmark_options',
+        'priority' => 40,
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_hero_title', array(
+        'default'           => '業務を、使いやすく。',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_hero_title', array(
+        'label'   => esc_html__( 'Hero Title', 'plainmark' ),
+        'section' => 'plainmark_about_hero',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_hero_lead', array(
+        'default'           => 'まーさんです。業務システム、EC、予約システムなどの開発で、要件整理から設計、実装、テストまで一貫して携わってきました。複雑な仕様を整理し、利用者にも運用者にも扱いやすいWebシステムに落とし込むことを大切にしています。',
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_hero_lead', array(
+        'label'   => esc_html__( 'Hero Lead Text', 'plainmark' ),
+        'section' => 'plainmark_about_hero',
+        'type'    => 'textarea',
+    ) );
+
+    // About Profile Card Section
+    $wp_customize->add_section( 'plainmark_about_profile', array(
+        'title'    => esc_html__( 'About: Profile Card', 'plainmark' ),
+        'panel'    => 'plainmark_options',
+        'priority' => 41,
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_profile_mark', array(
+        'default'           => 'M',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_profile_mark', array(
+        'label'   => esc_html__( 'Profile Mark/Initial', 'plainmark' ),
+        'section' => 'plainmark_about_profile',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_profile_name', array(
+        'default'           => 'まーさん',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_profile_name', array(
+        'label'   => esc_html__( 'Name', 'plainmark' ),
+        'section' => 'plainmark_about_profile',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_profile_role', array(
+        'default'           => 'Web Engineer / Frontend & Backend',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_profile_role', array(
+        'label'   => esc_html__( 'Role/Title', 'plainmark' ),
+        'section' => 'plainmark_about_profile',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_profile_focus', array(
+        'default'           => '業務理解と設計',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_profile_focus', array(
+        'label'   => esc_html__( 'Focus', 'plainmark' ),
+        'section' => 'plainmark_about_profile',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_profile_frontend', array(
+        'default'           => 'React / Vue / Next.js',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_profile_frontend', array(
+        'label'   => esc_html__( 'Frontend Skills', 'plainmark' ),
+        'section' => 'plainmark_about_profile',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_profile_backend', array(
+        'default'           => 'FastAPI / Java',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_profile_backend', array(
+        'label'   => esc_html__( 'Backend Skills', 'plainmark' ),
+        'section' => 'plainmark_about_profile',
+        'type'    => 'text',
+    ) );
+
+    // About Philosophy Section
+    $wp_customize->add_section( 'plainmark_about_philosophy', array(
+        'title'    => esc_html__( 'About: Philosophy', 'plainmark' ),
+        'panel'    => 'plainmark_options',
+        'priority' => 42,
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_philosophy_title', array(
+        'default'           => '伝わる形にする。',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_philosophy_title', array(
+        'label'   => esc_html__( 'Philosophy Title', 'plainmark' ),
+        'section' => 'plainmark_about_philosophy',
+        'type'    => 'text',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_philosophy_text1', array(
+        'default'           => '開発で大切にしているのは、仕様をそのまま実装することではなく、背景にある業務や課題を理解したうえで、保守しやすく、使いやすい形に整理することです。',
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_philosophy_text1', array(
+        'label'   => esc_html__( 'Philosophy Text 1', 'plainmark' ),
+        'section' => 'plainmark_about_philosophy',
+        'type'    => 'textarea',
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_philosophy_text2', array(
+        'default'           => '画面、API、DB、権限、運用フローはそれぞれ独立しているようで、実際には強くつながっています。だからこそ、フロントエンドとバックエンドを横断して全体像を見ながら設計することを意識しています。',
+        'sanitize_callback' => 'sanitize_textarea_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_philosophy_text2', array(
+        'label'   => esc_html__( 'Philosophy Text 2', 'plainmark' ),
+        'section' => 'plainmark_about_philosophy',
+        'type'    => 'textarea',
+    ) );
+
+    // About Strengths Section
+    $wp_customize->add_section( 'plainmark_about_strengths', array(
+        'title'    => esc_html__( 'About: Strengths', 'plainmark' ),
+        'panel'    => 'plainmark_options',
+        'priority' => 43,
+    ) );
+
+    for ( $i = 1; $i <= 3; $i++ ) {
+        $wp_customize->add_setting( "plainmark_about_strength_{$i}_title", array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+        ) );
+        $wp_customize->add_control( "plainmark_about_strength_{$i}_title", array(
+            'label'   => sprintf( esc_html__( 'Strength %d: Title', 'plainmark' ), $i ),
+            'section' => 'plainmark_about_strengths',
+            'type'    => 'text',
+        ) );
+
+        $wp_customize->add_setting( "plainmark_about_strength_{$i}_text", array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        ) );
+        $wp_customize->add_control( "plainmark_about_strength_{$i}_text", array(
+            'label'   => sprintf( esc_html__( 'Strength %d: Description', 'plainmark' ), $i ),
+            'section' => 'plainmark_about_strengths',
+            'type'    => 'textarea',
+        ) );
+    }
+
+    // About Experience Section
+    $wp_customize->add_section( 'plainmark_about_experience', array(
+        'title'    => esc_html__( 'About: Experience', 'plainmark' ),
+        'panel'    => 'plainmark_options',
+        'priority' => 44,
+    ) );
+
+    for ( $i = 1; $i <= 4; $i++ ) {
+        $wp_customize->add_setting( "plainmark_about_exp_{$i}_label", array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+        ) );
+        $wp_customize->add_control( "plainmark_about_exp_{$i}_label", array(
+            'label'   => sprintf( esc_html__( 'Experience %d: Label', 'plainmark' ), $i ),
+            'section' => 'plainmark_about_experience',
+            'type'    => 'text',
+        ) );
+
+        $wp_customize->add_setting( "plainmark_about_exp_{$i}_title", array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_text_field',
+        ) );
+        $wp_customize->add_control( "plainmark_about_exp_{$i}_title", array(
+            'label'   => sprintf( esc_html__( 'Experience %d: Title', 'plainmark' ), $i ),
+            'section' => 'plainmark_about_experience',
+            'type'    => 'text',
+        ) );
+
+        $wp_customize->add_setting( "plainmark_about_exp_{$i}_text", array(
+            'default'           => '',
+            'sanitize_callback' => 'sanitize_textarea_field',
+        ) );
+        $wp_customize->add_control( "plainmark_about_exp_{$i}_text", array(
+            'label'   => sprintf( esc_html__( 'Experience %d: Description', 'plainmark' ), $i ),
+            'section' => 'plainmark_about_experience',
+            'type'    => 'textarea',
+        ) );
+    }
+
+    // About CTA Section
+    $wp_customize->add_section( 'plainmark_about_cta', array(
+        'title'    => esc_html__( 'About: CTA', 'plainmark' ),
+        'panel'    => 'plainmark_options',
+        'priority' => 45,
+    ) );
+
+    $wp_customize->add_setting( 'plainmark_about_cta_title', array(
+        'default'           => '学びを残す。',
+        'sanitize_callback' => 'sanitize_text_field',
+    ) );
+    $wp_customize->add_control( 'plainmark_about_cta_title', array(
+        'label'   => esc_html__( 'CTA Title', 'plainmark' ),
+        'section' => 'plainmark_about_cta',
+        'type'    => 'text',
+    ) );
+
     // Selective refresh for site title and description
     if ( isset( $wp_customize->selective_refresh ) ) {
         $wp_customize->selective_refresh->add_partial( 'blogname', array(
