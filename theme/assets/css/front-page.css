@@ -66,7 +66,8 @@
 
 .front-hero__phrase {
   display: block;
-  transition: transform 300ms ease, opacity 300ms ease;
+  will-change: transform, opacity;
+  cursor: default;
 }
 
 .front-hero__phrase:nth-child(1) {
@@ -79,6 +80,11 @@
 
 .front-hero__phrase:nth-child(3) {
   transform: translateX(1.2em);
+}
+
+/* Fallback for no-JS */
+.no-js .front-hero__phrase {
+  opacity: 1 !important;
 }
 
 .front-hero__lead {

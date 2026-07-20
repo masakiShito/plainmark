@@ -92,6 +92,15 @@ function plainmark_scripts() {
             array( 'plainmark-style' ),
             file_exists( $front_page_css ) ? (string) filemtime( $front_page_css ) : PLAINMARK_VERSION
         );
+
+        $front_hero_js = PLAINMARK_DIR . '/assets/js/front-hero.js';
+        wp_enqueue_script(
+            'plainmark-front-hero',
+            PLAINMARK_URI . '/assets/js/front-hero.js',
+            array(),
+            file_exists( $front_hero_js ) ? (string) filemtime( $front_hero_js ) : PLAINMARK_VERSION,
+            true
+        );
     }
 
     // Shared Home / Blog hero stylesheet. Load after front-page.css so the editorial hero wins.
