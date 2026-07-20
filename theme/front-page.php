@@ -42,7 +42,9 @@ $portfolio_items = new WP_Query(
             <div class="front-hero__content">
                 <p class="front-hero__eyebrow"><?php esc_html_e( 'HOME', 'plainmark' ); ?></p>
                 <h1 class="front-hero__title">
-                    <?php esc_html_e( 'つくる。学ぶ。残す。', 'plainmark' ); ?>
+                    <span class="front-hero__phrase"><?php esc_html_e( 'つくる。', 'plainmark' ); ?></span>
+                    <span class="front-hero__phrase"><?php esc_html_e( '学ぶ。', 'plainmark' ); ?></span>
+                    <span class="front-hero__phrase"><?php esc_html_e( '残す。', 'plainmark' ); ?></span>
                 </h1>
                 <p class="front-hero__lead">
                     <?php
