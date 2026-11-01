@@ -16,8 +16,8 @@ review_date: "2026-09-10"
 tested_path: "examples/react-state"
 test_command: "node --test"
 ci_status: "passing"
-ci_checked_at: "2026-10-25T20:11:50Z"
-ci_run_url: "https://github.com/masakiShito/plainmark/actions/runs/40229614231"
+ci_checked_at: "2026-11-01T21:31:27Z"
+ci_run_url: "https://github.com/masakiShito/plainmark/actions/runs/41352431686"
 ---
 
 Reactを書いていると、次のコードが直感に反して見えることがあります。
